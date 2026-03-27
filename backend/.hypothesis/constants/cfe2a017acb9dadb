@@ -1,0 +1,4 @@
+# file: C:\Users\polkk\working\Liven\backend\notifications\models.py
+# hypothesis_version: 6.151.9
+
+[255, 'Announcement', 'Approval', 'Event', 'Parcel', 'Report', 'accounts.User', 'announcement', 'approval', 'event', 'notifications', 'parcel', 'report', 'user_id']

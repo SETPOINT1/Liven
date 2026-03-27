@@ -1,0 +1,4 @@
+# file: C:\Users\polkk\working\Liven\backend\accounts\views.py
+# hypothesis_version: 6.151.9
+
+['-created_at', 'NOT_FOUND', 'VALIDATION_ERROR', 'approval', 'approved', 'code', 'details', 'error', 'juristic', 'message', 'rejected', 'role', 'status', 'user_id', 'ข้อมูลไม่ถูกต้อง', 'คำขอลงทะเบียนใหม่', 'บัญชีถูกปฏิเสธ', 'ไม่พบผู้ใช้']

@@ -1,0 +1,4 @@
+# file: C:\Users\polkk\working\Liven\backend\parcels\ocr_service.py
+# hypothesis_version: 6.151.9
+
+[0.0, 0.1, 0.6, 256, '/', 'Authorization', 'Content-Type', 'Operation-Location', '```', 'analyzeResult', 'application/json', 'cancelled', 'choices', 'confidence', 'content', 'courier', 'failed', 'lines', 'max_tokens', 'message', 'messages', 'model', 'readResults', 'recipient_name', 'role', 'status', 'succeeded', 'system', 'temperature', 'text', 'tracking_number', 'unit_number', 'user', 'words']

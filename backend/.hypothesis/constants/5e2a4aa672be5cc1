@@ -1,0 +1,4 @@
+# file: C:\Users\polkk\working\Liven\backend\social\models.py
+# hypothesis_version: 6.151.9
+
+['Alert', 'Announcement', 'Dismissed', 'Normal', 'Pending', 'Reviewed', 'accounts.Project', 'accounts.User', 'alert', 'announcement', 'author_id', 'comments', 'dismissed', 'likes', 'normal', 'pending', 'post', 'post_id', 'post_reports', 'posts', 'project_id', 'reported_by', 'reviewed', 'user', 'user_id']

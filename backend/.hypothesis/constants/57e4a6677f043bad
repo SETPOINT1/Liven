@@ -1,0 +1,4 @@
+# file: C:\Users\polkk\working\Liven\backend\facilities\tests.py
+# hypothesis_version: 6.151.9
+
+[-300, 200, 240, 300, 5000, '123 Test Street', 'Juristic Manager', 'Test Fitness', 'Test Project', 'approved', 'available', 'confirmed', 'current_status', 'fitness', 'juristic', 'occupied']

@@ -1,0 +1,4 @@
+# file: C:\Users\polkk\working\Liven\backend\events\views.py
+# hypothesis_version: 6.151.9
+
+['-created_at', 'FORBIDDEN', 'VALIDATION_ERROR', 'announcement', 'announcement_id', 'code', 'content', 'description', 'details', 'emergency', 'error', 'event', 'event_date', 'event_id', 'expires_at', 'image_url', 'important', 'juristic', 'location', 'message', 'normal', 'priority', 'priority_order', 'title', 'ข้อมูลไม่ถูกต้อง']

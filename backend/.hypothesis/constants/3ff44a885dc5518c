@@ -1,0 +1,4 @@
+# file: C:\Users\polkk\working\Liven\backend\chatbot\urls.py
+# hypothesis_version: 6.151.9
+
+['chatbot-history', 'chatbot-message', 'chatbot/history/', 'chatbot/message/']

@@ -1,0 +1,4 @@
+# file: C:\Users\polkk\working\Liven\backend\analytics\views.py
+# hypothesis_version: 6.151.9
+
+[0.0, 100.0, '+', '-count', 'booking_count', 'chatbot_trends', 'comment_count', 'confirmed', 'count', 'end_date', 'engagement_level', 'error', 'facilities', 'facility_id', 'facility_name', 'facility_stats', 'id', 'pending', 'picked_up', 'post_count', 'question', 'satisfaction_rate', 'start_date', 'top_questions', 'total', 'total_picked_up', 'total_received', 'user_message']

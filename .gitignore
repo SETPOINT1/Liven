@@ -1,0 +1,54 @@
+# Environment variables
+.env
+.env.local
+.env.production
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+venv/
+.venv/
+*.egg-info/
+dist/
+build/
+*.egg
+.Python
+db.sqlite3
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnp
+.pnp.js
+
+# React / Vite
+frontend-web/dist/
+frontend-web/.vite/
+
+# React Native
+frontend-mobile/android/app/build/
+frontend-mobile/ios/Pods/
+frontend-mobile/ios/build/
+*.apk
+*.aab
+*.ipa
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Django
+staticfiles/
+media/
+*.log

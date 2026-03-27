@@ -1,0 +1,4 @@
+# file: C:\Users\polkk\working\Liven\backend\parcels\serializers.py
+# hypothesis_version: 6.151.9
+
+[0.0, 100, 255, 'arrived_at', 'courier', 'created_at', 'id', 'image_url', 'ocr_confidence', 'picked_up_at', 'project_id', 'recipient_name', 'registered_by_id', 'resident_id', 'status', 'tracking_number', 'unit_number']

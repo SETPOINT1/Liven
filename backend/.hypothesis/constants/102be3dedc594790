@@ -1,0 +1,4 @@
+# file: C:\Users\polkk\working\Liven\backend\liven\urls.py
+# hypothesis_version: 6.151.9
+
+['accounts.urls', 'admin/', 'api/', 'events.urls', 'facilities.urls', 'parcels.urls', 'social.urls']

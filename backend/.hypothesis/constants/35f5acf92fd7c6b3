@@ -1,0 +1,4 @@
+# file: C:\Users\polkk\working\Liven\backend\parcels\urls.py
+# hypothesis_version: 6.151.9
+
+['parcel-list-create', 'parcel-ocr', 'parcel-pickup', 'parcels/', 'parcels/ocr/']

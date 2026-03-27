@@ -1,0 +1,4 @@
+# file: C:\Users\polkk\working\Liven\backend\liven\settings.py
+# hypothesis_version: 6.151.9
+
+[',', '/', '1', ':', '://', '@', 'ALLOWED_HOSTS', 'APP_DIRS', 'AZURE_CV_ENDPOINT', 'AZURE_CV_KEY', 'Asia/Bangkok', 'BACKEND', 'CORS_ALLOWED_ORIGINS', 'DATABASE_URL', 'DIRS', 'DJANGO_DEBUG', 'DJANGO_SECRET_KEY', 'ENGINE', 'GEMINI_API_KEY', 'HOST', 'NAME', 'OPTIONS', 'PAGE_SIZE', 'PASSWORD', 'PORT', 'SUPABASE_ANON_KEY', 'SUPABASE_JWT_SECRET', 'SUPABASE_URL', 'TYPHOON_API_KEY', 'True', 'USER', 'accounts', 'analytics', 'chatbot', 'context_processors', 'corsheaders', 'db.sqlite3', 'default', 'django.contrib.admin', 'django.contrib.auth', 'en-us', 'events', 'facilities', 'liven.urls', 'localhost,127.0.0.1', 'notifications', 'parcels', 'rest_framework', 'social', 'static/', 'staticfiles', 'true', 'yes']

@@ -1,0 +1,4 @@
+# file: C:\Users\polkk\working\Liven\backend\accounts\middleware.py
+# hypothesis_version: 6.151.9
+
+[401, '/admin/', '/api/auth/register/', 'Bearer ', 'HS256', 'HTTP_AUTHORIZATION', 'INVALID_TOKEN', 'SUPABASE_JWT_SECRET', 'TEST_MODE', 'TOKEN_EXPIRED', 'Token หมดอายุ', 'Token ไม่ถูกต้อง', 'USER_NOT_FOUND', 'authenticated', 'code', 'error', 'message', 'sub', 'ไม่พบผู้ใช้ในระบบ']

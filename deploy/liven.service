@@ -1,0 +1,12 @@
+[Unit]
+Description=Liven Django App
+After=network.target
+
+[Service]
+User=ubuntu
+WorkingDirectory=/home/ubuntu/liven/backend
+ExecStart=/home/ubuntu/liven/backend/venv/bin/gunicorn liven.wsgi:application -c gunicorn.conf.py
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

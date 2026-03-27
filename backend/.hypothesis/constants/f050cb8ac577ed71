@@ -1,0 +1,4 @@
+# file: C:\Users\polkk\working\Liven\backend\events\models.py
+# hypothesis_version: 6.151.9
+
+[255, 'Emergency', 'Important', 'Normal', 'accounts.Project', 'accounts.User', 'announcements', 'created_by', 'emergency', 'events', 'important', 'normal', 'project_id']

@@ -1,0 +1,4 @@
+# file: C:\Users\polkk\working\Liven\backend\accounts\tests.py
+# hypothesis_version: 6.151.9
+
+[100, 200, 201, 255, 400, 5000, '.', '/api/auth/register/', '0812345678', '0[0-9]{8,9}', '123 Test Street', '@', 'A101', 'B202', 'Existing User', 'Juristic Manager', 'L', 'Test Project', 'Zs', 'application/json', 'approval', 'approved', 'email', 'error', 'full_name', 'juristic', 'juristic@example.com', 'pending', 'phone', 'project_id', 'resident', 'unit_number']

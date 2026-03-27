@@ -1,0 +1,4 @@
+# file: C:\Users\polkk\working\Liven\backend\notifications\serializers.py
+# hypothesis_version: 6.151.9
+
+['body', 'created_at', 'data', 'id', 'is_read', 'title', 'type', 'user_id']

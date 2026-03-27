@@ -1,0 +1,4 @@
+# file: C:\Users\polkk\working\Liven\backend\social\urls.py
+# hypothesis_version: 6.151.9
+
+['post-comment', 'post-like', 'post-list-create', 'post-report', 'post-share-link', 'posts/']

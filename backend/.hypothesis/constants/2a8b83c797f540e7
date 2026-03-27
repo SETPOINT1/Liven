@@ -1,0 +1,4 @@
+# file: C:\Users\polkk\working\Liven\backend\social\serializers.py
+# hypothesis_version: 6.151.9
+
+['alert', 'announcement', 'author_id', 'comment_count', 'content', 'created_at', 'id', 'image_url', 'is_liked', 'is_pinned', 'like_count', 'normal', 'post_id', 'post_type', 'project_id', 'request', 'share_token', 'user_obj']

@@ -1,0 +1,4 @@
+# file: C:\Users\polkk\working\Liven\backend\liven\tests.py
+# hypothesis_version: 6.151.9
+
+[100, 200, 201, 255, 5000, 10000, '/api/announcements/', '/api/auth/register/', '/api/events/', '/api/facilities/', '/api/parcels/', '/api/posts/', '/api/users/', '0812345678', 'A101', 'Addr', 'Juristic CRUD', 'L', 'N', 'Resident CRUD', 'Test Project', 'Test facility', 'alert', 'announcement', 'application/json', 'approved', 'content', 'courier', 'description', 'email', 'emergency', 'event_date', 'fitness', 'full_name', 'garden', 'id', 'important', 'juristic', 'juristic_crud', 'location', 'meeting_room', 'name', 'normal', 'parking', 'phone', 'pool', 'post_type', 'priority', 'project_id', 'recipient_name', 'resident', 'resident_crud', 'title', 'tracking_number', 'type', 'unit_number', 'user']

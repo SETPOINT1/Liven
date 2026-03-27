@@ -1,0 +1,4 @@
+# file: C:\Users\polkk\working\Liven\backend\parcels\views.py
+# hypothesis_version: 6.151.9
+
+['-arrived_at', 'ALREADY_PICKED_UP', 'FORBIDDEN', 'NOT_FOUND', 'VALIDATION_ERROR', 'approved', 'code', 'courier', 'details', 'error', 'image', 'image_url', 'juristic', 'message', 'ocr_confidence', 'parcel', 'parcel_id', 'pending', 'picked_up', 'project_id', 'recipient_name', 'resident', 'status', 'tracking_number', 'unit_number', 'ข้อมูลไม่ถูกต้อง', 'พัสดุนี้ถูกรับไปแล้ว', 'พัสดุมาถึงแล้ว', 'ไม่พบพัสดุ']

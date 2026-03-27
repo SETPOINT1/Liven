@@ -1,0 +1,4 @@
+# file: C:\Users\polkk\working\Liven\backend\analytics\tests.py
+# hypothesis_version: 6.151.9
+
+[100, 200, 15000, '101', '102', 'Addr', 'Analytics Project', 'Analytics User', 'Health Project', 'Health User', 'Inside Resident', 'Outside Resident', 'Test Facility P21', 'Test Gym', 'Test answer', 'Test answer outside', 'Test report', 'approved', 'arrived_at', 'booking_count', 'chat_history', 'chatbot_trends', 'comment_count', 'confirmed', 'count', 'created_at', 'engagement_level', 'facilities', 'facility_id', 'facility_stats', 'fitness', 'juristic', 'parcels', 'pending', 'picked_up', 'pool', 'post_count', 'question', 'satisfaction_rate', 'top_questions', 'total', 'total_received']

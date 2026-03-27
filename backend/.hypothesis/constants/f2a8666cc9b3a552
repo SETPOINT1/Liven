@@ -1,0 +1,4 @@
+# file: C:\Users\polkk\working\Liven\backend\accounts\urls.py
+# hypothesis_version: 6.151.9
+
+['approve-user', 'auth/me/', 'auth/register/', 'change-role', 'me', 'register', 'reject-user', 'user-list', 'users/']

@@ -1,0 +1,4 @@
+# file: C:\Users\polkk\working\Liven\backend\parcels\models.py
+# hypothesis_version: 6.151.9
+
+[100, 255, 'Pending', 'Picked Up', 'accounts.Project', 'accounts.User', 'parcels', 'parcels_owned', 'parcels_registered', 'pending', 'picked_up', 'project_id', 'registered_by', 'resident_id']

@@ -1,0 +1,4 @@
+# file: C:\Users\polkk\working\Liven\backend\facilities\serializers.py
+# hypothesis_version: 6.151.9
+
+['available', 'confirmed', 'created_at', 'current_status', 'description', 'end_time', 'facility_id', 'id', 'is_active', 'name', 'non_field_errors', 'occupied', 'operating_hours', 'project_id', 'start_time', 'status', 'type', 'user_id']

@@ -1,0 +1,4 @@
+# file: C:\Users\polkk\working\Liven\backend\accounts\tests.py
+# hypothesis_version: 6.151.9
+
+[100, 200, 201, 255, 400, 5000, '-created_at', '.', '/api/auth/me/', '/api/auth/register/', '/api/users/', '0812345678', '0[0-9]{8,9}', '123 Test Street', '@', 'A101', 'B202', 'Existing User', 'Juristic Admin', 'Juristic Manager', 'L', 'Pending Resident', 'Test Project', 'Test User', 'Zs', 'application/json', 'approval', 'approve', 'approved', 'developer', 'email', 'error', 'full_name', 'juristic', 'juristic@example.com', 'pending', 'phone', 'project_id', 'reject', 'rejected', 'resident', 'role', 'status', 'suspended', 'unit_number']

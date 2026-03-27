@@ -1,0 +1,4 @@
+# file: C:\Users\polkk\working\Liven\backend\chatbot\serializers.py
+# hypothesis_version: 6.151.9
+
+[2000, 'bot_response', 'created_at', 'id', 'is_escalated', 'session_id', 'user', 'user_message']

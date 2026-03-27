@@ -1,0 +1,4 @@
+# file: C:\Users\polkk\working\Liven\backend\liven\exception_handler.py
+# hypothesis_version: 6.151.9
+
+[400, 401, 403, 404, 405, 429, 500, 'ERROR', 'FORBIDDEN', 'INTERNAL_ERROR', 'METHOD_NOT_ALLOWED', 'NOT_FOUND', 'THROTTLED', 'UNAUTHORIZED', 'VALIDATION_ERROR', 'code', 'detail', 'details', 'error', 'message', 'เกิดข้อผิดพลาด']

@@ -1,0 +1,21 @@
+{
+  "expo": {
+    "name": "Liven Smart Community",
+    "slug": "liven-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "liven",
+    "platforms": [
+      "ios",
+      "android"
+    ],
+    "extra": {
+      "SUPABASE_URL": "https://skqxccixaybsssfpqpnb.supabase.co",
+      "SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrcXhjY2l4YXlic3NzZnBxcG5iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2MDgxMTMsImV4cCI6MjA5MDE4NDExM30.5CxdLDlKlwHtOJjkF6sNWxl2iHaxT1WCjcN8cjRUhE0",
+      "API_BASE_URL": "http://localhost:8000/api"
+    },
+    "plugins": [
+      "expo-asset"
+    ]
+  }
+}

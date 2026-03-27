@@ -1,0 +1,4 @@
+# file: C:\Users\polkk\working\Liven\backend\parcels\tests.py
+# hypothesis_version: 6.151.9
+
+[b'fake-image-data', 0.0, 0.59, 0.6, 1.0, 200, 201, 5000, '-created_at', '/api/parcels/', '123 Test Street', 'A101', 'DHL', 'Flash Express', 'J&T Express', 'Juristic Manager', 'Kerry Express', 'L', 'Ninja Van', 'Shopee Express', 'Test Project', 'Test Resident', 'Thailand Post', 'Zs', 'application/json', 'approved', 'arrived_at', 'confidence', 'courier', 'image_url', 'juristic', 'parcel', 'parcel_id', 'pending', 'picked_up', 'picked_up_at', 'project_id', 'recipient_name', 'resident', 'resident_id', 'some text', 'status', 'tracking_number', 'unit_number']

@@ -1,0 +1,4 @@
+# file: C:\Users\polkk\working\Liven\backend\events\tests.py
+# hypothesis_version: 6.151.9
+
+[100, 200, 201, 10000, 15000, '/api/announcements/', '/api/events/', 'Addr', 'Juristic Events', 'Juristic P18', 'Juristic P19', 'L', 'N', 'P', 'Resident P18', 'Resident P19', 'Test Location', 'Test Project', 'Zs', 'application/json', 'approved', 'content', 'created_at', 'description', 'emergency', 'event', 'event_date', 'important', 'juristic', 'location', 'normal', 'priority', 'resident', 'title']

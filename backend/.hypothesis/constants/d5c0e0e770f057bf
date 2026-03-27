@@ -1,0 +1,4 @@
+# file: C:\Users\polkk\working\Liven\backend\chatbot\tests.py
+# hypothesis_version: 6.151.9
+
+[200, 201, 500, 10000, '-created_at', 'Addr', 'L', 'N', 'P', 'Resident Chatbot', 'Test Project', 'Zs', 'application/json', 'approved', 'message', 'resident']

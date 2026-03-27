@@ -1,0 +1,4 @@
+# file: C:\Users\polkk\working\Liven\backend\accounts\serializers.py
+# hypothesis_version: 6.151.9
+
+[255, 'approved', 'created_at', 'developer', 'email', 'full_name', 'id', 'juristic', 'pending', 'phone', 'project_id', 'rejected', 'resident', 'role', 'status', 'supabase_uid', 'suspended', 'unit_number', 'updated_at']

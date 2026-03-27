@@ -1,0 +1,4 @@
+# file: C:\Users\polkk\working\Liven\backend\social\tests.py
+# hypothesis_version: 6.151.9
+
+[100, 200, 201, 401, 403, 5000, 10000, '-created_at', '/api/posts/', 'Addr', 'Addr A', 'Addr B', 'Feeder', 'Juristic Manager', 'L', 'Liker', 'N', 'P', 'Project A', 'Project B', 'Reporter', 'Sharer', 'Test Project', 'User A', 'User B', 'Zs', 'alert', 'announcement', 'application/json', 'approved', 'content', 'feeder@example.com', 'id', 'juristic', 'juristic@example.com', 'like_count', 'liked', 'liker@example.com', 'normal', 'post_id', 'post_type', 'reason', 'report', 'reporter@example.com', 'resident', 'share_token', 'sharer@example.com', 'user_a@example.com', 'user_b@example.com']

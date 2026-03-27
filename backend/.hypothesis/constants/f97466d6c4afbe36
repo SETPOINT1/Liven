@@ -1,0 +1,4 @@
+# file: C:\Users\polkk\working\Liven\backend\facilities\models.py
+# hypothesis_version: 6.151.9
+
+[100, 255, 'Cancelled', 'Confirmed', 'Fitness', 'Garden', 'Meeting Room', 'Parking', 'Pool', 'accounts.Project', 'accounts.User', 'bookings', 'cancelled', 'confirmed', 'facilities', 'facility_id', 'fitness', 'garden', 'meeting_room', 'parking', 'pool', 'project_id', 'user_id']

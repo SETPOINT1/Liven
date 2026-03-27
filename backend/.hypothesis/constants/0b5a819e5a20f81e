@@ -1,0 +1,4 @@
+# file: C:\Users\polkk\working\Liven\backend\chatbot\models.py
+# hypothesis_version: 6.151.9
+
+[100, 'accounts.Project', 'accounts.User', 'chat_history', 'knowledge_base', 'project_id', 'user_id']

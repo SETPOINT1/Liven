@@ -1,0 +1,4 @@
+# file: C:\Users\polkk\working\Liven\backend\facilities\urls.py
+# hypothesis_version: 6.151.9
+
+['book-facility', 'booking-list', 'bookings/', 'facilities/', 'facility-list', 'facility-status']

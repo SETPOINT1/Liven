@@ -1,0 +1,4 @@
+# file: C:\Users\polkk\working\Liven\backend\analytics\urls.py
+# hypothesis_version: 6.151.9
+
+['chatbot-trends', 'community-health', 'facility-usage', 'parcel-stats']
