@@ -71,13 +71,21 @@ WSGI_APPLICATION = 'liven.wsgi.application'
 # Database configuration via DATABASE_URL
 DATABASE_URL = os.getenv('DATABASE_URL', '')
 if DATABASE_URL:
+    import socket
+    # Resolve hostname to IPv4 to avoid IPv6 connectivity issues on EC2
+    _db_host = DATABASE_URL.split('@')[1].split(':')[0]
+    try:
+        _db_host_ipv4 = socket.getaddrinfo(_db_host, None, socket.AF_INET)[0][4][0]
+    except socket.gaierror:
+        _db_host_ipv4 = _db_host
+
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
             'NAME': DATABASE_URL.split('/')[-1],
             'USER': DATABASE_URL.split('://')[1].split(':')[0],
             'PASSWORD': DATABASE_URL.split(':')[2].split('@')[0],
-            'HOST': DATABASE_URL.split('@')[1].split(':')[0],
+            'HOST': _db_host_ipv4,
             'PORT': DATABASE_URL.split(':')[-1].split('/')[0],
         }
     }
