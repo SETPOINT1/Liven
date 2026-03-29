@@ -18,15 +18,47 @@ class PostSerializer(serializers.ModelSerializer):
     like_count = serializers.SerializerMethodField()
     comment_count = serializers.SerializerMethodField()
     is_liked = serializers.SerializerMethodField()
+    author_name = serializers.SerializerMethodField()
+    author_role = serializers.SerializerMethodField()
+    comments = serializers.SerializerMethodField()
 
     class Meta:
         model = Post
         fields = [
-            'id', 'author_id', 'project_id', 'post_type', 'content',
+            'id', 'author_id', 'author_name', 'author_role', 'project_id', 'post_type', 'content',
             'image_url', 'is_pinned', 'share_token', 'created_at',
-            'like_count', 'comment_count', 'is_liked',
+            'like_count', 'comment_count', 'is_liked', 'comments',
         ]
         read_only_fields = fields
+
+    def get_author_name(self, obj):
+        try:
+            return obj.author.full_name
+        except Exception:
+            return 'ผู้ใช้'
+
+    def get_author_role(self, obj):
+        try:
+            return obj.author.role
+        except Exception:
+            return 'resident'
+
+    def get_comments(self, obj):
+        comments = Comment.objects.filter(post_id=obj.id).order_by('created_at')
+        result = []
+        for c in comments:
+            try:
+                author_name = c.author.full_name
+            except Exception:
+                author_name = 'ผู้ใช้'
+            result.append({
+                'id': str(c.id),
+                'author_id': str(c.author_id),
+                'author_name': author_name,
+                'content': c.content,
+                'created_at': c.created_at.isoformat() if c.created_at else None,
+            })
+        return result
 
     def get_like_count(self, obj):
         return Like.objects.filter(post_id=obj.id).count()

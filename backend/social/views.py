@@ -221,3 +221,51 @@ class ShareLinkView(APIView):
             'share_url': share_url,
         })
         return Response(serializer.data)
+
+class DeletePostView(APIView):
+    """DELETE /api/posts/{id}/ — Delete a post. Juristic can delete any post in their project."""
+    permission_classes = [IsAuthenticated, IsApproved]
+
+    def delete(self, request, pk):
+        try:
+            post = Post.objects.get(pk=pk)
+        except Post.DoesNotExist:
+            return Response(
+                {'error': {'code': 'NOT_FOUND', 'message': 'ไม่พบโพสต์'}},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        user = request.user_obj
+        # Juristic can delete any post in their project, others can only delete their own
+        if user.role == 'juristic' or post.author_id == user.id:
+            post.delete()
+            return Response({'message': 'ลบโพสต์สำเร็จ'}, status=status.HTTP_200_OK)
+
+        return Response(
+            {'error': {'code': 'FORBIDDEN', 'message': 'ไม่มีสิทธิ์ลบโพสต์นี้'}},
+            status=status.HTTP_403_FORBIDDEN,
+        )
+
+
+class DeleteCommentView(APIView):
+    """DELETE /api/posts/{post_id}/comments/{comment_id}/ — Delete a comment."""
+    permission_classes = [IsAuthenticated, IsApproved]
+
+    def delete(self, request, post_id, comment_id):
+        try:
+            comment = Comment.objects.get(pk=comment_id, post_id=post_id)
+        except Comment.DoesNotExist:
+            return Response(
+                {'error': {'code': 'NOT_FOUND', 'message': 'ไม่พบความคิดเห็น'}},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        user = request.user_obj
+        if user.role == 'juristic' or comment.author_id == user.id:
+            comment.delete()
+            return Response({'message': 'ลบความคิดเห็นสำเร็จ'}, status=status.HTTP_200_OK)
+
+        return Response(
+            {'error': {'code': 'FORBIDDEN', 'message': 'ไม่มีสิทธิ์ลบความคิดเห็นนี้'}},
+            status=status.HTTP_403_FORBIDDEN,
+        )

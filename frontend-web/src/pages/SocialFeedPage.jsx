@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import api from '../services/api';
+import { useAuth } from '../hooks/useAuth';
+import ConfirmModal from '../components/ConfirmModal';
 
 const cardStyle = { background: '#fff', borderRadius: 8, padding: 20, marginBottom: 16, boxShadow: '0 1px 3px rgba(0,0,0,0.08)' };
 const inputStyle = { width: '100%', padding: '8px 12px', border: '1px solid #d9d9d9', borderRadius: 4, fontSize: 14, marginBottom: 12, boxSizing: 'border-box' };
@@ -7,14 +9,66 @@ const btnPrimary = { padding: '8px 20px', background: '#1a1a2e', color: '#fff', 
 const btnSmall = (bg) => ({ padding: '4px 12px', border: 'none', borderRadius: 4, color: '#fff', background: bg, cursor: 'pointer', fontSize: 12, marginRight: 4 });
 const tabStyle = (active) => ({ padding: '8px 20px', border: 'none', borderBottom: active ? '2px solid #1a1a2e' : '2px solid transparent', background: 'none', cursor: 'pointer', fontWeight: active ? 600 : 400, fontSize: 14 });
 
+const typeBadge = {
+  announcement: { label: '📢 ประกาศ', bg: '#e6f7ff', color: '#1890ff', border: '#91d5ff' },
+  alert: { label: '🚨 แจ้งเตือน', bg: '#fff2f0', color: '#ff4d4f', border: '#ffa39e' },
+  normal: { label: '💬 ทั่วไป', bg: '#f6ffed', color: '#52c41a', border: '#b7eb8f' },
+};
+
+const roleBadge = {
+  juristic: { label: 'นิติบุคคล', bg: '#f0f5ff', color: '#2f54eb' },
+  resident: { label: 'ลูกบ้าน', bg: '#f9f0ff', color: '#722ed1' },
+  developer: { label: 'Developer', bg: '#fff7e6', color: '#fa8c16' },
+};
+
 const reportStatusLabels = { pending: 'รอตรวจสอบ', reviewed: 'ตรวจสอบแล้ว', dismissed: 'ยกเลิก' };
 
+function renderBadge(type) {
+  const badge = typeBadge[type] || typeBadge.normal;
+  return (
+    <span style={{
+      fontSize: 11, padding: '2px 8px', borderRadius: 10,
+      background: badge.bg, color: badge.color, border: `1px solid ${badge.border}`,
+    }}>
+      {badge.label}
+    </span>
+  );
+}
+
+function renderRoleBadge(role) {
+  const badge = roleBadge[role] || roleBadge.resident;
+  return (
+    <span style={{
+      fontSize: 11, padding: '1px 6px', borderRadius: 4,
+      background: badge.bg, color: badge.color, marginLeft: 6,
+    }}>
+      {badge.label}
+    </span>
+  );
+}
+
+function timeAgo(dateStr) {
+  if (!dateStr) return '';
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return 'เมื่อสักครู่';
+  if (mins < 60) return `${mins} นาทีที่แล้ว`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours} ชั่วโมงที่แล้ว`;
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `${days} วันที่แล้ว`;
+  return new Date(dateStr).toLocaleDateString('th-TH');
+}
+
 export default function SocialFeedPage() {
+  const { user } = useAuth();
+  const isJuristic = user?.role === 'juristic';
   const [tab, setTab] = useState('feed');
   const [posts, setPosts] = useState([]);
   const [reports, setReports] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [postForm, setPostForm] = useState({ content: '', post_type: 'announcement', image: null });
+  const [confirm, setConfirm] = useState({ open: false, title: '', message: '', action: null });
 
   useEffect(() => { fetchPosts(); }, []);
   useEffect(() => { if (tab === 'reports') fetchReports(); }, [tab]);
@@ -48,14 +102,32 @@ export default function SocialFeedPage() {
     fetchPosts();
   }
 
-  async function handleReportAction(postId, reportId, status) {
+  async function handleReportAction(postId, reportId, newStatus) {
     try {
-      await api.patch(`/posts/${postId}/report/${reportId}/`, { status });
+      await api.patch(`/posts/${postId}/report/${reportId}/`, { status: newStatus });
       fetchReports();
     } catch { /* ignore */ }
   }
 
-  const typeLabels = { normal: 'โพสต์', announcement: '📢 ประกาศ', alert: '🚨 แจ้งเตือน' };
+  async function handleDeletePost(postId) {
+    setConfirm({
+      open: true, title: 'ลบโพสต์', message: 'ต้องการลบโพสต์นี้ใช่หรือไม่? การดำเนินการนี้ไม่สามารถย้อนกลับได้',
+      action: async () => {
+        try { await api.delete(`/posts/${postId}/`); fetchPosts(); } catch { /* ignore */ }
+        setConfirm({ open: false });
+      },
+    });
+  }
+
+  async function handleDeleteComment(postId, commentId) {
+    setConfirm({
+      open: true, title: 'ลบความคิดเห็น', message: 'ต้องการลบความคิดเห็นนี้ใช่หรือไม่?',
+      action: async () => {
+        try { await api.delete(`/posts/${postId}/comments/${commentId}/`); fetchPosts(); } catch { /* ignore */ }
+        setConfirm({ open: false });
+      },
+    });
+  }
 
   return (
     <div>
@@ -91,19 +163,67 @@ export default function SocialFeedPage() {
         </div>
       )}
 
-      {tab === 'feed' && posts.map((post) => (
-        <div key={post.id} style={{ ...cardStyle, borderLeft: post.post_type === 'alert' ? '4px solid #ff4d4f' : post.post_type === 'announcement' ? '4px solid #1890ff' : 'none' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-            <span style={{ fontWeight: 600 }}>{post.author_name || 'ผู้ใช้'}</span>
-            <span style={{ fontSize: 12, color: '#999' }}>{typeLabels[post.post_type] || post.post_type}</span>
+      {tab === 'feed' && posts.map((post) => {
+        const isJuristic = post.author_role === 'juristic';
+        let borderColor;
+        if (isJuristic && post.post_type === 'alert') {
+          borderColor = '#ff4d4f'; // แดง - แจ้งเตือนจากนิติ
+        } else if (isJuristic) {
+          borderColor = '#722ed1'; // ม่วง - ประกาศจากนิติ
+        } else {
+          borderColor = '#1890ff'; // น้ำเงิน - ลูกบ้าน
+        }
+        return (
+          <div key={post.id} style={{ ...cardStyle, borderLeft: `4px solid ${borderColor}` }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <div style={{
+                  width: 36, height: 36, borderRadius: '50%', background: '#e8e8e8',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: 16, marginRight: 10, flexShrink: 0,
+                }}>
+                  {(post.author_name || '?')[0]}
+                </div>
+                <div>
+                  <div style={{ fontWeight: 600, fontSize: 14 }}>
+                    {post.author_name || 'ผู้ใช้'}
+                    {renderRoleBadge(post.author_role)}
+                  </div>
+                  <div style={{ fontSize: 12, color: '#999' }}>{timeAgo(post.created_at)}</div>
+                </div>
+              </div>
+              {renderBadge(post.post_type)}
+            </div>
+            <p style={{ margin: '8px 0', lineHeight: 1.6 }}>{post.content}</p>
+            {post.image_url && <img src={post.image_url} alt="" style={{ maxWidth: '100%', maxHeight: 300, borderRadius: 4, marginTop: 8 }} />}
+            <div style={{ marginTop: 12, paddingTop: 10, borderTop: '1px solid #f0f0f0', fontSize: 13, color: '#666', display: 'flex', gap: 16, alignItems: 'center' }}>
+              <span>{post.is_liked ? '❤️' : '🤍'} {post.like_count || 0} ถูกใจ</span>
+              <span>💬 {post.comment_count || 0} ความคิดเห็น</span>
+              {isJuristic && (
+                <button onClick={() => handleDeletePost(post.id)} style={{ marginLeft: 'auto', padding: '2px 10px', border: '1px solid #ff4d4f', borderRadius: 4, background: '#fff', color: '#ff4d4f', cursor: 'pointer', fontSize: 12 }}>
+                  🗑 ลบโพสต์
+                </button>
+              )}
+            </div>
+            {post.comments && post.comments.length > 0 && (
+              <div style={{ marginTop: 10, paddingTop: 10, borderTop: '1px solid #f5f5f5' }}>
+                {post.comments.map((c) => (
+                  <div key={c.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '6px 0', fontSize: 13 }}>
+                    <div>
+                      <span style={{ fontWeight: 600 }}>{c.author_name}</span>
+                      <span style={{ color: '#666', marginLeft: 8 }}>{c.content}</span>
+                      <span style={{ color: '#bbb', marginLeft: 8, fontSize: 11 }}>{timeAgo(c.created_at)}</span>
+                    </div>
+                    {isJuristic && (
+                      <button onClick={() => handleDeleteComment(post.id, c.id)} style={{ padding: '1px 6px', border: 'none', background: 'none', color: '#ff4d4f', cursor: 'pointer', fontSize: 12 }}>✕</button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
-          <p>{post.content}</p>
-          {post.image_url && <img src={post.image_url} alt="" style={{ maxWidth: 300, borderRadius: 4, marginTop: 8 }} />}
-          <div style={{ marginTop: 8, fontSize: 12, color: '#999' }}>
-            ❤️ {post.likes_count || 0} | 💬 {post.comments_count || 0} | {post.created_at ? new Date(post.created_at).toLocaleString('th-TH') : ''}
-          </div>
-        </div>
-      ))}
+        );
+      })}
 
       {tab === 'reports' && (
         <div>
@@ -126,6 +246,13 @@ export default function SocialFeedPage() {
           ))}
         </div>
       )}
+      <ConfirmModal
+        open={confirm.open}
+        title={confirm.title}
+        message={confirm.message}
+        onConfirm={confirm.action}
+        onCancel={() => setConfirm({ open: false })}
+      />
     </div>
   );
 }

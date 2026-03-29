@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 
 const containerStyle = {
@@ -24,8 +24,17 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { signIn } = useAuth();
+  const { signIn, signOut } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // แสดง error จาก ProtectedRoute redirect
+  useEffect(() => {
+    if (location.state?.error) {
+      setError(location.state.error);
+      signOut(); // logout เพื่อ clear session
+    }
+  }, [location.state]);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -50,7 +59,16 @@ export default function LoginPage() {
           <input style={inputStyle} type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
           <label style={{ fontSize: 13, color: '#555' }}>รหัสผ่าน</label>
           <input style={inputStyle} type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
-          {error && <div style={{ color: 'red', fontSize: 13, marginBottom: 12 }}>{error}</div>}
+          {error && (
+            <div style={{
+              padding: '10px 14px', marginBottom: 12, borderRadius: 4, fontSize: 13,
+              background: location.state?.error ? '#fff7e6' : '#fff2f0',
+              border: `1px solid ${location.state?.error ? '#ffd591' : '#ffa39e'}`,
+              color: location.state?.error ? '#ad6800' : '#cf1322',
+            }}>
+              {error}
+            </div>
+          )}
           <button style={btnStyle} type="submit" disabled={loading}>
             {loading ? 'กำลังเข้าสู่ระบบ...' : 'เข้าสู่ระบบ'}
           </button>

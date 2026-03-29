@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import api from '../services/api';
 import { supabase } from '../services/supabase';
+import ConfirmModal from '../components/ConfirmModal';
 
 const tableStyle = { width: '100%', borderCollapse: 'collapse', background: '#fff', borderRadius: 8, overflow: 'hidden' };
 const thStyle = { padding: '12px 16px', textAlign: 'left', background: '#fafafa', borderBottom: '2px solid #e8e8e8', fontSize: 13, color: '#555' };
@@ -13,6 +14,7 @@ const statusLabels = { pending: 'รอการอนุมัติ', approved
 export default function UsersPage() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [confirm, setConfirm] = useState({ open: false, title: '', message: '', action: null });
 
   useEffect(() => {
     fetchUsers();
@@ -30,20 +32,25 @@ export default function UsersPage() {
     setLoading(false);
   }
 
-  async function handleApprove(id) {
-    await api.patch(`/users/${id}/approve/`);
-    fetchUsers();
-  }
-  async function handleReject(id) {
-    await api.patch(`/users/${id}/reject/`);
-    fetchUsers();
+  async function handleStatusChange(id, name, newStatus) {
+    const labels = { approved: 'อนุมัติ', rejected: 'ปฏิเสธ', suspended: 'ระงับ', pending: 'รอการอนุมัติ' };
+    setConfirm({
+      open: true,
+      title: 'เปลี่ยนสถานะผู้ใช้',
+      message: `ต้องการเปลี่ยนสถานะของ "${name}" เป็น "${labels[newStatus]}" ใช่หรือไม่?`,
+      action: async () => {
+        if (newStatus === 'approved') {
+          await api.patch(`/users/${id}/approve/`);
+        } else {
+          await api.patch(`/users/${id}/reject/`);
+        }
+        fetchUsers();
+        setConfirm({ open: false });
+      },
+    });
   }
   async function handleRoleChange(id, role) {
     await api.patch(`/users/${id}/role/`, { role });
-    fetchUsers();
-  }
-  async function handleSuspend(id) {
-    await api.patch(`/users/${id}/reject/`, { status: 'suspended' });
     fetchUsers();
   }
 
@@ -60,7 +67,6 @@ export default function UsersPage() {
             <th style={thStyle}>ห้อง</th>
             <th style={thStyle}>สถานะ</th>
             <th style={thStyle}>บทบาท</th>
-            <th style={thStyle}>การดำเนินการ</th>
           </tr>
         </thead>
         <tbody>
@@ -70,9 +76,19 @@ export default function UsersPage() {
               <td style={tdStyle}>{u.email}</td>
               <td style={tdStyle}>{u.unit_number || '-'}</td>
               <td style={tdStyle}>
-                <span style={{ color: statusColors[u.status] || '#000', fontWeight: 600 }}>
-                  {statusLabels[u.status] || u.status}
-                </span>
+                <select
+                  value={u.status}
+                  onChange={(e) => handleStatusChange(u.id, u.full_name, e.target.value)}
+                  style={{
+                    padding: '4px 8px', borderRadius: 4, border: '1px solid #d9d9d9',
+                    color: statusColors[u.status] || '#000', fontWeight: 600,
+                  }}
+                >
+                  <option value="pending" style={{ color: statusColors.pending }}>รอการอนุมัติ</option>
+                  <option value="approved" style={{ color: statusColors.approved }}>อนุมัติแล้ว</option>
+                  <option value="rejected" style={{ color: statusColors.rejected }}>ถูกปฏิเสธ</option>
+                  <option value="suspended" style={{ color: statusColors.suspended }}>ถูกระงับ</option>
+                </select>
               </td>
               <td style={tdStyle}>
                 <select value={u.role} onChange={(e) => handleRoleChange(u.id, e.target.value)}
@@ -82,21 +98,17 @@ export default function UsersPage() {
                   <option value="developer">Developer</option>
                 </select>
               </td>
-              <td style={tdStyle}>
-                {u.status === 'pending' && (
-                  <>
-                    <button style={btnSmall('#52c41a')} onClick={() => handleApprove(u.id)}>อนุมัติ</button>
-                    <button style={btnSmall('#ff4d4f')} onClick={() => handleReject(u.id)}>ปฏิเสธ</button>
-                  </>
-                )}
-                {u.status === 'approved' && (
-                  <button style={btnSmall('#8c8c8c')} onClick={() => handleSuspend(u.id)}>ระงับ</button>
-                )}
-              </td>
             </tr>
           ))}
         </tbody>
       </table>
+      <ConfirmModal
+        open={confirm.open}
+        title={confirm.title}
+        message={confirm.message}
+        onConfirm={confirm.action}
+        onCancel={() => setConfirm({ open: false })}
+      />
     </div>
   );
 }
