@@ -57,7 +57,7 @@ class SupabaseJWTMiddleware:
                 payload = jwt.decode(
                     token,
                     supabase_jwt_secret,
-                    algorithms=['HS256'],
+                    algorithms=['HS256', 'HS384', 'HS512'],
                     audience='authenticated',
                 )
                 supabase_uid = payload.get('sub')
