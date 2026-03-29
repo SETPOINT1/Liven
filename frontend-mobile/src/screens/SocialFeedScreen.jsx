@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   View, Text, FlatList, TouchableOpacity, StyleSheet, TextInput, Alert,
-  Modal, ActivityIndicator, RefreshControl, Share,
+  Modal, ActivityIndicator, RefreshControl, Share, Keyboard, TouchableWithoutFeedback,
+  KeyboardAvoidingView, Platform,
 } from 'react-native';
 import api from '../services/api';
 import { supabase } from '../services/supabase';
@@ -39,6 +40,14 @@ const SocialFeedScreen = () => {
   }, []);
 
   useEffect(() => { fetchPosts(); }, [fetchPosts]);
+
+  // Update comments when posts change and comment modal is open
+  useEffect(() => {
+    if (showComments) {
+      const post = posts.find((p) => p.id === showComments);
+      setComments(post?.comments || []);
+    }
+  }, [posts, showComments]);
 
   // Supabase Realtime for new posts
   useEffect(() => {
@@ -105,12 +114,9 @@ const SocialFeedScreen = () => {
   const openComments = async (postId) => {
     setShowComments(postId);
     setCommentsLoading(true);
-    try {
-      const res = await api.get(`/posts/${postId}/comments/`);
-      setComments(res.data.results || res.data || []);
-    } catch {
-      setComments([]);
-    }
+    // Get comments from post data (already included in PostSerializer)
+    const post = posts.find((p) => p.id === postId);
+    setComments(post?.comments || []);
     setCommentsLoading(false);
   };
 
@@ -119,7 +125,8 @@ const SocialFeedScreen = () => {
     try {
       await api.post(`/posts/${showComments}/comments/`, { content: newComment });
       setNewComment('');
-      openComments(showComments);
+      // Refresh posts to get updated comments
+      await fetchPosts();
     } catch {
       Alert.alert('ข้อผิดพลาด', 'ไม่สามารถคอมเมนต์ได้');
     }
@@ -137,10 +144,10 @@ const SocialFeedScreen = () => {
       <Text style={styles.date}>{new Date(item.created_at).toLocaleDateString('th-TH')}</Text>
       <View style={styles.actions}>
         <TouchableOpacity style={styles.actionBtn} onPress={() => handleLike(item.id)}>
-          <Text style={styles.actionText}>❤️ {item.likes_count || 0}</Text>
+          <Text style={styles.actionText}>{item.is_liked ? '❤️' : '🤍'} {item.like_count || 0}</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.actionBtn} onPress={() => openComments(item.id)}>
-          <Text style={styles.actionText}>💬 {item.comments_count || 0}</Text>
+          <Text style={styles.actionText}>💬 {item.comment_count || 0}</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.actionBtn} onPress={() => handleShare(item.id)}>
           <Text style={styles.actionText}>🔗 แชร์</Text>
@@ -173,65 +180,79 @@ const SocialFeedScreen = () => {
 
       {/* Create Post Modal */}
       <Modal visible={showCreate} transparent animationType="slide">
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>สร้างโพสต์ใหม่</Text>
-            <TextInput
-              style={[styles.input, { height: 100, textAlignVertical: 'top' }]}
-              placeholder="เขียนอะไรสักอย่าง..."
-              value={newContent}
-              onChangeText={setNewContent}
-              multiline
-            />
-            <View style={styles.modalActions}>
-              <TouchableOpacity style={styles.cancelBtn} onPress={() => setShowCreate(false)}>
-                <Text style={styles.cancelBtnText}>ยกเลิก</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.confirmBtn} onPress={handleCreatePost} disabled={submitting}>
-                {submitting ? <ActivityIndicator color="#FFF" /> : <Text style={styles.confirmBtnText}>โพสต์</Text>}
-              </TouchableOpacity>
+        <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+          <TouchableWithoutFeedback onPress={() => { Keyboard.dismiss(); setShowCreate(false); }}>
+            <View style={styles.modalOverlay}>
+              <TouchableWithoutFeedback onPress={(e) => e.stopPropagation()}>
+                <View style={styles.modalContent}>
+                  <Text style={styles.modalTitle}>สร้างโพสต์ใหม่</Text>
+                  <TextInput
+                    style={[styles.input, { height: 100, textAlignVertical: 'top' }]}
+                    placeholder="เขียนอะไรสักอย่าง..."
+                    placeholderTextColor="#9CA3AF"
+                    value={newContent}
+                    onChangeText={setNewContent}
+                    multiline
+                  />
+                  <View style={styles.modalActions}>
+                    <TouchableOpacity style={styles.cancelBtn} onPress={() => { Keyboard.dismiss(); setShowCreate(false); }}>
+                      <Text style={styles.cancelBtnText}>ยกเลิก</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.confirmBtn} onPress={handleCreatePost} disabled={submitting}>
+                      {submitting ? <ActivityIndicator color="#FFF" /> : <Text style={styles.confirmBtnText}>โพสต์</Text>}
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              </TouchableWithoutFeedback>
             </View>
-          </View>
-        </View>
+          </TouchableWithoutFeedback>
+        </KeyboardAvoidingView>
       </Modal>
 
       {/* Comments Modal */}
       <Modal visible={showComments !== null} transparent animationType="slide">
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { maxHeight: '70%' }]}>
-            <Text style={styles.modalTitle}>ความคิดเห็น</Text>
-            {commentsLoading ? (
-              <ActivityIndicator color="#4F46E5" />
-            ) : (
-              <FlatList
-                data={comments}
-                keyExtractor={(item) => item.id}
-                renderItem={({ item }) => (
-                  <View style={styles.commentItem}>
-                    <Text style={styles.commentAuthor}>{item.author_name || 'ผู้ใช้'}</Text>
-                    <Text style={styles.commentContent}>{item.content}</Text>
+        <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+          <TouchableWithoutFeedback onPress={() => { Keyboard.dismiss(); setShowComments(null); setComments([]); }}>
+            <View style={styles.modalOverlay}>
+              <TouchableWithoutFeedback onPress={(e) => e.stopPropagation()}>
+                <View style={[styles.modalContent, { maxHeight: '70%' }]}>
+                  <Text style={styles.modalTitle}>ความคิดเห็น</Text>
+                  {commentsLoading ? (
+                    <ActivityIndicator color="#4F46E5" />
+                  ) : (
+                    <FlatList
+                      data={comments}
+                      keyExtractor={(item) => item.id}
+                      renderItem={({ item }) => (
+                        <View style={styles.commentItem}>
+                          <Text style={styles.commentAuthor}>{item.author_name || 'ผู้ใช้'}</Text>
+                          <Text style={styles.commentContent}>{item.content}</Text>
+                        </View>
+                      )}
+                      ListEmptyComponent={<Text style={styles.emptyText}>ยังไม่มีความคิดเห็น</Text>}
+                      style={{ maxHeight: 300 }}
+                    />
+                  )}
+                  <View style={styles.commentInputRow}>
+                    <TextInput
+                      style={[styles.input, { flex: 1, marginBottom: 0, marginRight: 8 }]}
+                      placeholder="เขียนความคิดเห็น..."
+                      placeholderTextColor="#9CA3AF"
+                      value={newComment}
+                      onChangeText={setNewComment}
+                    />
+                    <TouchableOpacity style={styles.sendBtn} onPress={handleAddComment}>
+                      <Text style={styles.sendBtnText}>ส่ง</Text>
+                    </TouchableOpacity>
                   </View>
-                )}
-                ListEmptyComponent={<Text style={styles.emptyText}>ยังไม่มีความคิดเห็น</Text>}
-                style={{ maxHeight: 300 }}
-              />
-            )}
-            <View style={styles.commentInputRow}>
-              <TextInput
-                style={[styles.input, { flex: 1, marginBottom: 0, marginRight: 8 }]}
-                placeholder="เขียนความคิดเห็น..."
-                value={newComment}
-                onChangeText={setNewComment}
-              />
-              <TouchableOpacity style={styles.sendBtn} onPress={handleAddComment}>
-                <Text style={styles.sendBtnText}>ส่ง</Text>
-              </TouchableOpacity>
+                  <TouchableOpacity style={[styles.cancelBtn, { marginTop: 12 }]} onPress={() => { Keyboard.dismiss(); setShowComments(null); setComments([]); }}>
+                    <Text style={styles.cancelBtnText}>ปิด</Text>
+                  </TouchableOpacity>
+                </View>
+              </TouchableWithoutFeedback>
             </View>
-            <TouchableOpacity style={[styles.cancelBtn, { marginTop: 12 }]} onPress={() => { setShowComments(null); setComments([]); }}>
-              <Text style={styles.cancelBtnText}>ปิด</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
+          </TouchableWithoutFeedback>
+        </KeyboardAvoidingView>
       </Modal>
     </View>
   );
@@ -257,7 +278,7 @@ const styles = StyleSheet.create({
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'flex-end' },
   modalContent: { backgroundColor: '#FFF', borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 24 },
   modalTitle: { fontSize: 18, fontWeight: '700', color: '#1F2937', marginBottom: 16 },
-  input: { borderWidth: 1, borderColor: '#D1D5DB', borderRadius: 8, padding: 12, marginBottom: 12, fontSize: 15 },
+  input: { borderWidth: 1, borderColor: '#D1D5DB', borderRadius: 8, padding: 12, marginBottom: 12, fontSize: 15, color: '#111827' },
   modalActions: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 8 },
   cancelBtn: { flex: 1, padding: 12, alignItems: 'center', marginRight: 8, borderRadius: 8, borderWidth: 1, borderColor: '#D1D5DB' },
   cancelBtnText: { color: '#6B7280', fontWeight: '600' },

@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, StyleSheet, RefreshControl } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import FacilityWidget from '../components/widgets/FacilityWidget';
 import ParcelWidget from '../components/widgets/ParcelWidget';
 import NewsWidget from '../components/widgets/NewsWidget';
 import FeedWidget from '../components/widgets/FeedWidget';
 import api from '../services/api';
 
-const HomeScreen = ({ navigation }) => {
+const HomeScreen = () => {
+  const navigation = useNavigation();
   const [userName, setUserName] = useState('');
   const [refreshing, setRefreshing] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);

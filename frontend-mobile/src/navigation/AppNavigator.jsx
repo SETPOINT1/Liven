@@ -3,6 +3,7 @@ import { ActivityIndicator, View, StyleSheet } from 'react-native';
 import { createStaticNavigation } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { supabase } from '../services/supabase';
+import api from '../services/api';
 import LoginScreen from '../screens/LoginScreen';
 import HomeScreen from '../screens/HomeScreen';
 import FacilityScreen from '../screens/FacilityScreen';
@@ -29,19 +30,45 @@ const Tabs = createBottomTabNavigator({
 const Navigation = createStaticNavigation(Tabs);
 
 const AppNavigator = () => {
-  const [session, setSession] = useState(null);
+  const [approved, setApproved] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session: s } }) => {
-      setSession(s);
-      setLoading(false);
-    });
+    checkAuth();
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, s) => {
-      setSession(s);
+      if (!s) {
+        setApproved(false);
+      }
     });
     return () => subscription?.unsubscribe();
   }, []);
+
+  async function checkAuth() {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      setLoading(false);
+      return;
+    }
+    // Verify user is approved
+    try {
+      const res = await api.get('/auth/me/');
+      if (res.data.status === 'approved') {
+        setApproved(true);
+      }
+    } catch {
+      // Not approved or error
+    }
+    setLoading(false);
+  }
+
+  function handleLogin() {
+    setApproved(true);
+  }
+
+  function handleLogout() {
+    supabase.auth.signOut();
+    setApproved(false);
+  }
 
   if (loading) {
     return (
@@ -51,8 +78,8 @@ const AppNavigator = () => {
     );
   }
 
-  if (!session) {
-    return <LoginScreen onLogin={setSession} />;
+  if (!approved) {
+    return <LoginScreen onLogin={handleLogin} />;
   }
 
   return <Navigation />;

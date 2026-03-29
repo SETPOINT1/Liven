@@ -21,13 +21,14 @@ class PostSerializer(serializers.ModelSerializer):
     author_name = serializers.SerializerMethodField()
     author_role = serializers.SerializerMethodField()
     comments = serializers.SerializerMethodField()
+    reports = serializers.SerializerMethodField()
 
     class Meta:
         model = Post
         fields = [
             'id', 'author_id', 'author_name', 'author_role', 'project_id', 'post_type', 'content',
             'image_url', 'is_pinned', 'share_token', 'created_at',
-            'like_count', 'comment_count', 'is_liked', 'comments',
+            'like_count', 'comment_count', 'is_liked', 'comments', 'reports',
         ]
         read_only_fields = fields
 
@@ -57,6 +58,31 @@ class PostSerializer(serializers.ModelSerializer):
                 'author_name': author_name,
                 'content': c.content,
                 'created_at': c.created_at.isoformat() if c.created_at else None,
+            })
+        return result
+
+    def get_reports(self, obj):
+        # Only return reports for juristic users
+        request = self.context.get('request')
+        if not request:
+            return []
+        user = getattr(request, 'user_obj', None)
+        if not user or user.role != 'juristic':
+            return []
+        reports = PostReport.objects.filter(post_id=obj.id).order_by('-created_at')
+        result = []
+        for r in reports:
+            try:
+                reporter_name = r.reported_by.full_name
+            except Exception:
+                reporter_name = 'ผู้ใช้'
+            result.append({
+                'id': str(r.id),
+                'reported_by': str(r.reported_by_id),
+                'reporter_name': reporter_name,
+                'reason': r.reason or '',
+                'status': r.status,
+                'created_at': r.created_at.isoformat() if r.created_at else None,
             })
         return result
 

@@ -31,30 +31,30 @@ const LoginScreen = ({ onLogin }) => {
       try {
         const res = await api.get('/auth/me/');
         if (res.data.status === 'pending') {
-          setPendingMessage('บัญชีของคุณอยู่ระหว่างรอการอนุมัติจากนิติบุคคล');
+          Alert.alert('รอการอนุมัติ', 'บัญชีของคุณอยู่ระหว่างรอการอนุมัติจากนิติบุคคล');
           await supabase.auth.signOut();
           setLoading(false);
           return;
         }
         if (res.data.status === 'rejected') {
-          setPendingMessage('บัญชีของคุณถูกปฏิเสธ กรุณาติดต่อนิติบุคคล');
+          Alert.alert('บัญชีถูกปฏิเสธ', 'บัญชีของคุณถูกปฏิเสธ กรุณาติดต่อนิติบุคคล');
           await supabase.auth.signOut();
           setLoading(false);
           return;
         }
         if (res.data.status === 'suspended') {
-          setPendingMessage('บัญชีของคุณถูกระงับ กรุณาติดต่อนิติบุคคล');
+          Alert.alert('บัญชีถูกระงับ', 'บัญชีของคุณถูกระงับ กรุณาติดต่อนิติบุคคล');
           await supabase.auth.signOut();
           setLoading(false);
           return;
         }
-        onLogin(data.session);
+        onLogin();
       } catch (meErr) {
         const code = meErr.response?.data?.error?.code;
         if (code === 'USER_NOT_FOUND') {
-          setPendingMessage('ไม่พบข้อมูลผู้ใช้ในระบบ กรุณาลงทะเบียนก่อน');
+          Alert.alert('ไม่พบผู้ใช้', 'ไม่พบข้อมูลผู้ใช้ในระบบ กรุณาลงทะเบียนก่อน');
         } else {
-          setPendingMessage('ไม่สามารถตรวจสอบสถานะบัญชีได้ กรุณาลองใหม่');
+          Alert.alert('ข้อผิดพลาด', 'ไม่สามารถตรวจสอบสถานะบัญชีได้ กรุณาลองใหม่');
         }
         await supabase.auth.signOut();
       }
