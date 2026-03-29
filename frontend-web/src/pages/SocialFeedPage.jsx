@@ -105,7 +105,9 @@ export default function SocialFeedPage() {
   async function handleReportAction(postId, reportId, newStatus) {
     try {
       await api.patch(`/posts/${postId}/report/${reportId}/`, { status: newStatus });
+      // Refresh reports
       fetchReports();
+      fetchPosts();
     } catch { /* ignore */ }
   }
 

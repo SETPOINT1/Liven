@@ -33,7 +33,7 @@ class PostListCreateView(APIView):
         user = request.user_obj
         queryset = Post.objects.filter(
             project_id=user.project_id,
-        ).order_by('-is_pinned', '-created_at')
+        ).select_related('author').order_by('-is_pinned', '-created_at')
 
         serializer = PostSerializer(
             queryset, many=True, context={'request': request},
@@ -269,3 +269,34 @@ class DeleteCommentView(APIView):
             {'error': {'code': 'FORBIDDEN', 'message': 'ไม่มีสิทธิ์ลบความคิดเห็นนี้'}},
             status=status.HTTP_403_FORBIDDEN,
         )
+
+
+class UpdateReportView(APIView):
+    """PATCH /api/posts/{post_id}/report/{report_id}/ — Update report status."""
+    permission_classes = [IsAuthenticated, IsApproved]
+
+    def patch(self, request, post_id, report_id):
+        user = request.user_obj
+        if user.role != 'juristic':
+            return Response(
+                {'error': {'code': 'FORBIDDEN', 'message': 'เฉพาะนิติบุคคลเท่านั้น'}},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        try:
+            report = PostReport.objects.get(pk=report_id, post_id=post_id)
+        except PostReport.DoesNotExist:
+            return Response(
+                {'error': {'code': 'NOT_FOUND', 'message': 'ไม่พบรายงาน'}},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        new_status = request.data.get('status')
+        if new_status not in ('reviewed', 'dismissed'):
+            return Response(
+                {'error': {'code': 'VALIDATION_ERROR', 'message': 'สถานะไม่ถูกต้อง'}},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        report.status = new_status
+        report.save()
+        return Response({'message': 'อัพเดตสถานะสำเร็จ', 'status': report.status})

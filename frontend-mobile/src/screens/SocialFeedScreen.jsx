@@ -75,11 +75,23 @@ const SocialFeedScreen = () => {
   };
 
   const handleLike = async (postId) => {
+    // Optimistic update
+    setPosts((prev) =>
+      prev.map((p) =>
+        p.id === postId
+          ? {
+              ...p,
+              is_liked: !p.is_liked,
+              like_count: p.is_liked ? (p.like_count || 1) - 1 : (p.like_count || 0) + 1,
+            }
+          : p
+      )
+    );
     try {
       await api.post(`/posts/${postId}/like/`);
-      fetchPosts();
     } catch {
-      // silent
+      // Revert on error
+      fetchPosts();
     }
   };
 
