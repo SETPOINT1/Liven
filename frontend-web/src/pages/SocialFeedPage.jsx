@@ -69,6 +69,8 @@ export default function SocialFeedPage() {
   const [showForm, setShowForm] = useState(false);
   const [postForm, setPostForm] = useState({ content: '', post_type: 'announcement', image: null });
   const [confirm, setConfirm] = useState({ open: false, title: '', message: '', action: null });
+  const [reviewModal, setReviewModal] = useState({ open: false, postId: null, reportId: null });
+  const [reviewResult, setReviewResult] = useState(null);
 
   useEffect(() => { fetchPosts(); }, []);
   useEffect(() => { if (tab === 'reports') fetchReports(); }, [tab]);
@@ -105,10 +107,30 @@ export default function SocialFeedPage() {
   async function handleReportAction(postId, reportId, newStatus) {
     try {
       await api.patch(`/posts/${postId}/report/${reportId}/`, { status: newStatus });
-      // Refresh reports
       fetchReports();
       fetchPosts();
     } catch { /* ignore */ }
+  }
+
+  async function handleReviewAction(action) {
+    const { postId, reportId } = reviewModal;
+    if (action === 'delete') {
+      try {
+        await api.delete(`/posts/${postId}/`);
+        setReviewResult('ตรวจสอบแล้ว — ลบโพสต์แล้ว');
+      } catch { setReviewResult('ไม่สามารถลบโพสต์ได้'); }
+    } else if (action === 'dismiss') {
+      setReviewResult('ตรวจสอบแล้ว — ไม่พบปัญหา');
+    }
+    // Mark all reports as reviewed
+    try {
+      await api.patch(`/posts/${postId}/report/${reportId}/`, { status: 'reviewed' });
+    } catch { /* ignore */ }
+    setReviewModal({ open: false, postId: null, reportId: null });
+    fetchReports();
+    fetchPosts();
+    // Auto-clear result after 3 seconds
+    setTimeout(() => setReviewResult(null), 3000);
   }
 
   async function handleDeletePost(postId) {
@@ -166,11 +188,11 @@ export default function SocialFeedPage() {
       )}
 
       {tab === 'feed' && posts.map((post) => {
-        const isJuristic = post.author_role === 'juristic';
+        const isAuthorJuristic = post.author_role === 'juristic';
         let borderColor;
-        if (isJuristic && post.post_type === 'alert') {
+        if (isAuthorJuristic && post.post_type === 'alert') {
           borderColor = '#ff4d4f'; // แดง - แจ้งเตือนจากนิติ
-        } else if (isJuristic) {
+        } else if (isAuthorJuristic) {
           borderColor = '#722ed1'; // ม่วง - ประกาศจากนิติ
         } else {
           borderColor = '#1890ff'; // น้ำเงิน - ลูกบ้าน
@@ -229,23 +251,64 @@ export default function SocialFeedPage() {
 
       {tab === 'reports' && (
         <div>
+          {reviewResult && (
+            <div style={{ padding: '10px 16px', marginBottom: 12, borderRadius: 6, background: '#f0fdf4', border: '1px solid #bbf7d0', color: '#166534', fontSize: 14 }}>
+              ✅ {reviewResult}
+            </div>
+          )}
           {reports.length === 0 && <p style={{ color: '#999' }}>ไม่มีโพสต์ที่ถูกรายงาน</p>}
           {reports.map((r) => (
             <div key={r.id} style={cardStyle}>
               <div style={{ marginBottom: 8 }}>
                 <span style={{ fontWeight: 600 }}>โพสต์: </span>{r.post?.content?.substring(0, 100) || '-'}
               </div>
-              <div style={{ fontSize: 13, color: '#666', marginBottom: 8 }}>
-                เหตุผล: {r.reason || '-'} | สถานะ: {reportStatusLabels[r.status] || r.status}
+              <div style={{ fontSize: 13, color: '#666', marginBottom: 4 }}>
+                ผู้รายงาน: {r.reporter_name || 'ผู้ใช้'} | เหตุผล: {r.reason || 'ไม่ระบุ'}
               </div>
-              {r.status === 'pending' && (
-                <div>
-                  <button style={btnSmall('#52c41a')} onClick={() => handleReportAction(r.post?.id, r.id, 'reviewed')}>ตรวจสอบแล้ว</button>
-                  <button style={btnSmall('#8c8c8c')} onClick={() => handleReportAction(r.post?.id, r.id, 'dismissed')}>ยกเลิก</button>
-                </div>
+              <div style={{ fontSize: 12, color: '#999', marginBottom: 8 }}>
+                {r.created_at ? new Date(r.created_at).toLocaleString('th-TH') : ''}
+              </div>
+              {r.status === 'pending' ? (
+                <button
+                  onClick={() => setReviewModal({ open: true, postId: r.post?.id, reportId: r.id })}
+                  style={{ padding: '6px 16px', border: 'none', borderRadius: 4, background: '#4F46E5', color: '#fff', cursor: 'pointer', fontSize: 13 }}
+                >
+                  ตรวจสอบ
+                </button>
+              ) : (
+                <span style={{ fontSize: 13, color: '#52c41a', fontWeight: 600 }}>✅ ตรวจสอบแล้ว</span>
               )}
             </div>
           ))}
+        </div>
+      )}
+
+      {reviewModal.open && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+          <div style={{ background: '#fff', borderRadius: 8, padding: '28px 32px', minWidth: 360, maxWidth: 440, boxShadow: '0 4px 20px rgba(0,0,0,0.15)' }} onClick={(e) => e.stopPropagation()}>
+            <h3 style={{ margin: '0 0 8px', fontSize: 16 }}>ตรวจสอบโพสต์ที่ถูกรายงาน</h3>
+            <p style={{ margin: '0 0 20px', color: '#555', fontSize: 14 }}>เลือกการดำเนินการสำหรับโพสต์นี้</p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <button
+                onClick={() => handleReviewAction('delete')}
+                style={{ padding: '10px 0', border: 'none', borderRadius: 4, background: '#ff4d4f', color: '#fff', cursor: 'pointer', fontSize: 14 }}
+              >
+                🗑 ลบโพสต์
+              </button>
+              <button
+                onClick={() => handleReviewAction('dismiss')}
+                style={{ padding: '10px 0', border: '1px solid #d9d9d9', borderRadius: 4, background: '#fff', color: '#333', cursor: 'pointer', fontSize: 14 }}
+              >
+                ✓ ไม่พบปัญหา
+              </button>
+              <button
+                onClick={() => setReviewModal({ open: false, postId: null, reportId: null })}
+                style={{ padding: '10px 0', border: 'none', borderRadius: 4, background: 'none', color: '#999', cursor: 'pointer', fontSize: 14 }}
+              >
+                ยกเลิก
+              </button>
+            </div>
+          </div>
         </div>
       )}
       <ConfirmModal
