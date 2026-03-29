@@ -53,6 +53,16 @@ class SupabaseJWTMiddleware:
         else:
             # Verify JWT with Supabase JWT secret
             supabase_jwt_secret = os.getenv('SUPABASE_JWT_SECRET', settings.SECRET_KEY)
+            # Debug: decode token header to see algorithm
+            import base64, json
+            try:
+                header_b64 = token.split('.')[0]
+                header_b64 += '=' * (4 - len(header_b64) % 4)
+                token_header = json.loads(base64.b64decode(header_b64))
+                logger.warning(f"[JWT] Token header: {token_header}")
+                logger.warning(f"[JWT] Secret (first 10 chars): {supabase_jwt_secret[:10]}")
+            except Exception as e:
+                logger.warning(f"[JWT] Could not decode header: {e}")
             try:
                 payload = jwt.decode(
                     token,
