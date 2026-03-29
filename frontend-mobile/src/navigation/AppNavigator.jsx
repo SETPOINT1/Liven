@@ -6,7 +6,7 @@ import { supabase } from '../services/supabase';
 import api from '../services/api';
 import LoginScreen from '../screens/LoginScreen';
 import HomeScreen from '../screens/HomeScreen';
-import FacilityScreen from '../screens/FacilityScreen';
+import NewsScreen from '../screens/NewsScreen';
 import ParcelScreen from '../screens/ParcelScreen';
 import SocialFeedScreen from '../screens/SocialFeedScreen';
 import ChatbotScreen from '../screens/ChatbotScreen';
@@ -20,7 +20,7 @@ const Tabs = createBottomTabNavigator({
   },
   screens: {
     Home: { screen: HomeScreen, options: { title: 'หน้าหลัก' } },
-    Facility: { screen: FacilityScreen, options: { title: 'Facility' } },
+    News: { screen: NewsScreen, options: { title: 'ข่าวสาร' } },
     Parcel: { screen: ParcelScreen, options: { title: 'พัสดุ' } },
     Social: { screen: SocialFeedScreen, options: { title: 'ฟีด' } },
     Chatbot: { screen: ChatbotScreen, options: { title: 'แชทบอท' } },

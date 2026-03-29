@@ -297,6 +297,13 @@ class UpdateReportView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        report.status = new_status
-        report.save()
-        return Response({'message': 'อัพเดตสถานะสำเร็จ', 'status': report.status})
+        # Update ALL pending reports for the same post
+        updated = PostReport.objects.filter(
+            post_id=post_id, status='pending'
+        ).update(status=new_status)
+
+        return Response({
+            'message': 'อัพเดตสถานะสำเร็จ',
+            'status': new_status,
+            'updated_count': updated,
+        })
