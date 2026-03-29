@@ -71,16 +71,31 @@ class UserListView(APIView):
     def get(self, request):
         queryset = User.objects.all()
 
-        # Filter by project if the juristic user belongs to one
+        # Filter by project — include users with same project OR no project (new registrations)
         if request.user_obj.project_id:
-            queryset = queryset.filter(project_id=request.user_obj.project_id)
+            from django.db.models import Q
+            queryset = queryset.filter(
+                Q(project_id=request.user_obj.project_id) | Q(project_id__isnull=True)
+            )
 
         # Optional status filter
         status_filter = request.query_params.get('status')
         if status_filter:
             queryset = queryset.filter(status=status_filter)
 
-        queryset = queryset.order_by('-created_at')
+        # Order: pending first, then by newest
+        from django.db.models import Case, When, IntegerField
+        queryset = queryset.annotate(
+            status_order=Case(
+                When(status='pending', then=0),
+                When(status='approved', then=1),
+                When(status='suspended', then=2),
+                When(status='rejected', then=3),
+                default=4,
+                output_field=IntegerField(),
+            )
+        ).order_by('status_order', '-created_at')
+
         serializer = UserSerializer(queryset, many=True)
         return Response(serializer.data)
 
@@ -99,6 +114,9 @@ class ApproveUserView(APIView):
             )
 
         user.status = 'approved'
+        # Assign project if user doesn't have one
+        if not user.project_id and request.user_obj.project_id:
+            user.project_id = request.user_obj.project_id
         user.save()
 
         create_notification(

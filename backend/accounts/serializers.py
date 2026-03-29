@@ -8,6 +8,7 @@ class RegisterSerializer(serializers.Serializer):
     phone = serializers.CharField(max_length=20, required=False, allow_blank=True)
     unit_number = serializers.CharField(max_length=50, required=False, allow_blank=True)
     project_id = serializers.UUIDField(required=False, allow_null=True)
+    supabase_uid = serializers.UUIDField(required=False, allow_null=True)
 
     def validate_email(self, value):
         if User.objects.filter(email=value).exists():
@@ -21,6 +22,7 @@ class RegisterSerializer(serializers.Serializer):
             phone=validated_data.get('phone', ''),
             unit_number=validated_data.get('unit_number', ''),
             project_id=validated_data.get('project_id'),
+            supabase_uid=validated_data.get('supabase_uid'),
             role='resident',
             status='pending',
         )

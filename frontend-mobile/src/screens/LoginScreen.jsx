@@ -22,25 +22,42 @@ const LoginScreen = ({ onLogin }) => {
       return;
     }
     setLoading(true);
+    setPendingMessage('');
     try {
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
 
       // Check user status from backend
-      const res = await api.get('/auth/me/');
-      if (res.data.status === 'pending') {
-        setPendingMessage('บัญชีของคุณยังรอการอนุมัติจากนิติบุคคล');
+      try {
+        const res = await api.get('/auth/me/');
+        if (res.data.status === 'pending') {
+          setPendingMessage('บัญชีของคุณอยู่ระหว่างรอการอนุมัติจากนิติบุคคล');
+          await supabase.auth.signOut();
+          setLoading(false);
+          return;
+        }
+        if (res.data.status === 'rejected') {
+          setPendingMessage('บัญชีของคุณถูกปฏิเสธ กรุณาติดต่อนิติบุคคล');
+          await supabase.auth.signOut();
+          setLoading(false);
+          return;
+        }
+        if (res.data.status === 'suspended') {
+          setPendingMessage('บัญชีของคุณถูกระงับ กรุณาติดต่อนิติบุคคล');
+          await supabase.auth.signOut();
+          setLoading(false);
+          return;
+        }
+        onLogin(data.session);
+      } catch (meErr) {
+        const code = meErr.response?.data?.error?.code;
+        if (code === 'USER_NOT_FOUND') {
+          setPendingMessage('ไม่พบข้อมูลผู้ใช้ในระบบ กรุณาลงทะเบียนก่อน');
+        } else {
+          setPendingMessage('ไม่สามารถตรวจสอบสถานะบัญชีได้ กรุณาลองใหม่');
+        }
         await supabase.auth.signOut();
-        setLoading(false);
-        return;
       }
-      if (res.data.status === 'rejected') {
-        setPendingMessage('บัญชีของคุณถูกปฏิเสธ กรุณาติดต่อนิติบุคคล');
-        await supabase.auth.signOut();
-        setLoading(false);
-        return;
-      }
-      onLogin(data.session);
     } catch (err) {
       Alert.alert('เข้าสู่ระบบไม่สำเร็จ', err.message || 'อีเมลหรือรหัสผ่านไม่ถูกต้อง');
     }
@@ -59,6 +76,7 @@ const LoginScreen = ({ onLogin }) => {
 
       await api.post('/auth/register/', {
         email, full_name: fullName, phone, unit_number: unitNumber,
+        supabase_uid: data.user?.id,
       });
       setPendingMessage('ลงทะเบียนสำเร็จ! กรุณารอการอนุมัติจากนิติบุคคล');
       setIsRegister(false);
@@ -83,14 +101,14 @@ const LoginScreen = ({ onLogin }) => {
 
         {isRegister && (
           <>
-            <TextInput style={styles.input} placeholder="ชื่อ-นามสกุล" value={fullName} onChangeText={setFullName} />
-            <TextInput style={styles.input} placeholder="เบอร์โทรศัพท์" value={phone} onChangeText={setPhone} keyboardType="phone-pad" />
-            <TextInput style={styles.input} placeholder="หมายเลขห้อง/บ้าน" value={unitNumber} onChangeText={setUnitNumber} />
+            <TextInput style={styles.input} placeholder="ชื่อ-นามสกุล" placeholderTextColor="#9CA3AF" value={fullName} onChangeText={setFullName} />
+            <TextInput style={styles.input} placeholder="เบอร์โทรศัพท์" placeholderTextColor="#9CA3AF" value={phone} onChangeText={setPhone} keyboardType="phone-pad" />
+            <TextInput style={styles.input} placeholder="หมายเลขห้อง/บ้าน" placeholderTextColor="#9CA3AF" value={unitNumber} onChangeText={setUnitNumber} />
           </>
         )}
 
-        <TextInput style={styles.input} placeholder="อีเมล" value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" />
-        <TextInput style={styles.input} placeholder="รหัสผ่าน" value={password} onChangeText={setPassword} secureTextEntry />
+        <TextInput style={styles.input} placeholder="อีเมล" placeholderTextColor="#9CA3AF" value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" />
+        <TextInput style={styles.input} placeholder="รหัสผ่าน" placeholderTextColor="#9CA3AF" value={password} onChangeText={setPassword} secureTextEntry />
 
         <TouchableOpacity style={styles.button} onPress={isRegister ? handleRegister : handleLogin} disabled={loading}>
           {loading ? <ActivityIndicator color="#FFF" /> : <Text style={styles.buttonText}>{isRegister ? 'ลงทะเบียน' : 'เข้าสู่ระบบ'}</Text>}
@@ -113,7 +131,7 @@ const styles = StyleSheet.create({
   subtitle: { fontSize: 16, color: '#6B7280', textAlign: 'center', marginBottom: 32 },
   input: {
     backgroundColor: '#FFF', borderWidth: 1, borderColor: '#D1D5DB', borderRadius: 8,
-    padding: 12, marginBottom: 12, fontSize: 16,
+    padding: 12, marginBottom: 12, fontSize: 16, color: '#111827',
   },
   button: {
     backgroundColor: '#4F46E5', borderRadius: 8, padding: 14, alignItems: 'center', marginTop: 8,
