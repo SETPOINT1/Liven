@@ -1,6 +1,9 @@
+import os
+import logging
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from supabase import create_client
 from accounts.models import User
 from accounts.serializers import (
     RegisterSerializer,
@@ -10,6 +13,14 @@ from accounts.serializers import (
 )
 from accounts.permissions import IsAuthenticated, IsApproved, IsJuristic
 from notifications.utils import create_notification
+
+logger = logging.getLogger(__name__)
+
+
+def get_supabase_admin():
+    url = os.getenv('SUPABASE_URL', '')
+    key = os.getenv('SUPABASE_SERVICE_ROLE_KEY', '')
+    return create_client(url, key)
 
 
 class RegisterView(APIView):
@@ -152,3 +163,71 @@ class ChangeRoleView(APIView):
         user.save()
 
         return Response(UserSerializer(user).data)
+
+
+class JuristicRegisterView(APIView):
+    """POST /api/users/register/ — Juristic registers a resident.
+    
+    Creates Supabase auth user + DB user in one step.
+    Auto-assigns the juristic's project and sets status to approved.
+    """
+    permission_classes = [IsAuthenticated, IsApproved, IsJuristic]
+
+    def post(self, request):
+        data = request.data
+        email = data.get('email', '').strip()
+        password = data.get('password', '').strip()
+        full_name = data.get('full_name', '').strip()
+        phone = data.get('phone', '').strip()
+        unit_number = data.get('unit_number', '').strip()
+        role = data.get('role', 'resident')
+
+        if not email or not password or not full_name:
+            return Response(
+                {'error': {'code': 'VALIDATION_ERROR', 'message': 'กรุณากรอก อีเมล, รหัสผ่าน และชื่อ'}},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if User.objects.filter(email=email).exists():
+            return Response(
+                {'error': {'code': 'DUPLICATE_EMAIL', 'message': 'อีเมลนี้ถูกใช้งานแล้ว'}},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Create Supabase auth user
+        try:
+            sb = get_supabase_admin()
+            auth_response = sb.auth.admin.create_user({
+                'email': email,
+                'password': password,
+                'email_confirm': True,
+            })
+            supabase_uid = auth_response.user.id
+        except Exception as e:
+            logger.error(f"[Register] Supabase auth error: {e}")
+            return Response(
+                {'error': {'code': 'AUTH_ERROR', 'message': f'สร้างบัญชีไม่สำเร็จ: {str(e)}'}},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Create DB user with juristic's project
+        juristic_user = request.user_obj
+        try:
+            user = User.objects.create(
+                email=email,
+                full_name=full_name,
+                phone=phone,
+                unit_number=unit_number,
+                supabase_uid=supabase_uid,
+                role=role if role in ('resident', 'juristic') else 'resident',
+                status='approved',
+                project_id=juristic_user.project_id,
+            )
+        except Exception as e:
+            logger.error(f"[Register] DB error: {e}")
+            return Response(
+                {'error': {'code': 'DB_ERROR', 'message': f'บันทึกข้อมูลไม่สำเร็จ: {str(e)}'}},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+        return Response(UserSerializer(user).data, status=status.HTTP_201_CREATED)

@@ -8,6 +8,7 @@ import ParcelsPage from './pages/ParcelsPage';
 import EventsPage from './pages/EventsPage';
 import SocialFeedPage from './pages/SocialFeedPage';
 import AnalyticsPage from './pages/AnalyticsPage';
+import RegisterUserPage from './pages/RegisterUserPage';
 
 function App() {
   return (
@@ -27,6 +28,7 @@ function App() {
           <Route path="/events" element={<EventsPage />} />
           <Route path="/social" element={<SocialFeedPage />} />
           <Route path="/analytics" element={<AnalyticsPage />} />
+          <Route path="/register-user" element={<RegisterUserPage />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

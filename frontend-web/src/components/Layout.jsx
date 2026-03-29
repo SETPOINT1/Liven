@@ -8,6 +8,7 @@ const navItems = [
   { to: '/events', label: '📅 กิจกรรม' },
   { to: '/social', label: '💬 Social Feed' },
   { to: '/analytics', label: '📈 Analytics' },
+  { to: '/register-user', label: '📝 ลงทะเบียน' },
 ];
 
 const sidebarStyle = {
