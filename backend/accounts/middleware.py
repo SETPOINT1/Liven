@@ -1,8 +1,11 @@
 import os
 import jwt
+import logging
 from django.conf import settings
 from django.http import JsonResponse
 from accounts.models import User
+
+logger = logging.getLogger(__name__)
 
 
 class SupabaseJWTMiddleware:
@@ -26,10 +29,12 @@ class SupabaseJWTMiddleware:
 
         auth_header = request.META.get('HTTP_AUTHORIZATION', '')
         if not auth_header.startswith('Bearer '):
+            logger.warning(f"[JWT] No Bearer token for {request.path}")
             return self.get_response(request)
 
         token = auth_header.split('Bearer ')[1].strip()
         if not token:
+            logger.warning(f"[JWT] Empty token for {request.path}")
             return self.get_response(request)
 
         # Support test mode: skip JWT verification when TEST_MODE is set
@@ -56,6 +61,7 @@ class SupabaseJWTMiddleware:
                     audience='authenticated',
                 )
                 supabase_uid = payload.get('sub')
+                logger.info(f"[JWT] Decoded OK, sub={supabase_uid}")
                 if not supabase_uid:
                     return JsonResponse(
                         {'error': {'code': 'INVALID_TOKEN', 'message': 'Token ไม่ถูกต้อง'}},
@@ -70,11 +76,13 @@ class SupabaseJWTMiddleware:
                         status=401,
                     )
             except jwt.ExpiredSignatureError:
+                logger.warning(f"[JWT] Token expired for {request.path}")
                 return JsonResponse(
                     {'error': {'code': 'TOKEN_EXPIRED', 'message': 'Token หมดอายุ'}},
                     status=401,
                 )
-            except jwt.InvalidTokenError:
+            except jwt.InvalidTokenError as e:
+                logger.warning(f"[JWT] Invalid token for {request.path}: {e}")
                 return JsonResponse(
                     {'error': {'code': 'INVALID_TOKEN', 'message': 'Token ไม่ถูกต้อง'}},
                     status=401,
