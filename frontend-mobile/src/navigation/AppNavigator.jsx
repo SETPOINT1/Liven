@@ -13,6 +13,7 @@ import SocialFeedScreen from '../screens/SocialFeedScreen';
 import ChatbotScreen from '../screens/ChatbotScreen';
 import FacilityScreen from '../screens/FacilityScreen';
 import FacilityDetailScreen from '../screens/FacilityDetailScreen';
+import BookingHistoryScreen from '../screens/BookingHistoryScreen';
 
 const FacilityStack = createNativeStackNavigator({
   screens: {
@@ -23,6 +24,10 @@ const FacilityStack = createNativeStackNavigator({
     FacilityDetail: {
       screen: FacilityDetailScreen,
       options: ({ route }) => ({ title: route.params?.facility?.name || 'รายละเอียด' }),
+    },
+    BookingHistory: {
+      screen: BookingHistoryScreen,
+      options: { title: 'ประวัติการจอง' },
     },
   },
 });

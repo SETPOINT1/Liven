@@ -4,6 +4,7 @@ import {
   ActivityIndicator, Alert, RefreshControl,
 } from 'react-native';
 import api from '../services/api';
+import { supabase } from '../services/supabase';
 
 const PLACEHOLDER_IMG = 'https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800';
 
@@ -44,6 +45,14 @@ const FacilityDetailScreen = ({ route, navigation }) => {
 
   useEffect(() => {
     if (selectedDate) fetchSlots(selectedDate);
+  }, [selectedDate, fetchSlots]);
+
+  useEffect(() => {
+    const channel = supabase
+      .channel('bookings-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'bookings' }, () => fetchSlots(selectedDate))
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
   }, [selectedDate, fetchSlots]);
 
   const handleBook = async () => {

@@ -8,6 +8,8 @@ const navItems = [
   { to: '/events', label: '📅 กิจกรรม' },
   { to: '/social', label: '💬 Social Feed' },
   { to: '/analytics', label: '📈 Analytics' },
+  { to: '/facilities', label: '🏢 สิ่งอำนวยความสะดวก' },
+  { to: '/bookings', label: '📋 การจอง' },
   { to: '/register-user', label: '📝 ลงทะเบียน' },
 ];
 

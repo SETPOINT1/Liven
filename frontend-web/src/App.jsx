@@ -9,6 +9,8 @@ import EventsPage from './pages/EventsPage';
 import SocialFeedPage from './pages/SocialFeedPage';
 import AnalyticsPage from './pages/AnalyticsPage';
 import RegisterUserPage from './pages/RegisterUserPage';
+import FacilitiesPage from './pages/FacilitiesPage';
+import BookingsPage from './pages/BookingsPage';
 
 function App() {
   return (
@@ -28,6 +30,8 @@ function App() {
           <Route path="/events" element={<EventsPage />} />
           <Route path="/social" element={<SocialFeedPage />} />
           <Route path="/analytics" element={<AnalyticsPage />} />
+          <Route path="/facilities" element={<FacilitiesPage />} />
+          <Route path="/bookings" element={<BookingsPage />} />
           <Route path="/register-user" element={<RegisterUserPage />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />

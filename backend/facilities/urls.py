@@ -4,6 +4,7 @@ from facilities.views import (
     FacilityStatusView,
     BookFacilityView,
     BookingListView,
+    ResidentBookingCancelView,
     FacilitySlotsView,
     FacilityManageView,
     FacilityManageDetailView,
@@ -17,6 +18,7 @@ urlpatterns = [
     path('facilities/<uuid:pk>/slots/', FacilitySlotsView.as_view(), name='facility-slots'),
     path('facilities/<uuid:pk>/book/', BookFacilityView.as_view(), name='book-facility'),
     path('bookings/', BookingListView.as_view(), name='booking-list'),
+    path('bookings/<uuid:pk>/cancel/', ResidentBookingCancelView.as_view(), name='resident-booking-cancel'),
     # Juristic management
     path('manage/facilities/', FacilityManageView.as_view(), name='facility-manage'),
     path('manage/facilities/<uuid:pk>/', FacilityManageDetailView.as_view(), name='facility-manage-detail'),

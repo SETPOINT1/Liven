@@ -8,6 +8,7 @@ from facilities.serializers import (
     FacilityStatusSerializer,
     BookingSerializer,
     BookingCreateSerializer,
+    BookingManageSerializer,
     FacilityManageSerializer,
 )
 from accounts.permissions import IsAuthenticated, IsApproved, IsJuristic
@@ -64,7 +65,7 @@ class BookFacilityView(APIView):
 
         serializer = BookingCreateSerializer(
             data=request.data,
-            context={'facility_id': facility.id},
+            context={'facility_id': facility.id, 'facility': facility},
         )
         if not serializer.is_valid():
             return Response(
@@ -94,11 +95,55 @@ class BookingListView(APIView):
         return Response(serializer.data)
 
 
+class ResidentBookingCancelView(APIView):
+    """POST /api/bookings/{id}/cancel/ — Resident cancels their own booking."""
+    permission_classes = [IsAuthenticated, IsApproved]
+
+    def post(self, request, pk):
+        try:
+            booking = Booking.objects.get(pk=pk)
+        except Booking.DoesNotExist:
+            return Response(
+                {'error': {'code': 'NOT_FOUND', 'message': 'ไม่พบการจอง'}},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        # Check that booking belongs to the logged-in user
+        if booking.user_id != request.user_obj.id:
+            return Response(
+                {'error': {'code': 'FORBIDDEN', 'message': 'ไม่มีสิทธิ์ยกเลิกการจองนี้'}},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        # Check that booking is not already cancelled
+        if booking.status == 'cancelled':
+            return Response(
+                {'error': {'code': 'ALREADY_CANCELLED', 'message': 'การจองนี้ถูกยกเลิกแล้ว'}},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Check that start_time is in the future
+        if booking.start_time <= timezone.now():
+            return Response(
+                {'error': {'code': 'PAST_BOOKING', 'message': 'ไม่สามารถยกเลิกการจองที่ผ่านมาแล้วได้'}},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        booking.status = 'cancelled'
+        booking.save()
+        return Response(BookingSerializer(booking).data)
+
+
 class FacilitySlotsView(APIView):
     """GET /api/facilities/{id}/slots/?date=YYYY-MM-DD — Get available time slots."""
     permission_classes = [IsAuthenticated, IsApproved]
 
-    SLOT_DURATION = 60  # minutes per slot
+    # Type-specific slot durations in minutes
+    SLOT_DURATIONS = {
+        'meeting_room': 60,
+        'theatre': 120,
+    }
+    DEFAULT_SLOT_DURATION = 60  # minutes per slot
 
     def get(self, request, pk):
         try:
@@ -127,6 +172,19 @@ class FacilitySlotsView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+        # Advance booking limit validation
+        today = timezone.now().date()
+        if target_date < today:
+            return Response(
+                {'error': {'code': 'PAST_DATE', 'message': 'ไม่สามารถจองวันที่ผ่านมาแล้วได้'}},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if target_date > today + timedelta(days=2):
+            return Response(
+                {'error': {'code': 'ADVANCE_LIMIT', 'message': 'จองล่วงหน้าได้ไม่เกิน 3 วัน'}},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
         # Parse operating hours (e.g. "08:00 - 20:00")
         open_hour, close_hour = 6, 22
         if facility.operating_hours:
@@ -137,13 +195,16 @@ class FacilitySlotsView(APIView):
             except (ValueError, IndexError):
                 pass
 
+        # Determine slot duration based on facility type
+        slot_duration = self.SLOT_DURATIONS.get(facility.type, self.DEFAULT_SLOT_DURATION)
+
         # Generate slots
         slots = []
         current = datetime.combine(target_date, datetime.min.time().replace(hour=open_hour))
         end_of_day = datetime.combine(target_date, datetime.min.time().replace(hour=close_hour))
 
-        while current + timedelta(minutes=self.SLOT_DURATION) <= end_of_day:
-            slot_end = current + timedelta(minutes=self.SLOT_DURATION)
+        while current + timedelta(minutes=slot_duration) <= end_of_day:
+            slot_end = current + timedelta(minutes=slot_duration)
             slots.append({
                 'start_time': current.isoformat(),
                 'end_time': slot_end.isoformat(),
@@ -169,7 +230,7 @@ class FacilitySlotsView(APIView):
         return Response({
             'facility_id': str(facility.id),
             'date': date_str,
-            'slot_duration_minutes': self.SLOT_DURATION,
+            'slot_duration_minutes': slot_duration,
             'slots': slots,
         })
 
@@ -257,7 +318,7 @@ class BookingManageView(APIView):
         if user.project_id:
             queryset = queryset.filter(facility__project_id=user.project_id)
         queryset = queryset.order_by('-start_time')
-        serializer = BookingSerializer(queryset, many=True)
+        serializer = BookingManageSerializer(queryset, many=True)
         return Response(serializer.data)
 
 
@@ -268,7 +329,7 @@ class BookingCancelView(APIView):
     def post(self, request, pk):
         """POST /api/manage/bookings/{id}/cancel/ — Cancel a booking."""
         try:
-            booking = Booking.objects.select_related('facility').get(pk=pk)
+            booking = Booking.objects.select_related('facility', 'user').get(pk=pk)
         except Booking.DoesNotExist:
             return Response(
                 {'error': {'code': 'NOT_FOUND', 'message': 'ไม่พบการจอง'}},
@@ -281,4 +342,4 @@ class BookingCancelView(APIView):
             )
         booking.status = 'cancelled'
         booking.save()
-        return Response(BookingSerializer(booking).data)
+        return Response(BookingManageSerializer(booking).data)

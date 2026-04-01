@@ -22,6 +22,26 @@ class BookingSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['id', 'user_id', 'status', 'created_at']
 
+
+class BookingManageSerializer(serializers.ModelSerializer):
+    """Booking serializer with nested facility/user info for juristic management."""
+    facility = serializers.SerializerMethodField()
+    user = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Booking
+        fields = [
+            'id', 'facility', 'user', 'start_time',
+            'end_time', 'status', 'created_at',
+        ]
+        read_only_fields = fields
+
+    def get_facility(self, obj):
+        return {'id': str(obj.facility_id), 'name': obj.facility.name} if obj.facility else None
+
+    def get_user(self, obj):
+        return {'id': str(obj.user_id), 'full_name': obj.user.full_name} if obj.user else None
+
     def validate(self, data):
         start_time = data.get('start_time')
         end_time = data.get('end_time')
@@ -53,13 +73,40 @@ class BookingCreateSerializer(serializers.Serializer):
     start_time = serializers.DateTimeField()
     end_time = serializers.DateTimeField()
 
+    # Slot duration in minutes per facility type
+    SLOT_DURATIONS = {
+        'meeting_room': 60,
+        'theatre': 120,
+    }
+    DEFAULT_SLOT_DURATION = 60
+
     def validate(self, data):
         if data['end_time'] <= data['start_time']:
             raise serializers.ValidationError(
                 {'end_time': 'เวลาสิ้นสุดต้องอยู่หลังเวลาเริ่มต้น'}
             )
 
+        facility = self.context.get('facility')
         facility_id = self.context.get('facility_id')
+
+        # Validate slot duration against facility type
+        if facility:
+            facility_type = facility.type or ''
+            expected_duration = self.SLOT_DURATIONS.get(
+                facility_type, self.DEFAULT_SLOT_DURATION
+            )
+            actual_duration = (data['end_time'] - data['start_time']).total_seconds() / 60
+            if actual_duration != expected_duration:
+                raise serializers.ValidationError(
+                    {
+                        'non_field_errors': (
+                            f'ระยะเวลาการจองต้องเป็น {expected_duration} นาที '
+                            f'สำหรับประเภท {facility_type or "default"}'
+                        )
+                    }
+                )
+            facility_id = facility.id
+
         if facility_id:
             overlapping = Booking.objects.filter(
                 facility_id=facility_id,

@@ -78,6 +78,13 @@ const FacilityScreen = () => {
 
   return (
     <View style={styles.container}>
+      <TouchableOpacity
+        style={styles.historyBtn}
+        activeOpacity={0.7}
+        onPress={() => navigation.navigate('BookingHistory')}
+      >
+        <Text style={styles.historyBtnText}>📋 ประวัติการจอง</Text>
+      </TouchableOpacity>
       <FlatList
         data={facilities}
         keyExtractor={(item) => item.id}
@@ -113,6 +120,11 @@ const styles = StyleSheet.create({
   freeTagText: { fontSize: 12, fontWeight: '600', color: '#065F46' },
   viewMore: { fontSize: 13, color: '#4F46E5', fontWeight: '600' },
   emptyText: { textAlign: 'center', color: '#9CA3AF', marginTop: 40 },
+  historyBtn: {
+    backgroundColor: '#4F46E5', borderRadius: 10, paddingVertical: 10,
+    marginHorizontal: 16, marginTop: 12, alignItems: 'center',
+  },
+  historyBtnText: { color: '#FFF', fontWeight: '600', fontSize: 14 },
 });
 
 export default FacilityScreen;
