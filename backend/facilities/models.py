@@ -9,6 +9,13 @@ class Facility(models.Model):
         ('meeting_room', 'Meeting Room'),
         ('pool', 'Pool'),
         ('garden', 'Garden'),
+        ('co_working', 'Co-Working Space'),
+        ('library', 'Library'),
+        ('theatre', 'Theatre'),
+        ('sauna', 'Sauna & Steam Room'),
+        ('sky_lounge', 'Sky Lounge'),
+        ('kids_zone', 'Kids Zone'),
+        ('rooftop', 'Rooftop Area'),
     ]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -19,6 +26,7 @@ class Facility(models.Model):
     type = models.CharField(max_length=50, choices=TYPE_CHOICES, blank=True, null=True)
     description = models.TextField(blank=True, null=True)
     operating_hours = models.CharField(max_length=100, blank=True, null=True)
+    requires_booking = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
 

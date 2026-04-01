@@ -8,7 +8,7 @@ class FacilitySerializer(serializers.ModelSerializer):
         model = Facility
         fields = [
             'id', 'project_id', 'name', 'type', 'description',
-            'operating_hours', 'is_active', 'created_at',
+            'operating_hours', 'requires_booking', 'is_active', 'created_at',
         ]
         read_only_fields = fields
 
@@ -83,7 +83,7 @@ class FacilityStatusSerializer(serializers.ModelSerializer):
         model = Facility
         fields = [
             'id', 'project_id', 'name', 'type', 'description',
-            'operating_hours', 'is_active', 'created_at', 'current_status',
+            'operating_hours', 'requires_booking', 'is_active', 'created_at', 'current_status',
         ]
         read_only_fields = fields
 
@@ -96,3 +96,15 @@ class FacilityStatusSerializer(serializers.ModelSerializer):
             end_time__gte=now,
         ).exists()
         return 'occupied' if has_active_booking else 'available'
+
+
+class FacilityManageSerializer(serializers.ModelSerializer):
+    """Serializer for juristic to create/update facilities."""
+
+    class Meta:
+        model = Facility
+        fields = [
+            'id', 'name', 'type', 'description',
+            'operating_hours', 'requires_booking', 'is_active',
+        ]
+        read_only_fields = ['id']

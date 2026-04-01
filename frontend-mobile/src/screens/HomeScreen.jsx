@@ -68,7 +68,7 @@ const HomeScreen = () => {
         </View>
       ) : null}
 
-      <FacilityWidget key={`fac-${refreshKey}`} onPress={() => navigation.navigate('News')} />
+      <FacilityWidget key={`fac-${refreshKey}`} onPress={() => navigation.navigate('Facility')} />
       <ParcelWidget key={`par-${refreshKey}`} onPress={() => navigation.navigate('Parcel')} />
       <NewsWidget key={`news-${refreshKey}`} onPress={() => navigation.navigate('News')} />
       <FeedWidget key={`feed-${refreshKey}`} onPress={() => navigation.navigate('Social')} />

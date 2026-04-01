@@ -81,12 +81,18 @@ const FacilityScreen = () => {
       <Text style={styles.type}>{item.type}</Text>
       {item.operating_hours ? <Text style={styles.hours}>⏰ {item.operating_hours}</Text> : null}
       {item.description ? <Text style={styles.desc}>{item.description}</Text> : null}
-      <TouchableOpacity
-        style={styles.bookBtn}
-        onPress={() => { setSelectedFacility(item); setShowBooking(true); }}
-      >
-        <Text style={styles.bookBtnText}>จอง</Text>
-      </TouchableOpacity>
+      {item.requires_booking ? (
+        <TouchableOpacity
+          style={styles.bookBtn}
+          onPress={() => { setSelectedFacility(item); setShowBooking(true); }}
+        >
+          <Text style={styles.bookBtnText}>จอง</Text>
+        </TouchableOpacity>
+      ) : (
+        <View style={styles.infoTag}>
+          <Text style={styles.infoTagText}>ใช้งานได้เลย ไม่ต้องจอง</Text>
+        </View>
+      )}
     </View>
   );
 
@@ -166,6 +172,8 @@ const styles = StyleSheet.create({
   desc: { fontSize: 13, color: '#6B7280', marginTop: 4 },
   bookBtn: { backgroundColor: '#4F46E5', borderRadius: 8, padding: 10, alignItems: 'center', marginTop: 10 },
   bookBtnText: { color: '#FFF', fontWeight: '600' },
+  infoTag: { backgroundColor: '#EEF2FF', borderRadius: 8, padding: 10, alignItems: 'center', marginTop: 10 },
+  infoTagText: { color: '#4F46E5', fontWeight: '600', fontSize: 13 },
   section: { marginTop: 16 },
   sectionTitle: { fontSize: 18, fontWeight: '700', color: '#1F2937', marginBottom: 8 },
   bookingCard: { backgroundColor: '#FFF', borderRadius: 8, padding: 12, marginBottom: 8 },

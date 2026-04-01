@@ -10,6 +10,7 @@ import NewsScreen from '../screens/NewsScreen';
 import ParcelScreen from '../screens/ParcelScreen';
 import SocialFeedScreen from '../screens/SocialFeedScreen';
 import ChatbotScreen from '../screens/ChatbotScreen';
+import FacilityScreen from '../screens/FacilityScreen';
 
 const Tabs = createBottomTabNavigator({
   screenOptions: {
@@ -20,6 +21,7 @@ const Tabs = createBottomTabNavigator({
   },
   screens: {
     Home: { screen: HomeScreen, options: { title: 'หน้าหลัก' } },
+    Facility: { screen: FacilityScreen, options: { title: 'จองส่วนกลาง' } },
     News: { screen: NewsScreen, options: { title: 'ข่าวสาร' } },
     Parcel: { screen: ParcelScreen, options: { title: 'พัสดุ' } },
     Social: { screen: SocialFeedScreen, options: { title: 'ฟีด' } },
