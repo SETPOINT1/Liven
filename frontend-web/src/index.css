@@ -1,0 +1,78 @@
+/* Global Reset & Base Styles */
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+  font-family: 'Noto Sans Thai', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 14px;
+  color: #1a1a2e;
+  background: #f8f8fb;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+input, button, select, textarea {
+  font-family: inherit;
+  font-size: inherit;
+}
+
+a { text-decoration: none; color: inherit; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #d0d0d0; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #b0b0b0; }
+
+/* Spinner */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+.spinner {
+  width: 28px; height: 28px;
+  border: 3px solid #e8e8ed;
+  border-top-color: #2B6CB0;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+/* Focus styles */
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: #2B6CB0;
+  box-shadow: 0 0 0 3px rgba(43, 108, 176, 0.1);
+}
+
+button:focus-visible {
+  outline: 2px solid #2B6CB0;
+  outline-offset: 2px;
+}
+
+/* Transition helper */
+button, a, input, select {
+  transition: all 0.15s ease;
+}
+
+/* Table row hover */
+table tbody tr:hover {
+  background: #F7FAFC;
+}
+
+/* Button disabled */
+button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* Nav link hover */
+nav a:hover {
+  background: #EDF2F7;
+}
+nav a[style*="background: rgb(12, 35, 64)"]:hover,
+nav a[style*="background: #0C2340"]:hover {
+  background: #0C2340 !important;
+}

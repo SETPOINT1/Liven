@@ -6,7 +6,12 @@ export default function ProtectedRoute({ children }) {
   const location = useLocation();
 
   if (loading) {
-    return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>กำลังโหลด...</div>;
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100vh', background: '#F7F8FA' }}>
+        <div className="spinner" />
+        <div style={{ marginTop: 16, fontSize: 14, color: '#A0AEC0' }}>กำลังโหลด...</div>
+      </div>
+    );
   }
 
   if (!session) {

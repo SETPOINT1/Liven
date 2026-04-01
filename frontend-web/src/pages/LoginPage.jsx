@@ -1,23 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-
-const containerStyle = {
-  display: 'flex', justifyContent: 'center', alignItems: 'center',
-  height: '100vh', background: '#f0f2f5',
-};
-const cardStyle = {
-  background: '#fff', padding: 40, borderRadius: 8,
-  boxShadow: '0 2px 8px rgba(0,0,0,0.1)', width: 360,
-};
-const inputStyle = {
-  width: '100%', padding: '10px 12px', marginBottom: 16,
-  border: '1px solid #d9d9d9', borderRadius: 4, fontSize: 14, boxSizing: 'border-box',
-};
-const btnStyle = {
-  width: '100%', padding: '10px 0', background: '#1a1a2e', color: '#fff',
-  border: 'none', borderRadius: 4, fontSize: 15, cursor: 'pointer',
-};
+import { colors, radius, input as inputBase, btnPrimary } from '../theme';
+import { LogoIcon } from '../components/Icons';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -28,11 +13,10 @@ export default function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // แสดง error จาก ProtectedRoute redirect
   useEffect(() => {
     if (location.state?.error) {
       setError(location.state.error);
-      signOut(); // logout เพื่อ clear session
+      signOut();
     }
   }, [location.state]);
 
@@ -50,26 +34,67 @@ export default function LoginPage() {
     }
   }
 
+  const isRedirectError = !!location.state?.error;
+
   return (
-    <div style={containerStyle}>
-      <div style={cardStyle}>
-        <h2 style={{ textAlign: 'center', marginBottom: 24 }}>🏠 Liven Dashboard</h2>
+    <div style={{
+      display: 'flex', justifyContent: 'center', alignItems: 'center',
+      height: '100vh', background: colors.bg,
+    }}>
+      <div style={{
+        background: colors.card, padding: '40px 36px', borderRadius: radius.lg,
+        boxShadow: '0 2px 12px rgba(0,0,0,0.06)', width: 380,
+      }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 28 }}>
+          <LogoIcon size={44} />
+          <div style={{ fontSize: 18, fontWeight: 700, color: colors.text, marginTop: 12 }}>Liven Dashboard</div>
+          <div style={{ fontSize: 12, color: colors.textMuted, marginTop: 2 }}>Smart Community Management</div>
+        </div>
+
         <form onSubmit={handleSubmit}>
-          <label style={{ fontSize: 13, color: '#555' }}>อีเมล</label>
-          <input style={inputStyle} type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-          <label style={{ fontSize: 13, color: '#555' }}>รหัสผ่าน</label>
-          <input style={inputStyle} type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+          <label style={{ fontSize: 12, fontWeight: 500, color: colors.textSecondary, display: 'block', marginBottom: 4 }}>
+            อีเมล
+          </label>
+          <input
+            style={inputBase}
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="name@example.com"
+            autoComplete="email"
+            required
+          />
+
+          <label style={{ fontSize: 12, fontWeight: 500, color: colors.textSecondary, display: 'block', marginBottom: 4 }}>
+            รหัสผ่าน
+          </label>
+          <input
+            style={inputBase}
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="••••••••"
+            autoComplete="current-password"
+            required
+          />
+
           {error && (
             <div style={{
-              padding: '10px 14px', marginBottom: 12, borderRadius: 4, fontSize: 13,
-              background: location.state?.error ? '#fff7e6' : '#fff2f0',
-              border: `1px solid ${location.state?.error ? '#ffd591' : '#ffa39e'}`,
-              color: location.state?.error ? '#ad6800' : '#cf1322',
+              padding: '9px 12px', marginBottom: 14, borderRadius: radius.sm, fontSize: 12,
+              background: isRedirectError ? '#fffbeb' : '#fef2f2',
+              border: `1px solid ${isRedirectError ? '#fde68a' : '#fecaca'}`,
+              color: isRedirectError ? '#92400e' : '#b91c1c',
+              lineHeight: 1.5,
             }}>
               {error}
             </div>
           )}
-          <button style={btnStyle} type="submit" disabled={loading}>
+
+          <button
+            style={{ ...btnPrimary, width: '100%', padding: '10px 0', fontSize: 14, borderRadius: radius.sm }}
+            type="submit"
+            disabled={loading}
+          >
             {loading ? 'กำลังเข้าสู่ระบบ...' : 'เข้าสู่ระบบ'}
           </button>
         </form>
