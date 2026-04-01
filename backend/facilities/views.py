@@ -1,6 +1,8 @@
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from django.utils import timezone
+from datetime import datetime, timedelta
 from facilities.models import Facility, Booking
 from facilities.serializers import (
     FacilityStatusSerializer,
@@ -90,6 +92,86 @@ class BookingListView(APIView):
         ).order_by('-start_time')
         serializer = BookingSerializer(queryset, many=True)
         return Response(serializer.data)
+
+
+class FacilitySlotsView(APIView):
+    """GET /api/facilities/{id}/slots/?date=YYYY-MM-DD — Get available time slots."""
+    permission_classes = [IsAuthenticated, IsApproved]
+
+    SLOT_DURATION = 60  # minutes per slot
+
+    def get(self, request, pk):
+        try:
+            facility = Facility.objects.get(pk=pk)
+        except Facility.DoesNotExist:
+            return Response(
+                {'error': {'code': 'NOT_FOUND', 'message': 'ไม่พบสิ่งอำนวยความสะดวก'}},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        if not facility.requires_booking:
+            return Response(
+                {'error': {'code': 'BOOKING_NOT_REQUIRED', 'message': 'สิ่งอำนวยความสะดวกนี้ไม่ต้องจอง'}},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        date_str = request.query_params.get('date')
+        if not date_str:
+            date_str = timezone.now().strftime('%Y-%m-%d')
+
+        try:
+            target_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+        except ValueError:
+            return Response(
+                {'error': {'code': 'INVALID_DATE', 'message': 'รูปแบบวันที่ไม่ถูกต้อง ใช้ YYYY-MM-DD'}},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Parse operating hours (e.g. "08:00 - 20:00")
+        open_hour, close_hour = 6, 22
+        if facility.operating_hours:
+            try:
+                parts = facility.operating_hours.split('-')
+                open_hour = int(parts[0].strip().split(':')[0])
+                close_hour = int(parts[1].strip().split(':')[0])
+            except (ValueError, IndexError):
+                pass
+
+        # Generate slots
+        slots = []
+        current = datetime.combine(target_date, datetime.min.time().replace(hour=open_hour))
+        end_of_day = datetime.combine(target_date, datetime.min.time().replace(hour=close_hour))
+
+        while current + timedelta(minutes=self.SLOT_DURATION) <= end_of_day:
+            slot_end = current + timedelta(minutes=self.SLOT_DURATION)
+            slots.append({
+                'start_time': current.isoformat(),
+                'end_time': slot_end.isoformat(),
+            })
+            current = slot_end
+
+        # Check which slots are booked
+        bookings = Booking.objects.filter(
+            facility_id=facility.id,
+            status='confirmed',
+            start_time__date=target_date,
+        )
+
+        for slot in slots:
+            slot_start = datetime.fromisoformat(slot['start_time'])
+            slot_end = datetime.fromisoformat(slot['end_time'])
+            is_booked = bookings.filter(
+                start_time__lt=slot_end,
+                end_time__gt=slot_start,
+            ).exists()
+            slot['is_available'] = not is_booked
+
+        return Response({
+            'facility_id': str(facility.id),
+            'date': date_str,
+            'slot_duration_minutes': self.SLOT_DURATION,
+            'slots': slots,
+        })
 
 
 class FacilityManageView(APIView):

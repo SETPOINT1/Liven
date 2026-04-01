@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ActivityIndicator, View, StyleSheet } from 'react-native';
 import { createStaticNavigation } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { supabase } from '../services/supabase';
 import api from '../services/api';
 import LoginScreen from '../screens/LoginScreen';
@@ -11,6 +12,20 @@ import ParcelScreen from '../screens/ParcelScreen';
 import SocialFeedScreen from '../screens/SocialFeedScreen';
 import ChatbotScreen from '../screens/ChatbotScreen';
 import FacilityScreen from '../screens/FacilityScreen';
+import FacilityDetailScreen from '../screens/FacilityDetailScreen';
+
+const FacilityStack = createNativeStackNavigator({
+  screens: {
+    FacilityList: {
+      screen: FacilityScreen,
+      options: { headerShown: false },
+    },
+    FacilityDetail: {
+      screen: FacilityDetailScreen,
+      options: ({ route }) => ({ title: route.params?.facility?.name || 'รายละเอียด' }),
+    },
+  },
+});
 
 const Tabs = createBottomTabNavigator({
   screenOptions: {
@@ -21,7 +36,7 @@ const Tabs = createBottomTabNavigator({
   },
   screens: {
     Home: { screen: HomeScreen, options: { title: 'หน้าหลัก' } },
-    Facility: { screen: FacilityScreen, options: { title: 'จองส่วนกลาง' } },
+    Facility: { screen: FacilityStack, options: { title: 'ส่วนกลาง', headerShown: false } },
     News: { screen: NewsScreen, options: { title: 'ข่าวสาร' } },
     Parcel: { screen: ParcelScreen, options: { title: 'พัสดุ' } },
     Social: { screen: SocialFeedScreen, options: { title: 'ฟีด' } },

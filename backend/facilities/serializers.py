@@ -8,7 +8,7 @@ class FacilitySerializer(serializers.ModelSerializer):
         model = Facility
         fields = [
             'id', 'project_id', 'name', 'type', 'description',
-            'operating_hours', 'requires_booking', 'is_active', 'created_at',
+            'image_url', 'operating_hours', 'requires_booking', 'is_active', 'created_at',
         ]
         read_only_fields = fields
 
@@ -83,7 +83,7 @@ class FacilityStatusSerializer(serializers.ModelSerializer):
         model = Facility
         fields = [
             'id', 'project_id', 'name', 'type', 'description',
-            'operating_hours', 'requires_booking', 'is_active', 'created_at', 'current_status',
+            'image_url', 'operating_hours', 'requires_booking', 'is_active', 'created_at', 'current_status',
         ]
         read_only_fields = fields
 
@@ -105,6 +105,6 @@ class FacilityManageSerializer(serializers.ModelSerializer):
         model = Facility
         fields = [
             'id', 'name', 'type', 'description',
-            'operating_hours', 'requires_booking', 'is_active',
+            'image_url', 'operating_hours', 'requires_booking', 'is_active',
         ]
         read_only_fields = ['id']

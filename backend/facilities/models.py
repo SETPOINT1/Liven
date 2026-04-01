@@ -25,6 +25,7 @@ class Facility(models.Model):
     name = models.CharField(max_length=255)
     type = models.CharField(max_length=50, choices=TYPE_CHOICES, blank=True, null=True)
     description = models.TextField(blank=True, null=True)
+    image_url = models.URLField(max_length=500, blank=True, null=True)
     operating_hours = models.CharField(max_length=100, blank=True, null=True)
     requires_booking = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
