@@ -1,7 +1,7 @@
 django>=4.2
 djangorestframework>=3.14
 supabase>=2.0,<2.10
-google-generativeai>=0.3
+google-genai>=1.0
 azure-cognitiveservices-vision-computervision>=0.9
 requests>=2.31
 gunicorn>=21.2

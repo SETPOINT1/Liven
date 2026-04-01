@@ -1,56 +1,47 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import api from '../../services/api';
-
-const FacilityWidget = ({ onPress }) => {
+import { colors, radius } from '../../theme';
+const facilityColors = ['#38A169', '#2B6CB0', '#D69E2E', '#805AD5', '#E53E3E', '#DD6B20'];
+export default function FacilityWidget({ onPress }) {
   const [facilities, setFacilities] = useState([]);
   const [loading, setLoading] = useState(true);
-
   useEffect(() => {
-    const fetchFacilities = async () => {
-      try {
-        const res = await api.get('/facilities/');
-        setFacilities((res.data.results || res.data || []).slice(0, 4));
-      } catch {
-        // silent
-      }
+    (async () => {
+      try { const res = await api.get('/facilities/'); setFacilities((res.data.results || res.data || []).slice(0, 4)); } catch {}
       setLoading(false);
-    };
-    fetchFacilities();
+    })();
   }, []);
-
   return (
-    <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.7}>
-      <Text style={styles.title}>🏋️ สิ่งอำนวยความสะดวก</Text>
-      {loading ? (
-        <Text style={styles.loadingText}>กำลังโหลด...</Text>
-      ) : facilities.length === 0 ? (
-        <Text style={styles.emptyText}>ไม่มีข้อมูล</Text>
-      ) : (
-        facilities.map((f) => (
-          <View key={f.id} style={styles.row}>
-            <Text style={styles.name} numberOfLines={1}>{f.name}</Text>
-            <View style={[styles.badge, f.is_active ? styles.available : styles.unavailable]}>
-              <Text style={styles.badgeText}>{f.is_active ? 'ว่าง' : 'ไม่ว่าง'}</Text>
-            </View>
-          </View>
-        ))
+    <View style={s.container}>
+      <Text style={s.title}>สถานะสิ่งอำนวยความสะดวก</Text>
+      {loading ? <Text style={s.muted}>กำลังโหลด...</Text> : facilities.length === 0 ? <Text style={s.muted}>ไม่มีข้อมูล</Text> : (
+        <View style={s.grid}>
+          {facilities.map((f, i) => {
+            const c = facilityColors[i % facilityColors.length];
+            return (
+              <TouchableOpacity key={f.id} style={s.card} onPress={onPress} activeOpacity={0.7}>
+                <View style={[s.iconCircle, { backgroundColor: c + '18' }]}>
+                  <Text style={[s.iconText, { color: c }]}>{(f.name || '?')[0]}</Text>
+                </View>
+                <Text style={s.name} numberOfLines={1}>{f.name}</Text>
+                <Text style={[s.status, { color: f.is_active ? colors.success : colors.textMuted }]}>{f.is_active ? 'ว่าง' : 'ปิดบริการ'}</Text>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
       )}
-    </TouchableOpacity>
+    </View>
   );
-};
-
-const styles = StyleSheet.create({
-  card: { backgroundColor: '#FFF', borderRadius: 12, padding: 16, marginBottom: 12, elevation: 2, shadowColor: '#000', shadowOpacity: 0.08, shadowRadius: 4, shadowOffset: { width: 0, height: 2 } },
-  title: { fontSize: 16, fontWeight: '700', color: '#1F2937', marginBottom: 10 },
-  row: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 },
-  name: { fontSize: 14, color: '#374151', flex: 1 },
-  badge: { borderRadius: 12, paddingHorizontal: 10, paddingVertical: 2 },
-  available: { backgroundColor: '#D1FAE5' },
-  unavailable: { backgroundColor: '#FEE2E2' },
-  badgeText: { fontSize: 12, fontWeight: '600' },
-  loadingText: { color: '#9CA3AF', fontSize: 13 },
-  emptyText: { color: '#9CA3AF', fontSize: 13 },
+}
+const s = StyleSheet.create({
+  container: { marginBottom: 12 },
+  title: { fontSize: 16, fontWeight: '700', color: colors.text, marginBottom: 12 },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
+  card: { backgroundColor: colors.card, borderRadius: radius.md, padding: 14, width: '48%', elevation: 2, shadowColor: '#000', shadowOpacity: 0.06, shadowRadius: 4, shadowOffset: { width: 0, height: 2 } },
+  iconCircle: { width: 42, height: 42, borderRadius: 12, justifyContent: 'center', alignItems: 'center', marginBottom: 8 },
+  iconText: { fontSize: 18, fontWeight: '700' },
+  name: { fontSize: 14, fontWeight: '600', color: colors.text, marginBottom: 2 },
+  status: { fontSize: 12, fontWeight: '500' },
+  muted: { color: colors.textMuted, fontSize: 13 },
 });
-
-export default FacilityWidget;

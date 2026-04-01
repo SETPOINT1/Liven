@@ -5,6 +5,7 @@ import {
 } from 'react-native';
 import api from '../services/api';
 import { supabase } from '../services/supabase';
+import { colors, radius } from '../theme';
 
 const FacilityScreen = () => {
   const [facilities, setFacilities] = useState([]);
@@ -91,7 +92,7 @@ const FacilityScreen = () => {
   );
 
   if (loading) {
-    return <View style={styles.center}><ActivityIndicator size="large" color="#4F46E5" /></View>;
+    return <View style={styles.center}><ActivityIndicator size="large" color={colors.accent} /></View>;
   }
 
   return (
@@ -111,7 +112,7 @@ const FacilityScreen = () => {
                 <View key={b.id} style={styles.bookingCard}>
                   <Text style={styles.bookingName}>{b.facility_name || 'Facility'}</Text>
                   <Text style={styles.bookingTime}>{b.start_time} - {b.end_time}</Text>
-                  <Text style={[styles.bookingStatus, b.status === 'cancelled' && { color: '#DC2626' }]}>{b.status}</Text>
+                  <Text style={[styles.bookingStatus, b.status === 'cancelled' && { color: colors.danger }]}>{b.status}</Text>
                 </View>
               ))}
             </View>
@@ -151,37 +152,40 @@ const FacilityScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F3F4F6' },
+  container: { flex: 1, backgroundColor: colors.bg },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   list: { padding: 16 },
   card: { backgroundColor: '#FFF', borderRadius: 12, padding: 16, marginBottom: 12, elevation: 2, shadowColor: '#000', shadowOpacity: 0.08, shadowRadius: 4, shadowOffset: { width: 0, height: 2 } },
   cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  facilityName: { fontSize: 16, fontWeight: '700', color: '#1F2937', flex: 1 },
+  facilityName: { fontSize: 16, fontWeight: '700', color: colors.text, flex: 1 },
   badge: { borderRadius: 12, paddingHorizontal: 10, paddingVertical: 3 },
-  available: { backgroundColor: '#D1FAE5' },
-  unavailable: { backgroundColor: '#FEE2E2' },
+  available: { backgroundColor: colors.successLight },
+  unavailable: { backgroundColor: colors.dangerLight },
   badgeText: { fontSize: 12, fontWeight: '600' },
-  type: { fontSize: 13, color: '#6B7280', marginTop: 4, textTransform: 'capitalize' },
-  hours: { fontSize: 13, color: '#6B7280', marginTop: 2 },
-  desc: { fontSize: 13, color: '#6B7280', marginTop: 4 },
-  bookBtn: { backgroundColor: '#4F46E5', borderRadius: 8, padding: 10, alignItems: 'center', marginTop: 10 },
+  type: { fontSize: 13, color: colors.textSecondary, marginTop: 4, textTransform: 'capitalize' },
+  hours: { fontSize: 13, color: colors.textSecondary, marginTop: 2 },
+  desc: { fontSize: 13, color: colors.textSecondary, marginTop: 4 },
+  bookBtn: { backgroundColor: colors.primary, borderRadius: 8, padding: 10, alignItems: 'center', marginTop: 10 },
   bookBtnText: { color: '#FFF', fontWeight: '600' },
   section: { marginTop: 16 },
-  sectionTitle: { fontSize: 18, fontWeight: '700', color: '#1F2937', marginBottom: 8 },
+  sectionTitle: { fontSize: 18, fontWeight: '700', color: colors.text, marginBottom: 8 },
   bookingCard: { backgroundColor: '#FFF', borderRadius: 8, padding: 12, marginBottom: 8 },
-  bookingName: { fontWeight: '600', color: '#1F2937' },
-  bookingTime: { fontSize: 13, color: '#6B7280', marginTop: 2 },
-  bookingStatus: { fontSize: 12, color: '#059669', marginTop: 2, textTransform: 'capitalize' },
-  emptyText: { textAlign: 'center', color: '#9CA3AF', marginTop: 40 },
+  bookingName: { fontWeight: '600', color: colors.text },
+  bookingTime: { fontSize: 13, color: colors.textSecondary, marginTop: 2 },
+  bookingStatus: { fontSize: 12, color: colors.success, marginTop: 2, textTransform: 'capitalize' },
+  emptyText: { textAlign: 'center', color: colors.textMuted, marginTop: 40 },
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'flex-end' },
   modalContent: { backgroundColor: '#FFF', borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 24 },
-  modalTitle: { fontSize: 18, fontWeight: '700', color: '#1F2937', marginBottom: 16 },
-  input: { borderWidth: 1, borderColor: '#D1D5DB', borderRadius: 8, padding: 12, marginBottom: 12, fontSize: 15 },
+  modalTitle: { fontSize: 18, fontWeight: '700', color: colors.text, marginBottom: 16 },
+  input: { borderWidth: 1, borderColor: colors.border, borderRadius: 8, padding: 12, marginBottom: 12, fontSize: 15 },
   modalActions: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 8 },
-  cancelBtn: { flex: 1, padding: 12, alignItems: 'center', marginRight: 8, borderRadius: 8, borderWidth: 1, borderColor: '#D1D5DB' },
-  cancelBtnText: { color: '#6B7280', fontWeight: '600' },
-  confirmBtn: { flex: 1, padding: 12, alignItems: 'center', marginLeft: 8, borderRadius: 8, backgroundColor: '#4F46E5' },
+  cancelBtn: { flex: 1, padding: 12, alignItems: 'center', marginRight: 8, borderRadius: 8, borderWidth: 1, borderColor: colors.border },
+  cancelBtnText: { color: colors.textSecondary, fontWeight: '600' },
+  confirmBtn: { flex: 1, padding: 12, alignItems: 'center', marginLeft: 8, borderRadius: 8, backgroundColor: colors.primary },
   confirmBtnText: { color: '#FFF', fontWeight: '600' },
 });
 
 export default FacilityScreen;
+
+
+

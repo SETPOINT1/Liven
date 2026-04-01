@@ -7,6 +7,8 @@ import {
 import api from '../services/api';
 import { supabase } from '../services/supabase';
 
+import { colors, radius } from '../theme';
+
 const SocialFeedScreen = () => {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -172,7 +174,7 @@ const SocialFeedScreen = () => {
   );
 
   if (loading) {
-    return <View style={styles.center}><ActivityIndicator size="large" color="#4F46E5" /></View>;
+    return <View style={styles.center}><ActivityIndicator size="large" color={colors.accent} /></View>;
   }
 
   return (
@@ -230,7 +232,7 @@ const SocialFeedScreen = () => {
                 <View style={[styles.modalContent, { maxHeight: '70%' }]}>
                   <Text style={styles.modalTitle}>ความคิดเห็น</Text>
                   {commentsLoading ? (
-                    <ActivityIndicator color="#4F46E5" />
+                    <ActivityIndicator color={colors.accent} />
                   ) : (
                     <FlatList
                       data={comments}
@@ -271,37 +273,40 @@ const SocialFeedScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F3F4F6' },
+  container: { flex: 1, backgroundColor: colors.bg },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   list: { padding: 16, paddingTop: 0 },
-  createBtn: { backgroundColor: '#4F46E5', margin: 16, marginBottom: 8, borderRadius: 8, padding: 12, alignItems: 'center' },
-  createBtnText: { color: '#FFF', fontWeight: '600', fontSize: 15 },
-  card: { backgroundColor: '#FFF', borderRadius: 12, padding: 14, marginBottom: 12, elevation: 2, shadowColor: '#000', shadowOpacity: 0.08, shadowRadius: 4, shadowOffset: { width: 0, height: 2 } },
-  pinnedCard: { borderLeftWidth: 3, borderLeftColor: '#F59E0B' },
+  createBtn: { backgroundColor: colors.primary, margin: 16, marginBottom: 8, borderRadius: 8, padding: 12, alignItems: 'center' },
+  createBtnText: { color: '#FFFFFF', fontWeight: '600', fontSize: 15 },
+  card: { backgroundColor: '#FFFFFF', borderRadius: 12, padding: 14, marginBottom: 12, elevation: 2, shadowColor: '#000', shadowOpacity: 0.08, shadowRadius: 4, shadowOffset: { width: 0, height: 2 } },
+  pinnedCard: { borderLeftWidth: 3, borderLeftColor: colors.warning },
   pinnedBadge: { marginBottom: 6 },
-  pinnedText: { fontSize: 12, color: '#F59E0B', fontWeight: '600' },
-  author: { fontSize: 14, fontWeight: '700', color: '#4F46E5' },
-  content: { fontSize: 15, color: '#1F2937', marginTop: 6 },
-  date: { fontSize: 12, color: '#9CA3AF', marginTop: 6 },
-  actions: { flexDirection: 'row', marginTop: 10, borderTopWidth: 1, borderTopColor: '#F3F4F6', paddingTop: 8 },
+  pinnedText: { fontSize: 12, color: colors.warning, fontWeight: '600' },
+  author: { fontSize: 14, fontWeight: '700', color: colors.primary },
+  content: { fontSize: 15, color: colors.text, marginTop: 6 },
+  date: { fontSize: 12, color: colors.textMuted, marginTop: 6 },
+  actions: { flexDirection: 'row', marginTop: 10, borderTopWidth: 1, borderTopColor: colors.bg, paddingTop: 8 },
   actionBtn: { marginRight: 16 },
-  actionText: { fontSize: 13, color: '#6B7280' },
-  emptyText: { textAlign: 'center', color: '#9CA3AF', marginTop: 40 },
+  actionText: { fontSize: 13, color: colors.textSecondary },
+  emptyText: { textAlign: 'center', color: colors.textMuted, marginTop: 40 },
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'flex-end' },
-  modalContent: { backgroundColor: '#FFF', borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 24 },
-  modalTitle: { fontSize: 18, fontWeight: '700', color: '#1F2937', marginBottom: 16 },
-  input: { borderWidth: 1, borderColor: '#D1D5DB', borderRadius: 8, padding: 12, marginBottom: 12, fontSize: 15, color: '#111827' },
+  modalContent: { backgroundColor: '#FFFFFF', borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 24 },
+  modalTitle: { fontSize: 18, fontWeight: '700', color: colors.text, marginBottom: 16 },
+  input: { borderWidth: 1, borderColor: colors.border, borderRadius: 8, padding: 12, marginBottom: 12, fontSize: 15, color: colors.text },
   modalActions: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 8 },
-  cancelBtn: { flex: 1, padding: 12, alignItems: 'center', marginRight: 8, borderRadius: 8, borderWidth: 1, borderColor: '#D1D5DB' },
-  cancelBtnText: { color: '#6B7280', fontWeight: '600' },
-  confirmBtn: { flex: 1, padding: 12, alignItems: 'center', marginLeft: 8, borderRadius: 8, backgroundColor: '#4F46E5' },
-  confirmBtnText: { color: '#FFF', fontWeight: '600' },
-  commentItem: { paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: '#F3F4F6' },
-  commentAuthor: { fontSize: 13, fontWeight: '600', color: '#4F46E5' },
-  commentContent: { fontSize: 14, color: '#374151', marginTop: 2 },
+  cancelBtn: { flex: 1, padding: 12, alignItems: 'center', marginRight: 8, borderRadius: 8, borderWidth: 1, borderColor: colors.border },
+  cancelBtnText: { color: colors.textSecondary, fontWeight: '600' },
+  confirmBtn: { flex: 1, padding: 12, alignItems: 'center', marginLeft: 8, borderRadius: 8, backgroundColor: colors.primary },
+  confirmBtnText: { color: '#FFFFFF', fontWeight: '600' },
+  commentItem: { paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: colors.bg },
+  commentAuthor: { fontSize: 13, fontWeight: '600', color: colors.primary },
+  commentContent: { fontSize: 14, color: colors.textSecondary, marginTop: 2 },
   commentInputRow: { flexDirection: 'row', alignItems: 'center', marginTop: 12 },
-  sendBtn: { backgroundColor: '#4F46E5', borderRadius: 8, paddingHorizontal: 16, paddingVertical: 12 },
-  sendBtnText: { color: '#FFF', fontWeight: '600' },
+  sendBtn: { backgroundColor: colors.primary, borderRadius: 8, paddingHorizontal: 16, paddingVertical: 12 },
+  sendBtnText: { color: '#FFFFFF', fontWeight: '600' },
 });
 
 export default SocialFeedScreen;
+
+
+

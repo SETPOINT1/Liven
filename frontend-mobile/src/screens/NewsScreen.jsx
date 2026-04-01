@@ -5,10 +5,12 @@ import {
 } from 'react-native';
 import api from '../services/api';
 
+import { colors, radius } from '../theme';
+
 const tabOptions = ['ทั้งหมด', 'ประกาศ', 'กิจกรรม'];
 
-const priorityLabels = { emergency: '🚨 ฉุกเฉิน', important: '⚠️ สำคัญ', normal: 'ทั่วไป' };
-const priorityColors = { emergency: '#DC2626', important: '#F59E0B', normal: '#6B7280' };
+const priorityLabels = { emergency: 'ฉุกเฉิน', important: 'สำคัญ', normal: 'ทั่วไป' };
+const priorityColors = { emergency: colors.danger, important: colors.warning, normal: colors.textSecondary };
 
 const NewsScreen = () => {
   const [items, setItems] = useState([]);
@@ -60,7 +62,7 @@ const NewsScreen = () => {
     return (
       <View style={[styles.card, isEvent && styles.eventCard]}>
         <View style={styles.cardHeader}>
-          <Text style={styles.icon}>{isEvent ? '📅' : '📢'}</Text>
+          <Text style={styles.icon}>{isEvent ? '◫' : '▤'}</Text>
           <View style={{ flex: 1 }}>
             <Text style={styles.cardTitle}>{item.title}</Text>
             <View style={styles.metaRow}>
@@ -87,7 +89,7 @@ const NewsScreen = () => {
   };
 
   if (loading) {
-    return <View style={styles.center}><ActivityIndicator size="large" color="#4F46E5" /></View>;
+    return <View style={styles.center}><ActivityIndicator size="large" color={colors.accent} /></View>;
   }
 
   return (
@@ -116,26 +118,28 @@ const NewsScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F3F4F6' },
+  container: { flex: 1, backgroundColor: colors.bg },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   list: { padding: 16, paddingTop: 8 },
   tabRow: { flexDirection: 'row', paddingHorizontal: 16, paddingTop: 12, paddingBottom: 4 },
-  tab: { paddingVertical: 6, paddingHorizontal: 16, borderRadius: 20, marginRight: 8, backgroundColor: '#E5E7EB' },
-  activeTab: { backgroundColor: '#4F46E5' },
-  tabText: { fontSize: 13, color: '#6B7280', fontWeight: '500' },
+  tab: { paddingVertical: 6, paddingHorizontal: 16, borderRadius: 20, marginRight: 8, backgroundColor: colors.border },
+  activeTab: { backgroundColor: colors.primary },
+  tabText: { fontSize: 13, color: colors.textSecondary, fontWeight: '500' },
   activeTabText: { color: '#FFF' },
   card: { backgroundColor: '#FFF', borderRadius: 12, padding: 16, marginBottom: 12, elevation: 2, shadowColor: '#000', shadowOpacity: 0.08, shadowRadius: 4, shadowOffset: { width: 0, height: 2 } },
-  eventCard: { borderLeftWidth: 3, borderLeftColor: '#4F46E5' },
+  eventCard: { borderLeftWidth: 3, borderLeftColor: colors.primary },
   cardHeader: { flexDirection: 'row', alignItems: 'flex-start' },
   icon: { fontSize: 20, marginRight: 10, marginTop: 2 },
-  cardTitle: { fontSize: 15, fontWeight: '700', color: '#1F2937', marginBottom: 4 },
+  cardTitle: { fontSize: 15, fontWeight: '700', color: colors.text, marginBottom: 4 },
   metaRow: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 6 },
-  typeBadge: { fontSize: 11, color: '#4F46E5', backgroundColor: '#EEF2FF', paddingHorizontal: 6, paddingVertical: 1, borderRadius: 4 },
+  typeBadge: { fontSize: 11, color: colors.primary, backgroundColor: colors.accentLight, paddingHorizontal: 6, paddingVertical: 1, borderRadius: 4 },
   priorityBadge: { fontSize: 11, fontWeight: '600' },
-  dateText: { fontSize: 11, color: '#9CA3AF' },
-  contentText: { fontSize: 14, color: '#374151', marginTop: 10, lineHeight: 20 },
-  locationText: { fontSize: 13, color: '#6B7280', marginTop: 6 },
-  emptyText: { textAlign: 'center', color: '#9CA3AF', marginTop: 40, fontSize: 14 },
+  dateText: { fontSize: 11, color: colors.textMuted },
+  contentText: { fontSize: 14, color: colors.textSecondary, marginTop: 10, lineHeight: 20 },
+  locationText: { fontSize: 13, color: colors.textSecondary, marginTop: 6 },
+  emptyText: { textAlign: 'center', color: colors.textMuted, marginTop: 40, fontSize: 14 },
 });
 
 export default NewsScreen;
+
+

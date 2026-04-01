@@ -1,87 +1,63 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, StyleSheet, RefreshControl } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import FacilityWidget from '../components/widgets/FacilityWidget';
+import QuickMenu from '../components/widgets/QuickMenu';
 import ParcelWidget from '../components/widgets/ParcelWidget';
-import NewsWidget from '../components/widgets/NewsWidget';
-import FeedWidget from '../components/widgets/FeedWidget';
+import EventWidget from '../components/widgets/EventWidget';
+import AnnouncementWidget from '../components/widgets/AnnouncementWidget';
+import FacilityWidget from '../components/widgets/FacilityWidget';
 import api from '../services/api';
-
-const HomeScreen = () => {
+import { colors, radius } from '../theme';
+export default function HomeScreen() {
   const navigation = useNavigation();
   const [userName, setUserName] = useState('');
+  const [projectName, setProjectName] = useState('');
   const [refreshing, setRefreshing] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
-  const [recommendation, setRecommendation] = useState('');
-
+  const [parcelCount, setParcelCount] = useState(0);
   useEffect(() => {
-    const fetchUser = async () => {
+    (async () => {
       try {
         const res = await api.get('/auth/me/');
         setUserName(res.data.full_name || '');
-      } catch {
-        // silent
-      }
-    };
-    fetchUser();
+        setProjectName(res.data.project_name || 'Liven Community');
+      } catch {}
+    })();
   }, []);
-
   useEffect(() => {
-    const fetchRecommendation = async () => {
+    (async () => {
       try {
-        const res = await api.get('/bookings/');
-        const bookings = res.data.results || res.data || [];
-        if (bookings.length > 0) {
-          // Find most frequently booked facility
-          const counts = {};
-          bookings.forEach((b) => {
-            const name = b.facility_name || b.facility_id;
-            counts[name] = (counts[name] || 0) + 1;
-          });
-          const top = Object.entries(counts).sort((a, b) => b[1] - a[1])[0];
-          if (top) setRecommendation(`คุณใช้ ${top[0]} บ่อยที่สุด`);
-        }
-      } catch {
-        // silent
-      }
-    };
-    fetchRecommendation();
+        const res = await api.get('/parcels/');
+        const parcels = res.data.results || res.data || [];
+        setParcelCount(parcels.filter(p => p.status === 'pending').length);
+      } catch {}
+    })();
   }, [refreshKey]);
-
-  const onRefresh = () => {
-    setRefreshing(true);
-    setRefreshKey((k) => k + 1);
-    setTimeout(() => setRefreshing(false), 1000);
-  };
-
+  const onRefresh = () => { setRefreshing(true); setRefreshKey(k => k + 1); setTimeout(() => setRefreshing(false), 1000); };
+  const today = new Date().toLocaleDateString('th-TH', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
   return (
-    <ScrollView
-      style={styles.container}
-      contentContainerStyle={styles.content}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-    >
-      <Text style={styles.greeting}>สวัสดี, {userName || 'ลูกบ้าน'} 👋</Text>
-
-      {recommendation ? (
-        <View style={styles.recBox}>
-          <Text style={styles.recText}>💡 {recommendation}</Text>
-        </View>
-      ) : null}
-
-      <FacilityWidget key={`fac-${refreshKey}`} onPress={() => navigation.navigate('News')} />
-      <ParcelWidget key={`par-${refreshKey}`} onPress={() => navigation.navigate('Parcel')} />
-      <NewsWidget key={`news-${refreshKey}`} onPress={() => navigation.navigate('News')} />
-      <FeedWidget key={`feed-${refreshKey}`} onPress={() => navigation.navigate('Social')} />
+    <ScrollView style={s.container} contentContainerStyle={s.content}
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.accent} />}>
+      <Text style={s.greeting}>สวัสดี, คุณ{userName || 'ลูกบ้าน'}</Text>
+      <Text style={s.sub}>ยินดีต้อนรับสู่ Liven - ระบบจัดการชุมชนอัจฉริยะ</Text>
+      <View style={s.projectCard}>
+        <Text style={s.projectName}>{projectName}</Text>
+        <Text style={s.projectDate}>{today}</Text>
+      </View>
+      <QuickMenu key={'qm-'+refreshKey} navigation={navigation} parcelCount={parcelCount} />
+      <ParcelWidget key={'pw-'+refreshKey} onPress={() => navigation.navigate('Parcel')} />
+      <EventWidget key={'ew-'+refreshKey} onPress={() => navigation.navigate('News')} navigation={navigation} />
+      <AnnouncementWidget key={'aw-'+refreshKey} onPress={() => navigation.navigate('News')} />
+      <FacilityWidget key={'fw-'+refreshKey} onPress={() => navigation.navigate('News')} />
     </ScrollView>
   );
-};
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F3F4F6' },
-  content: { padding: 16 },
-  greeting: { fontSize: 22, fontWeight: '700', color: '#1F2937', marginBottom: 4 },
-  recBox: { backgroundColor: '#EEF2FF', borderRadius: 8, padding: 10, marginBottom: 12, marginTop: 8 },
-  recText: { color: '#4338CA', fontSize: 13 },
+}
+const s = StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.bg },
+  content: { padding: 16, paddingBottom: 32 },
+  greeting: { fontSize: 22, fontWeight: '700', color: colors.text },
+  sub: { fontSize: 13, color: colors.textMuted, marginBottom: 16 },
+  projectCard: { backgroundColor: colors.primary, borderRadius: radius.md, padding: 20, marginBottom: 14 },
+  projectName: { fontSize: 18, fontWeight: '700', color: '#FFF', marginBottom: 4 },
+  projectDate: { fontSize: 13, color: 'rgba(255,255,255,0.7)' },
 });
-
-export default HomeScreen;

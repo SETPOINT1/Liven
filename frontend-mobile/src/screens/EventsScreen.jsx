@@ -5,6 +5,7 @@ import {
 } from 'react-native';
 import api from '../services/api';
 import { supabase } from '../services/supabase';
+import { colors, radius } from '../theme';
 
 const EventsScreen = () => {
   const [events, setEvents] = useState([]);
@@ -97,9 +98,9 @@ const EventsScreen = () => {
   };
 
   const priorityColor = (p) => {
-    if (p === 'emergency') return '#DC2626';
-    if (p === 'important') return '#F59E0B';
-    return '#6B7280';
+    if (p === 'emergency') return colors.danger;
+    if (p === 'important') return colors.warning;
+    return colors.textSecondary;
   };
 
   const priorityLabel = (p) => {
@@ -111,7 +112,7 @@ const EventsScreen = () => {
   const unreadCount = notifications.filter((n) => !n.is_read).length;
 
   if (loading) {
-    return <View style={styles.center}><ActivityIndicator size="large" color="#4F46E5" /></View>;
+    return <View style={styles.center}><ActivityIndicator size="large" color={colors.accent} /></View>;
   }
 
   return (
@@ -220,46 +221,49 @@ const EventsScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F3F4F6' },
+  container: { flex: 1, backgroundColor: colors.bg },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 12, backgroundColor: '#FFF', borderBottomWidth: 1, borderBottomColor: '#E5E7EB' },
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 12, backgroundColor: '#FFF', borderBottomWidth: 1, borderBottomColor: colors.border },
   tabs: { flexDirection: 'row' },
   tab: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20, marginRight: 8 },
-  activeTab: { backgroundColor: '#4F46E5' },
-  tabText: { fontSize: 14, color: '#6B7280', fontWeight: '600' },
+  activeTab: { backgroundColor: colors.primary },
+  tabText: { fontSize: 14, color: colors.textSecondary, fontWeight: '600' },
   activeTabText: { color: '#FFF' },
   bellBtn: { position: 'relative', padding: 4 },
   bellText: { fontSize: 22 },
-  badge: { position: 'absolute', top: -2, right: -4, backgroundColor: '#DC2626', borderRadius: 10, minWidth: 18, height: 18, justifyContent: 'center', alignItems: 'center' },
+  badge: { position: 'absolute', top: -2, right: -4, backgroundColor: colors.danger, borderRadius: 10, minWidth: 18, height: 18, justifyContent: 'center', alignItems: 'center' },
   badgeText: { color: '#FFF', fontSize: 11, fontWeight: '700' },
   list: { padding: 16 },
   card: { backgroundColor: '#FFF', borderRadius: 12, padding: 14, marginBottom: 12, elevation: 2, shadowColor: '#000', shadowOpacity: 0.08, shadowRadius: 4, shadowOffset: { width: 0, height: 2 } },
-  cardTitle: { fontSize: 16, fontWeight: '700', color: '#1F2937' },
-  cardDate: { fontSize: 13, color: '#6B7280', marginTop: 4 },
-  cardDetail: { fontSize: 13, color: '#6B7280', marginTop: 2 },
-  cardDesc: { fontSize: 14, color: '#374151', marginTop: 6 },
+  cardTitle: { fontSize: 16, fontWeight: '700', color: colors.text },
+  cardDate: { fontSize: 13, color: colors.textSecondary, marginTop: 4 },
+  cardDetail: { fontSize: 13, color: colors.textSecondary, marginTop: 2 },
+  cardDesc: { fontSize: 14, color: colors.textSecondary, marginTop: 6 },
   annHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   priorityBadge: { borderRadius: 12, paddingHorizontal: 8, paddingVertical: 2 },
   priorityText: { fontSize: 12, fontWeight: '600' },
-  emptyText: { textAlign: 'center', color: '#9CA3AF', marginTop: 40 },
+  emptyText: { textAlign: 'center', color: colors.textMuted, marginTop: 40 },
   emergencyOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'center', alignItems: 'center', padding: 24 },
   emergencyContent: { backgroundColor: '#FFF', borderRadius: 16, padding: 24, alignItems: 'center', width: '100%' },
   emergencyIcon: { fontSize: 48 },
-  emergencyTitle: { fontSize: 20, fontWeight: '700', color: '#DC2626', marginTop: 8 },
-  emergencyBody: { fontSize: 16, fontWeight: '600', color: '#1F2937', marginTop: 12, textAlign: 'center' },
-  emergencyDesc: { fontSize: 14, color: '#374151', marginTop: 8, textAlign: 'center' },
-  emergencyBtn: { backgroundColor: '#DC2626', borderRadius: 8, paddingHorizontal: 32, paddingVertical: 12, marginTop: 20 },
+  emergencyTitle: { fontSize: 20, fontWeight: '700', color: colors.danger, marginTop: 8 },
+  emergencyBody: { fontSize: 16, fontWeight: '600', color: colors.text, marginTop: 12, textAlign: 'center' },
+  emergencyDesc: { fontSize: 14, color: colors.textSecondary, marginTop: 8, textAlign: 'center' },
+  emergencyBtn: { backgroundColor: colors.danger, borderRadius: 8, paddingHorizontal: 32, paddingVertical: 12, marginTop: 20 },
   emergencyBtnText: { color: '#FFF', fontWeight: '600', fontSize: 16 },
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'flex-end' },
   modalContent: { backgroundColor: '#FFF', borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 24 },
   modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
-  modalTitle: { fontSize: 18, fontWeight: '700', color: '#1F2937' },
-  closeText: { fontSize: 20, color: '#6B7280', padding: 4 },
-  notifItem: { paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: '#F3F4F6' },
-  notifUnread: { backgroundColor: '#EEF2FF', borderRadius: 8, paddingHorizontal: 8, marginBottom: 4 },
-  notifTitle: { fontSize: 14, fontWeight: '600', color: '#1F2937' },
-  notifBody: { fontSize: 13, color: '#6B7280', marginTop: 2 },
-  notifDate: { fontSize: 12, color: '#9CA3AF', marginTop: 4 },
+  modalTitle: { fontSize: 18, fontWeight: '700', color: colors.text },
+  closeText: { fontSize: 20, color: colors.textSecondary, padding: 4 },
+  notifItem: { paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: colors.bg },
+  notifUnread: { backgroundColor: colors.accentLight, borderRadius: 8, paddingHorizontal: 8, marginBottom: 4 },
+  notifTitle: { fontSize: 14, fontWeight: '600', color: colors.text },
+  notifBody: { fontSize: 13, color: colors.textSecondary, marginTop: 2 },
+  notifDate: { fontSize: 12, color: colors.textMuted, marginTop: 4 },
 });
 
 export default EventsScreen;
+
+
+
