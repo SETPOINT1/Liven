@@ -11,6 +11,7 @@ export default function DashboardPage() {
   const [parcelStats, setParcelStats] = useState([]);
   const [chatbotTrends, setChatbotTrends] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [eventCount, setEventCount] = useState(0);
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const navigate = useNavigate();
@@ -23,13 +24,15 @@ export default function DashboardPage() {
     if (startDate) params.start_date = startDate;
     if (endDate) params.end_date = endDate;
     try {
-      const [ch, fu, ps, ct] = await Promise.all([
+      const [ch, fu, ps, ct, ev] = await Promise.all([
         api.get('/analytics/community-health/', { params }),
         api.get('/analytics/facility-usage/', { params }),
         api.get('/analytics/parcel-stats/', { params }),
         api.get('/analytics/chatbot-trends/', { params }),
+        api.get('/events/'),
       ]);
       setHealth(ch.data);
+      setEventCount((ev.data?.results || ev.data || []).length);
       setFacilityUsage(fu.data?.data || fu.data || []);
       setParcelStats(ps.data?.data || ps.data || []);
       setChatbotTrends(ct.data?.data || ct.data || []);
@@ -44,7 +47,6 @@ export default function DashboardPage() {
   const facilityStats = health?.facility_stats || [];
   const householdCount = health?.household_count || engagement.total || 0;
   const parcelCount = health?.parcel_trends?.reduce?.((s,t) => s+(t.count||0), 0) || 0;
-  const eventCount = health?.event_count || facilityStats.length || 0;
   const reportCount = health?.report_count || engagement.post_count || 0;
   const satColor = satisfactionRate >= 70 ? C.ok : satisfactionRate >= 40 ? C.warn : C.err;
 
