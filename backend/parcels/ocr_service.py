@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 CONFIDENCE_THRESHOLD = 0.60
 
-_TYPHOON_CHAT_URL = "https://api.opentyphoon.ai/v1/chat/completions"
+_TYPHOON_CHAT_URL = "https://api.opentyphoon.ai/v1"
 _TYPHOON_CHAT_MODEL = "typhoon-v2.5-30b-a3b-instruct"
 
 _EXTRACT_PROMPT = """คุณเป็น AI ที่เชี่ยวชาญในการอ่านฉลากพัสดุ (parcel label) ภาษาไทยและอังกฤษ
