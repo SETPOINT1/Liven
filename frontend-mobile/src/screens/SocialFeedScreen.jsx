@@ -20,8 +20,10 @@ const SocialFeedScreen = () => {
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
   const [commentsLoading, setCommentsLoading] = useState(false);
+  const [fetchError, setFetchError] = useState(false);
 
   const fetchPosts = useCallback(async () => {
+    setFetchError(false);
     try {
       const res = await api.get('/posts/');
       const data = res.data.results || res.data || [];
@@ -35,7 +37,7 @@ const SocialFeedScreen = () => {
       });
       setPosts(data);
     } catch {
-      // silent
+      setFetchError(true);
     }
     setLoading(false);
     setRefreshing(false);
@@ -157,16 +159,16 @@ const SocialFeedScreen = () => {
       <Text style={styles.content}>{item.content}</Text>
       <Text style={styles.date}>{new Date(item.created_at).toLocaleDateString('th-TH')}</Text>
       <View style={styles.actions}>
-        <TouchableOpacity style={styles.actionBtn} onPress={() => handleLike(item.id)}>
+        <TouchableOpacity style={styles.actionBtn} onPress={() => handleLike(item.id)} accessibilityLabel={item.is_liked ? 'เลิกถูกใจ' : 'ถูกใจ'} accessibilityRole="button">
           <Text style={styles.actionText}>{item.is_liked ? '❤️' : '🤍'} {item.like_count || 0}</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.actionBtn} onPress={() => openComments(item.id)}>
+        <TouchableOpacity style={styles.actionBtn} onPress={() => openComments(item.id)} accessibilityLabel="ความคิดเห็น" accessibilityRole="button">
           <Text style={styles.actionText}>💬 {item.comment_count || 0}</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.actionBtn} onPress={() => handleShare(item.id)}>
+        <TouchableOpacity style={styles.actionBtn} onPress={() => handleShare(item.id)} accessibilityLabel="แชร์" accessibilityRole="button">
           <Text style={styles.actionText}>🔗 แชร์</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.actionBtn} onPress={() => handleReport(item.id)}>
+        <TouchableOpacity style={styles.actionBtn} onPress={() => handleReport(item.id)} accessibilityLabel="รายงานโพสต์" accessibilityRole="button">
           <Text style={styles.actionText}>⚠️</Text>
         </TouchableOpacity>
       </View>
@@ -189,7 +191,25 @@ const SocialFeedScreen = () => {
         renderItem={renderPost}
         contentContainerStyle={styles.list}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); fetchPosts(); }} />}
-        ListEmptyComponent={<Text style={styles.emptyText}>ยังไม่มีโพสต์</Text>}
+        ListEmptyComponent={
+          fetchError ? (
+            <View style={styles.emptyContainer}>
+              <Text style={styles.emptyIcon}>⚠️</Text>
+              <Text style={styles.emptyTitle}>ไม่สามารถโหลดโพสต์ได้</Text>
+              <Text style={styles.emptyDesc}>กรุณาตรวจสอบการเชื่อมต่อแล้วลองใหม่</Text>
+              <TouchableOpacity style={styles.retryBtn} onPress={() => { setRefreshing(true); fetchPosts(); }}
+                accessibilityLabel="ลองใหม่" accessibilityRole="button">
+                <Text style={styles.retryBtnText}>ลองใหม่</Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <View style={styles.emptyContainer}>
+              <Text style={styles.emptyIcon}>💬</Text>
+              <Text style={styles.emptyTitle}>ยังไม่มีโพสต์</Text>
+              <Text style={styles.emptyDesc}>เริ่มสร้างโพสต์แรกเพื่อพูดคุยกับเพื่อนบ้าน</Text>
+            </View>
+          )
+        }
       />
 
       {/* Create Post Modal */}
@@ -289,6 +309,12 @@ const styles = StyleSheet.create({
   actionBtn: { marginRight: 16 },
   actionText: { fontSize: 13, color: colors.textSecondary },
   emptyText: { textAlign: 'center', color: colors.textMuted, marginTop: 40 },
+  emptyContainer: { alignItems: 'center', marginTop: 60, paddingHorizontal: 32 },
+  emptyIcon: { fontSize: 48, marginBottom: 12 },
+  emptyTitle: { fontSize: 16, fontWeight: '600', color: colors.text, marginBottom: 6 },
+  emptyDesc: { fontSize: 14, color: colors.textMuted, textAlign: 'center', lineHeight: 20 },
+  retryBtn: { backgroundColor: colors.accent, borderRadius: 8, paddingHorizontal: 24, paddingVertical: 10, marginTop: 16 },
+  retryBtnText: { color: '#FFF', fontWeight: '600', fontSize: 14 },
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'flex-end' },
   modalContent: { backgroundColor: '#FFFFFF', borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 24 },
   modalTitle: { fontSize: 18, fontWeight: '700', color: colors.text, marginBottom: 16 },

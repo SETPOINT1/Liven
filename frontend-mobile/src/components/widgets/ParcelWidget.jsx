@@ -1,43 +1,63 @@
-﻿import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
-import api from '../../services/api';
+﻿import React from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import { colors, radius } from '../../theme';
-export default function ParcelWidget({ onPress }) {
-  const [parcels, setParcels] = useState([]);
-  const [loading, setLoading] = useState(true);
-  useEffect(() => { fetchParcels(); }, []);
-  const fetchParcels = async () => {
-    try { const res = await api.get('/parcels/'); setParcels(res.data.results || res.data || []); } catch {}
-    setLoading(false);
-  };
+
+export default function ParcelWidget({ data, onPress, onRefresh }) {
+  const loading = data === null;
+  const parcels = data || [];
   const pending = parcels.filter(p => p.status === 'pending');
   const latest = pending[0];
   const history = parcels.slice(0, 3);
+
   const handlePickup = async (id) => {
-    try { await api.patch('/parcels/' + id + '/pickup/'); Alert.alert('สำเร็จ', 'ยืนยันรับพัสดุแล้ว'); fetchParcels(); }
-    catch { Alert.alert('ผิดพลาด', 'ไม่สามารถยืนยันได้'); }
+    Alert.alert('ยืนยันรับพัสดุ', 'คุณต้องการยืนยันว่ารับพัสดุนี้แล้ว?', [
+      { text: 'ยกเลิก', style: 'cancel' },
+      {
+        text: 'ยืนยัน',
+        onPress: async () => {
+          try {
+            const api = require('../../services/api').default;
+            await api.patch('/parcels/' + id + '/pickup/');
+            Alert.alert('สำเร็จ', 'ยืนยันรับพัสดุแล้ว');
+            if (onRefresh) onRefresh();
+          } catch {
+            Alert.alert('ผิดพลาด', 'ไม่สามารถยืนยันได้ กรุณาลองใหม่');
+          }
+        },
+      },
+    ]);
   };
+
   const fmtDate = (d) => d ? new Date(d).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' }) : '-';
+
   return (
     <View style={s.container}>
       <View style={s.header}>
         <Text style={s.title}>พัสดุของฉัน</Text>
-        <TouchableOpacity onPress={onPress}><Text style={s.link}>ดูทั้งหมด</Text></TouchableOpacity>
+        <TouchableOpacity onPress={onPress} accessibilityLabel="ดูพัสดุทั้งหมด" accessibilityRole="button">
+          <Text style={s.link}>ดูทั้งหมด</Text>
+        </TouchableOpacity>
       </View>
-      {loading ? <Text style={s.muted}>กำลังโหลด...</Text> : !latest ? <Text style={s.muted}>ไม่มีพัสดุรอรับ</Text> : (
+      {loading ? (
+        <ActivityIndicator size="small" color={colors.accent} style={{ marginVertical: 8 }} />
+      ) : !latest ? (
+        <Text style={s.muted}>ไม่มีพัสดุรอรับ</Text>
+      ) : (
         <View style={s.card}>
           <View style={s.statusRow}>
-            <View style={s.statusDot} /><Text style={s.statusText}>พร้อมรับ</Text>
+            <View style={s.statusDot} />
+            <Text style={s.statusText}>พร้อมรับ</Text>
             <Text style={s.trackNum}>{latest.tracking_number || '-'}</Text>
           </View>
           <Text style={s.detail}>{fmtDate(latest.arrived_at)} {latest.unit_number ? '• ห้อง ' + latest.unit_number : ''}</Text>
           {latest.courier ? <Text style={s.detail}>{latest.courier}</Text> : null}
-          <TouchableOpacity style={s.pickupBtn} onPress={() => handlePickup(latest.id)} activeOpacity={0.7}>
+          <TouchableOpacity style={s.pickupBtn} onPress={() => handlePickup(latest.id)} activeOpacity={0.7}
+            accessibilityLabel="ยืนยันรับพัสดุ" accessibilityRole="button">
             <Text style={s.pickupBtnText}>ยืนยันรับพัสดุ</Text>
           </TouchableOpacity>
         </View>
       )}
-      {history.length > 0 && (
+      {!loading && history.length > 0 && (
         <View style={s.historyBox}>
           <Text style={s.historyTitle}>ประวัติล่าสุด</Text>
           {history.map((p) => (
@@ -52,6 +72,7 @@ export default function ParcelWidget({ onPress }) {
     </View>
   );
 }
+
 const s = StyleSheet.create({
   container: { marginBottom: 12 },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },

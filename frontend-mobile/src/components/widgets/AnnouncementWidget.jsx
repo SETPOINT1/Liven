@@ -1,32 +1,32 @@
-﻿import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import api from '../../services/api';
+﻿import React from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { colors, radius } from '../../theme';
+
 const priorityStyle = { emergency: { border: '#E53E3E', bg: '#FFF5F5' }, important: { border: '#D69E2E', bg: '#FFFFF0' }, normal: { border: '#805AD5', bg: '#FAF5FF' } };
 const priorityLabel = { emergency: 'ฉุกเฉิน', important: 'สำคัญ', normal: 'ทั่วไป' };
-export default function AnnouncementWidget({ onPress }) {
-  const [items, setItems] = useState([]);
-  const [loading, setLoading] = useState(true);
-  useEffect(() => {
-    (async () => {
-      try {
-        const res = await api.get('/announcements/');
-        const data = (res.data.results || res.data || []).slice(0, 3);
-        const order = { emergency: 0, important: 1, normal: 2 };
-        data.sort((a, b) => (order[a.priority] ?? 2) - (order[b.priority] ?? 2));
-        setItems(data);
-      } catch {}
-      setLoading(false);
-    })();
-  }, []);
+
+export default function AnnouncementWidget({ data, onPress }) {
+  const loading = data === null;
+  const order = { emergency: 0, important: 1, normal: 2 };
+  const items = data
+    ? [...data].sort((a, b) => (order[a.priority] ?? 2) - (order[b.priority] ?? 2)).slice(0, 3)
+    : [];
+
   const formatDate = (d) => d ? new Date(d).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
+
   return (
     <View style={s.container}>
       <View style={s.header}>
         <Text style={s.title}>ประกาศจากนิติบุคคล</Text>
-        <TouchableOpacity onPress={onPress}><Text style={s.link}>ดูทั้งหมด</Text></TouchableOpacity>
+        <TouchableOpacity onPress={onPress} accessibilityLabel="ดูประกาศทั้งหมด" accessibilityRole="button">
+          <Text style={s.link}>ดูทั้งหมด</Text>
+        </TouchableOpacity>
       </View>
-      {loading ? <Text style={s.muted}>กำลังโหลด...</Text> : items.length === 0 ? <Text style={s.muted}>ไม่มีประกาศ</Text> : (
+      {loading ? (
+        <ActivityIndicator size="small" color={colors.accent} style={{ marginVertical: 8 }} />
+      ) : items.length === 0 ? (
+        <Text style={s.muted}>ไม่มีประกาศ</Text>
+      ) : (
         items.map((a) => {
           const ps = priorityStyle[a.priority] || priorityStyle.normal;
           return (
@@ -44,6 +44,7 @@ export default function AnnouncementWidget({ onPress }) {
     </View>
   );
 }
+
 const s = StyleSheet.create({
   container: { marginBottom: 12 },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },

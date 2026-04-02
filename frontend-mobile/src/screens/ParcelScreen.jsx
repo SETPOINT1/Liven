@@ -82,6 +82,14 @@ const ParcelScreen = () => {
     </View>
   );
 
+  const renderEmpty = () => (
+    <View style={styles.emptyContainer}>
+      <Text style={styles.emptyIcon}>📦</Text>
+      <Text style={styles.emptyTitle}>ไม่มีพัสดุ</Text>
+      <Text style={styles.emptyDesc}>เมื่อมีพัสดุมาถึง จะแสดงที่นี่</Text>
+    </View>
+  );
+
   if (loading) {
     return <View style={styles.center}><ActivityIndicator size="large" color={colors.accent} /></View>;
   }
@@ -94,7 +102,7 @@ const ParcelScreen = () => {
         renderItem={renderParcel}
         contentContainerStyle={styles.list}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); fetchParcels(); }} />}
-        ListEmptyComponent={<Text style={styles.emptyText}>ไม่มีพัสดุ</Text>}
+        ListEmptyComponent={renderEmpty}
       />
     </View>
   );
@@ -102,7 +110,7 @@ const ParcelScreen = () => {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
-  center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  center: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.bg },
   list: { padding: 16 },
   card: { backgroundColor: colors.card, borderRadius: radius.md, padding: 14, marginBottom: 12, elevation: 2, shadowColor: '#000', shadowOpacity: 0.06, shadowRadius: 4, shadowOffset: { width: 0, height: 2 } },
   row: { flexDirection: 'row' },
@@ -117,6 +125,11 @@ const styles = StyleSheet.create({
   pending: { backgroundColor: colors.warningLight },
   pickedUp: { backgroundColor: colors.successLight },
   statusText: { fontSize: 12, fontWeight: '600', color: colors.text },
+  // Empty state
+  emptyContainer: { alignItems: 'center', marginTop: 60, paddingHorizontal: 32 },
+  emptyIcon: { fontSize: 48, marginBottom: 12 },
+  emptyTitle: { fontSize: 16, fontWeight: '600', color: colors.text, marginBottom: 6 },
+  emptyDesc: { fontSize: 14, color: colors.textMuted, textAlign: 'center', lineHeight: 20 },
   emptyText: { textAlign: 'center', color: colors.textMuted, marginTop: 40 },
 });
 

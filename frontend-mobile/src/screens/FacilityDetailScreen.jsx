@@ -5,10 +5,11 @@ import {
 } from 'react-native';
 import api from '../services/api';
 import { supabase } from '../services/supabase';
+import { colors, radius, spacing } from '../theme';
 
 const PLACEHOLDER_IMG = 'https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800';
 
-const FacilityDetailScreen = ({ route, navigation }) => {
+const FacilityDetailScreen = ({ route }) => {
   const { facility } = route.params;
   const [slots, setSlots] = useState([]);
   const [selectedDate, setSelectedDate] = useState('');
@@ -56,10 +57,7 @@ const FacilityDetailScreen = ({ route, navigation }) => {
   }, [selectedDate, fetchSlots]);
 
   const handleBook = async () => {
-    if (!selectedSlot) {
-      Alert.alert('กรุณาเลือกรอบเวลา');
-      return;
-    }
+    if (!selectedSlot) { Alert.alert('กรุณาเลือกรอบเวลา'); return; }
     setBooking(true);
     try {
       await api.post(`/facilities/${facility.id}/book/`, {
@@ -72,7 +70,7 @@ const FacilityDetailScreen = ({ route, navigation }) => {
     } catch (err) {
       const msg = err.response?.data?.error?.message
         || err.response?.data?.error?.details?.non_field_errors
-        || 'ไม่สามารถจองได้';
+        || 'ไม่สามารถจองได้ กรุณาลองใหม่';
       Alert.alert('ข้อผิดพลาด', typeof msg === 'string' ? msg : JSON.stringify(msg));
     }
     setBooking(false);
@@ -103,7 +101,9 @@ const FacilityDetailScreen = ({ route, navigation }) => {
         <View style={styles.metaRow}>
           <Text style={styles.typeBadge}>{facility.type}</Text>
           <View style={[styles.statusBadge, facility.is_active ? styles.active : styles.inactive]}>
-            <Text style={styles.statusText}>{facility.is_active ? 'เปิดให้บริการ' : 'ปิดปรับปรุง'}</Text>
+            <Text style={[styles.statusText, { color: facility.is_active ? '#065F46' : '#991B1B' }]}>
+              {facility.is_active ? 'เปิดให้บริการ' : 'ปิดปรับปรุง'}
+            </Text>
           </View>
         </View>
 
@@ -132,6 +132,8 @@ const FacilityDetailScreen = ({ route, navigation }) => {
                     key={d}
                     style={[styles.dateChip, isSelected && styles.dateChipSelected]}
                     onPress={() => setSelectedDate(d)}
+                    accessibilityLabel={`วันที่ ${date} ${day}`}
+                    accessibilityRole="button"
                   >
                     <Text style={[styles.dateDay, isSelected && styles.dateDaySelected]}>{day}</Text>
                     <Text style={[styles.dateNum, isSelected && styles.dateNumSelected]}>{date}</Text>
@@ -142,7 +144,7 @@ const FacilityDetailScreen = ({ route, navigation }) => {
 
             <Text style={styles.sectionTitle}>เลือกรอบเวลา</Text>
             {loading ? (
-              <ActivityIndicator size="small" color="#4F46E5" style={{ marginTop: 16 }} />
+              <ActivityIndicator size="small" color={colors.accent} style={{ marginTop: 16 }} />
             ) : slots.length === 0 ? (
               <Text style={styles.emptySlots}>ไม่มีรอบเวลาสำหรับวันนี้</Text>
             ) : (
@@ -159,6 +161,8 @@ const FacilityDetailScreen = ({ route, navigation }) => {
                       ]}
                       disabled={!slot.is_available}
                       onPress={() => setSelectedSlot(slot)}
+                      accessibilityLabel={`${formatTime(slot.start_time)} ถึง ${formatTime(slot.end_time)} ${slot.is_available ? 'ว่าง' : 'จองแล้ว'}`}
+                      accessibilityRole="button"
                     >
                       <Text style={[
                         styles.slotText,
@@ -175,7 +179,13 @@ const FacilityDetailScreen = ({ route, navigation }) => {
             )}
 
             {selectedSlot && (
-              <TouchableOpacity style={styles.bookBtn} onPress={handleBook} disabled={booking}>
+              <TouchableOpacity
+                style={[styles.bookBtn, booking && { opacity: 0.6 }]}
+                onPress={handleBook}
+                disabled={booking}
+                accessibilityLabel="ยืนยันจอง"
+                accessibilityRole="button"
+              >
                 {booking ? (
                   <ActivityIndicator color="#FFF" />
                 ) : (
@@ -193,40 +203,55 @@ const FacilityDetailScreen = ({ route, navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F3F4F6' },
-  heroImage: { width: '100%', height: 220, backgroundColor: '#E5E7EB' },
-  content: { padding: 20 },
-  name: { fontSize: 22, fontWeight: '700', color: '#1F2937', marginBottom: 8 },
+  container: { flex: 1, backgroundColor: colors.bg },
+  heroImage: { width: '100%', height: 220, backgroundColor: colors.border },
+  content: { padding: spacing.xl },
+  name: { fontSize: 22, fontWeight: '700', color: colors.text, marginBottom: 8 },
   metaRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 12 },
-  typeBadge: { backgroundColor: '#EEF2FF', color: '#4F46E5', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12, fontSize: 12, fontWeight: '600', textTransform: 'capitalize', overflow: 'hidden' },
+  typeBadge: {
+    backgroundColor: colors.accentLight, color: colors.accent,
+    paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12,
+    fontSize: 12, fontWeight: '600', textTransform: 'capitalize', overflow: 'hidden',
+  },
   statusBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12 },
-  active: { backgroundColor: '#D1FAE5' },
-  inactive: { backgroundColor: '#FEE2E2' },
-  statusText: { fontSize: 12, fontWeight: '600', color: '#1F2937' },
-  hours: { fontSize: 14, color: '#6B7280', marginBottom: 8 },
-  description: { fontSize: 14, color: '#4B5563', lineHeight: 22, marginBottom: 16 },
-  noBookingBox: { backgroundColor: '#ECFDF5', borderRadius: 12, padding: 20, alignItems: 'center', marginTop: 8 },
+  active: { backgroundColor: colors.successLight },
+  inactive: { backgroundColor: colors.dangerLight },
+  statusText: { fontSize: 12, fontWeight: '600' },
+  hours: { fontSize: 14, color: colors.textSecondary, marginBottom: 8 },
+  description: { fontSize: 14, color: colors.textSecondary, lineHeight: 22, marginBottom: 16 },
+  noBookingBox: { backgroundColor: colors.successLight, borderRadius: radius.md, padding: 20, alignItems: 'center', marginTop: 8 },
   noBookingIcon: { fontSize: 28, marginBottom: 8 },
   noBookingText: { fontSize: 15, fontWeight: '600', color: '#065F46' },
   bookingSection: { marginTop: 8 },
-  sectionTitle: { fontSize: 16, fontWeight: '700', color: '#1F2937', marginBottom: 12 },
+  sectionTitle: { fontSize: 16, fontWeight: '700', color: colors.text, marginBottom: 12 },
   dateRow: { marginBottom: 20 },
-  dateChip: { width: 52, height: 64, borderRadius: 12, backgroundColor: '#FFF', alignItems: 'center', justifyContent: 'center', marginRight: 8, borderWidth: 1.5, borderColor: '#E5E7EB' },
-  dateChipSelected: { backgroundColor: '#4F46E5', borderColor: '#4F46E5' },
-  dateDay: { fontSize: 12, color: '#6B7280', fontWeight: '600' },
-  dateDaySelected: { color: '#C7D2FE' },
-  dateNum: { fontSize: 18, fontWeight: '700', color: '#1F2937', marginTop: 2 },
+  dateChip: {
+    width: 52, height: 64, borderRadius: radius.md, backgroundColor: colors.card,
+    alignItems: 'center', justifyContent: 'center', marginRight: 8,
+    borderWidth: 1.5, borderColor: colors.border,
+  },
+  dateChipSelected: { backgroundColor: colors.primary, borderColor: colors.primary },
+  dateDay: { fontSize: 12, color: colors.textSecondary, fontWeight: '600' },
+  dateDaySelected: { color: 'rgba(255,255,255,0.7)' },
+  dateNum: { fontSize: 18, fontWeight: '700', color: colors.text, marginTop: 2 },
   dateNumSelected: { color: '#FFF' },
   slotsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  slotChip: { paddingHorizontal: 14, paddingVertical: 10, borderRadius: 8, backgroundColor: '#FFF', borderWidth: 1.5, borderColor: '#E5E7EB', minWidth: 100, alignItems: 'center' },
-  slotUnavailable: { backgroundColor: '#F3F4F6', borderColor: '#E5E7EB' },
-  slotSelected: { backgroundColor: '#4F46E5', borderColor: '#4F46E5' },
-  slotText: { fontSize: 13, fontWeight: '600', color: '#1F2937' },
-  slotTextUnavailable: { color: '#9CA3AF' },
+  slotChip: {
+    paddingHorizontal: 14, paddingVertical: 10, borderRadius: radius.sm,
+    backgroundColor: colors.card, borderWidth: 1.5, borderColor: colors.border,
+    minWidth: 100, alignItems: 'center',
+  },
+  slotUnavailable: { backgroundColor: colors.bg, borderColor: colors.border },
+  slotSelected: { backgroundColor: colors.primary, borderColor: colors.primary },
+  slotText: { fontSize: 13, fontWeight: '600', color: colors.text },
+  slotTextUnavailable: { color: colors.textMuted },
   slotTextSelected: { color: '#FFF' },
-  slotBooked: { fontSize: 10, color: '#9CA3AF', marginTop: 2 },
-  emptySlots: { color: '#9CA3AF', textAlign: 'center', marginTop: 16 },
-  bookBtn: { backgroundColor: '#4F46E5', borderRadius: 12, padding: 16, alignItems: 'center', marginTop: 20, marginBottom: 32 },
+  slotBooked: { fontSize: 10, color: colors.textMuted, marginTop: 2 },
+  emptySlots: { color: colors.textMuted, textAlign: 'center', marginTop: 16 },
+  bookBtn: {
+    backgroundColor: colors.primary, borderRadius: radius.md,
+    padding: 16, alignItems: 'center', marginTop: 20, marginBottom: 32,
+  },
   bookBtnText: { color: '#FFF', fontWeight: '700', fontSize: 16 },
 });
 

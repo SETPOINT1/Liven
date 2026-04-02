@@ -26,8 +26,10 @@ export default function ChatbotScreen() {
       try {
         const res = await api.get('/chatbot/history/');
         const history = res.data.results || res.data || [];
+        // API returns newest-first, reverse to show oldest-first (chat order)
+        const sorted = [...history].reverse();
         const msgs = [];
-        history.forEach((h) => {
+        sorted.forEach((h) => {
           msgs.push({ id: `${h.id}-user`, text: h.user_message, isBot: false });
           msgs.push({ id: `${h.id}-bot`, text: h.bot_response, isBot: true, isEscalated: h.is_escalated });
         });
@@ -81,7 +83,7 @@ export default function ChatbotScreen() {
   }
 
   return (
-    <KeyboardAvoidingView style={s.container} behavior={Platform.OS === 'ios' ? 'padding' : undefined} keyboardVerticalOffset={90}>
+    <KeyboardAvoidingView style={s.container} behavior={Platform.OS === 'ios' ? 'padding' : undefined} keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}>
       <FlatList
         ref={flatListRef}
         data={messages}

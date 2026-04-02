@@ -6,8 +6,10 @@ const apiBaseUrl = Constants.expoConfig?.extra?.API_BASE_URL || 'http://localhos
 
 const api = axios.create({
   baseURL: apiBaseUrl,
+  timeout: 15000,
 });
 
+// Attach auth token
 api.interceptors.request.use(async (config) => {
   const { data: { session } } = await supabase.auth.getSession();
   if (session?.access_token) {
@@ -15,5 +17,16 @@ api.interceptors.request.use(async (config) => {
   }
   return config;
 });
+
+// Handle 401 — auto sign out on expired/invalid token
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    if (error.response?.status === 401) {
+      await supabase.auth.signOut();
+    }
+    return Promise.reject(error);
+  }
+);
 
 export default api;

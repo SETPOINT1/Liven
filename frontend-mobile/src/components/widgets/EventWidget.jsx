@@ -1,29 +1,29 @@
-﻿import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import api from '../../services/api';
+﻿import React from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { colors, radius } from '../../theme';
-export default function EventWidget({ onPress, navigation }) {
-  const [events, setEvents] = useState([]);
-  const [loading, setLoading] = useState(true);
-  useEffect(() => {
-    (async () => {
-      try {
-        const res = await api.get('/events/');
-        const data = (res.data.results || res.data || []).sort((a, b) => new Date(b.event_date || b.created_at) - new Date(a.event_date || a.created_at)).slice(0, 2);
-        setEvents(data);
-      } catch {}
-      setLoading(false);
-    })();
-  }, []);
+
+export default function EventWidget({ data, onPress }) {
+  const loading = data === null;
+  const events = data
+    ? [...data].sort((a, b) => new Date(b.event_date || b.created_at) - new Date(a.event_date || a.created_at)).slice(0, 2)
+    : [];
+
   const formatDate = (d) => d ? new Date(d).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' }) : '-';
   const formatTime = (d) => d ? new Date(d).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }) : '';
+
   return (
     <View style={s.container}>
       <View style={s.header}>
         <Text style={s.title}>กิจกรรมในชุมชน</Text>
-        <TouchableOpacity onPress={onPress}><Text style={s.link}>ดูทั้งหมด</Text></TouchableOpacity>
+        <TouchableOpacity onPress={onPress} accessibilityLabel="ดูกิจกรรมทั้งหมด" accessibilityRole="button">
+          <Text style={s.link}>ดูทั้งหมด</Text>
+        </TouchableOpacity>
       </View>
-      {loading ? <Text style={s.muted}>กำลังโหลด...</Text> : events.length === 0 ? <Text style={s.muted}>ไม่มีกิจกรรม</Text> : (
+      {loading ? (
+        <ActivityIndicator size="small" color={colors.accent} style={{ marginVertical: 8 }} />
+      ) : events.length === 0 ? (
+        <Text style={s.muted}>ไม่มีกิจกรรม</Text>
+      ) : (
         events.map((ev) => (
           <View key={ev.id} style={s.card}>
             <Text style={s.evTitle} numberOfLines={1}>{ev.title}</Text>
@@ -35,6 +35,7 @@ export default function EventWidget({ onPress, navigation }) {
     </View>
   );
 }
+
 const s = StyleSheet.create({
   container: { marginBottom: 12 },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },

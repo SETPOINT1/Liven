@@ -6,6 +6,8 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import api from '../services/api';
 import { supabase } from '../services/supabase';
+import { colors, radius, spacing } from '../theme';
+import { FacilityIcon } from '../components/TabIcons';
 
 const PLACEHOLDER_IMG = 'https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=400';
 
@@ -14,13 +16,15 @@ const FacilityScreen = () => {
   const [facilities, setFacilities] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState(false);
 
   const fetchData = useCallback(async () => {
+    setError(false);
     try {
       const res = await api.get('/facilities/');
       setFacilities(res.data.results || res.data || []);
     } catch {
-      // silent
+      setError(true);
     }
     setLoading(false);
     setRefreshing(false);
@@ -41,16 +45,17 @@ const FacilityScreen = () => {
       style={styles.card}
       activeOpacity={0.7}
       onPress={() => navigation.navigate('FacilityDetail', { facility: item })}
+      accessibilityLabel={`${item.name} - ${item.is_active ? 'เปิดให้บริการ' : 'ปิดปรับปรุง'}`}
+      accessibilityRole="button"
     >
-      <Image
-        source={{ uri: item.image_url || PLACEHOLDER_IMG }}
-        style={styles.cardImage}
-      />
+      <Image source={{ uri: item.image_url || PLACEHOLDER_IMG }} style={styles.cardImage} />
       <View style={styles.cardBody}>
         <View style={styles.cardHeader}>
           <Text style={styles.facilityName} numberOfLines={1}>{item.name}</Text>
           <View style={[styles.badge, item.is_active ? styles.available : styles.unavailable]}>
-            <Text style={styles.badgeText}>{item.is_active ? 'เปิด' : 'ปิด'}</Text>
+            <Text style={[styles.badgeText, { color: item.is_active ? '#065F46' : '#991B1B' }]}>
+              {item.is_active ? 'เปิด' : 'ปิด'}
+            </Text>
           </View>
         </View>
         <Text style={styles.type}>{item.type}</Text>
@@ -72,8 +77,30 @@ const FacilityScreen = () => {
     </TouchableOpacity>
   );
 
+  const renderEmpty = () => {
+    if (error) {
+      return (
+        <View style={styles.emptyContainer}>
+          <Text style={styles.emptyIcon}>⚠️</Text>
+          <Text style={styles.emptyTitle}>ไม่สามารถโหลดข้อมูลได้</Text>
+          <Text style={styles.emptyText}>กรุณาตรวจสอบการเชื่อมต่อแล้วลองใหม่</Text>
+          <TouchableOpacity style={styles.retryBtn} onPress={fetchData} accessibilityLabel="ลองใหม่" accessibilityRole="button">
+            <Text style={styles.retryBtnText}>ลองใหม่</Text>
+          </TouchableOpacity>
+        </View>
+      );
+    }
+    return (
+      <View style={styles.emptyContainer}>
+        <FacilityIcon size={48} color={colors.textMuted} />
+        <Text style={styles.emptyTitle}>ยังไม่มีสิ่งอำนวยความสะดวก</Text>
+        <Text style={styles.emptyText}>ข้อมูลจะแสดงเมื่อนิติบุคคลเพิ่มสิ่งอำนวยความสะดวก</Text>
+      </View>
+    );
+  };
+
   if (loading) {
-    return <View style={styles.center}><ActivityIndicator size="large" color="#4F46E5" /></View>;
+    return <View style={styles.center}><ActivityIndicator size="large" color={colors.accent} /></View>;
   }
 
   return (
@@ -84,12 +111,14 @@ const FacilityScreen = () => {
         renderItem={renderFacility}
         contentContainerStyle={styles.list}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); fetchData(); }} />}
-        ListEmptyComponent={<Text style={styles.emptyText}>ไม่มีสิ่งอำนวยความสะดวก</Text>}
+        ListEmptyComponent={renderEmpty}
       />
       <TouchableOpacity
         style={styles.fab}
         activeOpacity={0.85}
         onPress={() => navigation.navigate('BookingHistory')}
+        accessibilityLabel="ประวัติการจอง"
+        accessibilityRole="button"
       >
         <Text style={styles.fabText}>📋 ประวัติการจอง</Text>
       </TouchableOpacity>
@@ -98,31 +127,45 @@ const FacilityScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F3F4F6' },
-  center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  list: { padding: 16, paddingBottom: 80 },
-  card: { backgroundColor: '#FFF', borderRadius: 12, marginBottom: 14, elevation: 2, shadowColor: '#000', shadowOpacity: 0.08, shadowRadius: 4, shadowOffset: { width: 0, height: 2 }, overflow: 'hidden' },
-  cardImage: { width: '100%', height: 150, backgroundColor: '#E5E7EB' },
+  container: { flex: 1, backgroundColor: colors.bg },
+  center: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.bg },
+  list: { padding: spacing.lg, paddingBottom: 80 },
+  card: {
+    backgroundColor: colors.card, borderRadius: radius.md, marginBottom: 14,
+    elevation: 2, shadowColor: '#000', shadowOpacity: 0.08, shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 }, overflow: 'hidden',
+  },
+  cardImage: { width: '100%', height: 150, backgroundColor: colors.border },
   cardBody: { padding: 14 },
   cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  facilityName: { fontSize: 16, fontWeight: '700', color: '#1F2937', flex: 1, marginRight: 8 },
+  facilityName: { fontSize: 16, fontWeight: '700', color: colors.text, flex: 1, marginRight: 8 },
   badge: { borderRadius: 12, paddingHorizontal: 10, paddingVertical: 3 },
-  available: { backgroundColor: '#D1FAE5' },
-  unavailable: { backgroundColor: '#FEE2E2' },
+  available: { backgroundColor: colors.successLight },
+  unavailable: { backgroundColor: colors.dangerLight },
   badgeText: { fontSize: 12, fontWeight: '600' },
-  type: { fontSize: 12, color: '#6B7280', marginTop: 4, textTransform: 'capitalize' },
-  hours: { fontSize: 13, color: '#6B7280', marginTop: 4 },
-  desc: { fontSize: 13, color: '#6B7280', marginTop: 4, lineHeight: 19 },
+  type: { fontSize: 12, color: colors.textSecondary, marginTop: 4, textTransform: 'capitalize' },
+  hours: { fontSize: 13, color: colors.textSecondary, marginTop: 4 },
+  desc: { fontSize: 13, color: colors.textSecondary, marginTop: 4, lineHeight: 19 },
   cardFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 10 },
-  bookTag: { backgroundColor: '#FEF3C7', borderRadius: 8, paddingHorizontal: 10, paddingVertical: 4 },
+  bookTag: { backgroundColor: colors.warningLight, borderRadius: radius.sm, paddingHorizontal: 10, paddingVertical: 4 },
   bookTagText: { fontSize: 12, fontWeight: '600', color: '#92400E' },
-  freeTag: { backgroundColor: '#ECFDF5', borderRadius: 8, paddingHorizontal: 10, paddingVertical: 4 },
+  freeTag: { backgroundColor: colors.successLight, borderRadius: radius.sm, paddingHorizontal: 10, paddingVertical: 4 },
   freeTagText: { fontSize: 12, fontWeight: '600', color: '#065F46' },
-  viewMore: { fontSize: 13, color: '#4F46E5', fontWeight: '600' },
-  emptyText: { textAlign: 'center', color: '#9CA3AF', marginTop: 40 },
+  viewMore: { fontSize: 13, color: colors.accent, fontWeight: '600' },
+  // Empty state
+  emptyContainer: { alignItems: 'center', marginTop: 60, paddingHorizontal: 32 },
+  emptyIcon: { fontSize: 48, marginBottom: 12 },
+  emptyTitle: { fontSize: 16, fontWeight: '600', color: colors.text, marginTop: 12, marginBottom: 6 },
+  emptyText: { fontSize: 14, color: colors.textMuted, textAlign: 'center', lineHeight: 20 },
+  retryBtn: {
+    backgroundColor: colors.accent, borderRadius: radius.sm,
+    paddingHorizontal: 24, paddingVertical: 10, marginTop: 16,
+  },
+  retryBtnText: { color: '#FFF', fontWeight: '600', fontSize: 14 },
+  // FAB
   fab: {
     position: 'absolute', bottom: 24, alignSelf: 'center',
-    backgroundColor: '#4F46E5', borderRadius: 24, paddingVertical: 12, paddingHorizontal: 24,
+    backgroundColor: colors.primary, borderRadius: 24, paddingVertical: 12, paddingHorizontal: 24,
     elevation: 6, shadowColor: '#000', shadowOpacity: 0.2, shadowRadius: 6, shadowOffset: { width: 0, height: 3 },
   },
   fabText: { color: '#FFF', fontWeight: '700', fontSize: 14 },

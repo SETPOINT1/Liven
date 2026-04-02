@@ -111,7 +111,13 @@ const NewsScreen = () => {
         renderItem={renderItem}
         contentContainerStyle={styles.list}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); fetchData(); }} />}
-        ListEmptyComponent={<Text style={styles.emptyText}>ไม่มีข่าวสารหรือกิจกรรม</Text>}
+        ListEmptyComponent={
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyIcon}>📰</Text>
+            <Text style={styles.emptyTitle}>ไม่มีข่าวสารหรือกิจกรรม</Text>
+            <Text style={styles.emptyDesc}>ข่าวสารและกิจกรรมจากนิติบุคคลจะแสดงที่นี่</Text>
+          </View>
+        }
       />
     </View>
   );
@@ -138,6 +144,10 @@ const styles = StyleSheet.create({
   contentText: { fontSize: 14, color: colors.textSecondary, marginTop: 10, lineHeight: 20 },
   locationText: { fontSize: 13, color: colors.textSecondary, marginTop: 6 },
   emptyText: { textAlign: 'center', color: colors.textMuted, marginTop: 40, fontSize: 14 },
+  emptyContainer: { alignItems: 'center', marginTop: 60, paddingHorizontal: 32 },
+  emptyIcon: { fontSize: 48, marginBottom: 12 },
+  emptyTitle: { fontSize: 16, fontWeight: '600', color: colors.text, marginBottom: 6 },
+  emptyDesc: { fontSize: 14, color: colors.textMuted, textAlign: 'center', lineHeight: 20 },
 });
 
 export default NewsScreen;
