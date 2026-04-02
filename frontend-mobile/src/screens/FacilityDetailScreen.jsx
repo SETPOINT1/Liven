@@ -20,7 +20,7 @@ const FacilityDetailScreen = ({ route, navigation }) => {
 
   useEffect(() => {
     const d = [];
-    for (let i = 0; i < 7; i++) {
+    for (let i = 0; i < 3; i++) {
       const date = new Date();
       date.setDate(date.getDate() + i);
       d.push(date.toISOString().split('T')[0]);
