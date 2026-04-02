@@ -31,7 +31,7 @@ export default function ParcelsPage() {
       const fd = new FormData();
       fd.append('image', imageFile);
       const { data } = await api.post('/parcels/ocr/', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
-      if (data.confidence >= 60) {
+      if (data.confidence >= 0.60) {
         setForm({ recipient_name: data.recipient_name || '', unit_number: data.unit_number || '', courier: data.courier || '', tracking_number: data.tracking_number || '' });
       } else {
         setForm({ recipient_name: '', unit_number: '', courier: '', tracking_number: '' });
