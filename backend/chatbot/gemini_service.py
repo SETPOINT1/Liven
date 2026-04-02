@@ -1,4 +1,4 @@
-﻿import os
+import os
 import logging
 from google import genai
 from chatbot.models import KnowledgeBase
@@ -39,7 +39,7 @@ def _call_gemini(system_prompt, user_message):
         raise RuntimeError("GEMINI_API_KEY is not configured")
     client = genai.Client(api_key=api_key)
     response = client.models.generate_content(
-        model="gemini-2.0-flash-lite",
+        model="gemini-2.5-flash",
         contents=f"{system_prompt}\n\nUser: {user_message}",
     )
     return response.text
