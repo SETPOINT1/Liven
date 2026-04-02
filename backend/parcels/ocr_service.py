@@ -147,7 +147,7 @@ def _call_typhoon(raw_text: str) -> dict | None:
             {"role": "user", "content": f"Raw OCR text:\n{raw_text}"},
         ],
         "temperature": 0.6,
-        "max_completion_tokens": 512,
+        "max_completion_tokens": 2048,
         "top_p": 0.6,
         "repetition_penalty": 1.05,
         "stream": False,
