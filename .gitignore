@@ -52,3 +52,10 @@ Thumbs.db
 staticfiles/
 media/
 *.log
+
+# Hypothesis test artifacts
+.hypothesis/
+
+# Expo
+frontend-mobile/.expo/
+frontend-mobile/dist/

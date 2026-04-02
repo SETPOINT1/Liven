@@ -3,6 +3,7 @@ djangorestframework>=3.14
 supabase>=2.0,<2.10
 google-genai>=1.0
 azure-cognitiveservices-vision-computervision>=0.9
+typhoon-ocr>=0.1
 requests>=2.31
 gunicorn>=21.2
 Pillow>=10.0
