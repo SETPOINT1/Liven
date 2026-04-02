@@ -108,21 +108,18 @@ class ResidentBookingCancelView(APIView):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-        # Check that booking belongs to the logged-in user
         if booking.user_id != request.user_obj.id:
             return Response(
                 {'error': {'code': 'FORBIDDEN', 'message': 'ไม่มีสิทธิ์ยกเลิกการจองนี้'}},
                 status=status.HTTP_403_FORBIDDEN,
             )
 
-        # Check that booking is not already cancelled
         if booking.status == 'cancelled':
             return Response(
                 {'error': {'code': 'ALREADY_CANCELLED', 'message': 'การจองนี้ถูกยกเลิกแล้ว'}},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        # Check that start_time is in the future
         if booking.start_time <= timezone.now():
             return Response(
                 {'error': {'code': 'PAST_BOOKING', 'message': 'ไม่สามารถยกเลิกการจองที่ผ่านมาแล้วได้'}},
@@ -138,12 +135,13 @@ class FacilitySlotsView(APIView):
     """GET /api/facilities/{id}/slots/?date=YYYY-MM-DD — Get available time slots."""
     permission_classes = [IsAuthenticated, IsApproved]
 
-    # Type-specific slot durations in minutes
+    MAX_ADVANCE_DAYS = 3
+
     SLOT_DURATIONS = {
         'meeting_room': 60,
         'theatre': 120,
     }
-    DEFAULT_SLOT_DURATION = 60  # minutes per slot
+    DEFAULT_SLOT_DURATION = 60
 
     def get(self, request, pk):
         try:
@@ -172,20 +170,20 @@ class FacilitySlotsView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        # Advance booking limit validation
         today = timezone.now().date()
+        max_date = today + timedelta(days=self.MAX_ADVANCE_DAYS - 1)
         if target_date < today:
             return Response(
                 {'error': {'code': 'PAST_DATE', 'message': 'ไม่สามารถจองวันที่ผ่านมาแล้วได้'}},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        if target_date > today + timedelta(days=2):
+        if target_date > max_date:
             return Response(
                 {'error': {'code': 'ADVANCE_LIMIT', 'message': 'จองล่วงหน้าได้ไม่เกิน 3 วัน'}},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        # Parse operating hours (e.g. "08:00 - 20:00")
+        # Parse operating hours (e.g. "09:00 - 22:00")
         open_hour, close_hour = 6, 22
         if facility.operating_hours:
             try:
@@ -195,7 +193,6 @@ class FacilitySlotsView(APIView):
             except (ValueError, IndexError):
                 pass
 
-        # Determine slot duration based on facility type
         slot_duration = self.SLOT_DURATIONS.get(facility.type, self.DEFAULT_SLOT_DURATION)
 
         # Generate slots
@@ -274,7 +271,6 @@ class FacilityManageDetailView(APIView):
                 {'error': {'code': 'NOT_FOUND', 'message': 'ไม่พบสิ่งอำนวยความสะดวก'}},
                 status=status.HTTP_404_NOT_FOUND,
             )
-        # Ensure juristic can only manage their own project's facilities
         if request.user_obj.project_id and facility.project_id != request.user_obj.project_id:
             return Response(
                 {'error': {'code': 'FORBIDDEN', 'message': 'ไม่มีสิทธิ์จัดการสิ่งอำนวยความสะดวกนี้'}},
