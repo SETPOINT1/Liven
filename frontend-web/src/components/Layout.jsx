@@ -48,6 +48,7 @@ export default function Layout() {
                 <div style={{ fontSize:13, fontWeight:600, color:C.text, lineHeight:1.2 }}>{name}</div>
                 <div style={{ fontSize:11, color:C.muted, lineHeight:1.2 }}>นิติบุคคล</div>
               </div>
+              <button onClick={signOut} title="ออกจากระบบ" style={{ marginLeft:8, padding:'6px 14px', borderRadius:R.sm, border:`1px solid ${C.border}`, background:'transparent', color:C.sub, fontSize:13, cursor:'pointer' }}>ออกจากระบบ</button>
             </div>
           </div>
         </header>
