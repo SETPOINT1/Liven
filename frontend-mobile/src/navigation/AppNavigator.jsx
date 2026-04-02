@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ActivityIndicator, View, StyleSheet } from 'react-native';
+import { ActivityIndicator, View, StyleSheet, Platform } from 'react-native';
 import { createStaticNavigation } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -37,7 +37,11 @@ const Tabs = createBottomTabNavigator({
     headerShown: true,
     tabBarActiveTintColor: '#4F46E5',
     tabBarInactiveTintColor: '#9CA3AF',
-    tabBarStyle: { paddingBottom: 4, height: 56 },
+    tabBarStyle: {
+      paddingBottom: Platform.OS === 'ios' ? 20 : 12,
+      paddingTop: 8,
+      height: Platform.OS === 'ios' ? 88 : 72,
+    },
   },
   screens: {
     Home: { screen: HomeScreen, options: { title: 'หน้าหลัก' } },
