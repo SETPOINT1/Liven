@@ -1,4 +1,4 @@
-﻿from rest_framework import status
+from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.utils import timezone
@@ -15,7 +15,7 @@ from accounts.permissions import IsAuthenticated, IsApproved, IsJuristic
 
 
 class FacilityListView(APIView):
-    """GET /api/facilities/ โ€” List facilities for user's project with current status."""
+    """GET /api/facilities/ — List facilities for user's project with current status."""
     permission_classes = [IsAuthenticated, IsApproved]
 
     def get(self, request):
@@ -29,7 +29,7 @@ class FacilityListView(APIView):
 
 
 class FacilityStatusView(APIView):
-    """GET /api/facilities/{id}/status/ โ€” Get current status of a specific facility."""
+    """GET /api/facilities/{id}/status/ — Get current status of a specific facility."""
     permission_classes = [IsAuthenticated, IsApproved]
 
     def get(self, request, pk):
@@ -37,7 +37,7 @@ class FacilityStatusView(APIView):
             facility = Facility.objects.get(pk=pk)
         except Facility.DoesNotExist:
             return Response(
-                {'error': {'code': 'NOT_FOUND', 'message': 'เนเธกเนเธเธเธชเธดเนเธเธญเธณเธเธงเธขเธเธงเธฒเธกเธชเธฐเธ”เธงเธ'}},
+                {'error': {'code': 'NOT_FOUND', 'message': 'ไม่พบสิ่งอำนวยความสะดวก'}},
                 status=status.HTTP_404_NOT_FOUND,
             )
         serializer = FacilityStatusSerializer(facility)
@@ -45,7 +45,7 @@ class FacilityStatusView(APIView):
 
 
 class BookFacilityView(APIView):
-    """POST /api/facilities/{id}/book/ โ€” Create a booking for a facility."""
+    """POST /api/facilities/{id}/book/ — Create a booking for a facility."""
     permission_classes = [IsAuthenticated, IsApproved]
 
     def post(self, request, pk):
@@ -53,13 +53,13 @@ class BookFacilityView(APIView):
             facility = Facility.objects.get(pk=pk)
         except Facility.DoesNotExist:
             return Response(
-                {'error': {'code': 'NOT_FOUND', 'message': 'เนเธกเนเธเธเธชเธดเนเธเธญเธณเธเธงเธขเธเธงเธฒเธกเธชเธฐเธ”เธงเธ'}},
+                {'error': {'code': 'NOT_FOUND', 'message': 'ไม่พบสิ่งอำนวยความสะดวก'}},
                 status=status.HTTP_404_NOT_FOUND,
             )
 
         if not facility.requires_booking:
             return Response(
-                {'error': {'code': 'BOOKING_NOT_REQUIRED', 'message': 'เธชเธดเนเธเธญเธณเธเธงเธขเธเธงเธฒเธกเธชเธฐเธ”เธงเธเธเธตเนเนเธกเนเธ•เนเธญเธเธเธญเธ'}},
+                {'error': {'code': 'BOOKING_NOT_REQUIRED', 'message': 'สิ่งอำนวยความสะดวกนี้ไม่ต้องจอง'}},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -69,7 +69,7 @@ class BookFacilityView(APIView):
         )
         if not serializer.is_valid():
             return Response(
-                {'error': {'code': 'VALIDATION_ERROR', 'message': 'เธเนเธญเธกเธนเธฅเนเธกเนเธ–เธนเธเธ•เนเธญเธ', 'details': serializer.errors}},
+                {'error': {'code': 'VALIDATION_ERROR', 'message': 'ข้อมูลไม่ถูกต้อง', 'details': serializer.errors}},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -84,7 +84,7 @@ class BookFacilityView(APIView):
 
 
 class BookingListView(APIView):
-    """GET /api/bookings/ โ€” List current user's bookings."""
+    """GET /api/bookings/ — List current user's bookings."""
     permission_classes = [IsAuthenticated, IsApproved]
 
     def get(self, request):
@@ -96,7 +96,7 @@ class BookingListView(APIView):
 
 
 class ResidentBookingCancelView(APIView):
-    """POST /api/bookings/{id}/cancel/ โ€” Resident cancels their own booking."""
+    """POST /api/bookings/{id}/cancel/ — Resident cancels their own booking."""
     permission_classes = [IsAuthenticated, IsApproved]
 
     def post(self, request, pk):
@@ -104,28 +104,25 @@ class ResidentBookingCancelView(APIView):
             booking = Booking.objects.get(pk=pk)
         except Booking.DoesNotExist:
             return Response(
-                {'error': {'code': 'NOT_FOUND', 'message': 'เนเธกเนเธเธเธเธฒเธฃเธเธญเธ'}},
+                {'error': {'code': 'NOT_FOUND', 'message': 'ไม่พบการจอง'}},
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-        # Check that booking belongs to the logged-in user
         if booking.user_id != request.user_obj.id:
             return Response(
-                {'error': {'code': 'FORBIDDEN', 'message': 'เนเธกเนเธกเธตเธชเธดเธ—เธเธดเนเธขเธเน€เธฅเธดเธเธเธฒเธฃเธเธญเธเธเธตเน'}},
+                {'error': {'code': 'FORBIDDEN', 'message': 'ไม่มีสิทธิ์ยกเลิกการจองนี้'}},
                 status=status.HTTP_403_FORBIDDEN,
             )
 
-        # Check that booking is not already cancelled
         if booking.status == 'cancelled':
             return Response(
-                {'error': {'code': 'ALREADY_CANCELLED', 'message': 'เธเธฒเธฃเธเธญเธเธเธตเนเธ–เธนเธเธขเธเน€เธฅเธดเธเนเธฅเนเธง'}},
+                {'error': {'code': 'ALREADY_CANCELLED', 'message': 'การจองนี้ถูกยกเลิกแล้ว'}},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        # Check that start_time is in the future
         if booking.start_time <= timezone.now():
             return Response(
-                {'error': {'code': 'PAST_BOOKING', 'message': 'เนเธกเนเธชเธฒเธกเธฒเธฃเธ–เธขเธเน€เธฅเธดเธเธเธฒเธฃเธเธญเธเธ—เธตเนเธเนเธฒเธเธกเธฒเนเธฅเนเธงเนเธ”เน'}},
+                {'error': {'code': 'PAST_BOOKING', 'message': 'ไม่สามารถยกเลิกการจองที่ผ่านมาแล้วได้'}},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -135,28 +132,29 @@ class ResidentBookingCancelView(APIView):
 
 
 class FacilitySlotsView(APIView):
-    """GET /api/facilities/{id}/slots/?date=YYYY-MM-DD โ€” Get available time slots."""
+    """GET /api/facilities/{id}/slots/?date=YYYY-MM-DD — Get available time slots."""
     permission_classes = [IsAuthenticated, IsApproved]
 
-    # Type-specific slot durations in minutes
+    MAX_ADVANCE_DAYS = 3
+
     SLOT_DURATIONS = {
         'meeting_room': 60,
         'theatre': 120,
     }
-    DEFAULT_SLOT_DURATION = 60  # minutes per slot
+    DEFAULT_SLOT_DURATION = 60
 
     def get(self, request, pk):
         try:
             facility = Facility.objects.get(pk=pk)
         except Facility.DoesNotExist:
             return Response(
-                {'error': {'code': 'NOT_FOUND', 'message': 'เนเธกเนเธเธเธชเธดเนเธเธญเธณเธเธงเธขเธเธงเธฒเธกเธชเธฐเธ”เธงเธ'}},
+                {'error': {'code': 'NOT_FOUND', 'message': 'ไม่พบสิ่งอำนวยความสะดวก'}},
                 status=status.HTTP_404_NOT_FOUND,
             )
 
         if not facility.requires_booking:
             return Response(
-                {'error': {'code': 'BOOKING_NOT_REQUIRED', 'message': 'เธชเธดเนเธเธญเธณเธเธงเธขเธเธงเธฒเธกเธชเธฐเธ”เธงเธเธเธตเนเนเธกเนเธ•เนเธญเธเธเธญเธ'}},
+                {'error': {'code': 'BOOKING_NOT_REQUIRED', 'message': 'สิ่งอำนวยความสะดวกนี้ไม่ต้องจอง'}},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -168,24 +166,24 @@ class FacilitySlotsView(APIView):
             target_date = datetime.strptime(date_str, '%Y-%m-%d').date()
         except ValueError:
             return Response(
-                {'error': {'code': 'INVALID_DATE', 'message': 'เธฃเธนเธเนเธเธเธงเธฑเธเธ—เธตเนเนเธกเนเธ–เธนเธเธ•เนเธญเธ เนเธเน YYYY-MM-DD'}},
+                {'error': {'code': 'INVALID_DATE', 'message': 'รูปแบบวันที่ไม่ถูกต้อง ใช้ YYYY-MM-DD'}},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        # Advance booking limit validation
         today = timezone.now().date()
+        max_date = today + timedelta(days=self.MAX_ADVANCE_DAYS - 1)
         if target_date < today:
             return Response(
-                {'error': {'code': 'PAST_DATE', 'message': 'เนเธกเนเธชเธฒเธกเธฒเธฃเธ–เธเธญเธเธงเธฑเธเธ—เธตเนเธเนเธฒเธเธกเธฒเนเธฅเนเธงเนเธ”เน'}},
+                {'error': {'code': 'PAST_DATE', 'message': 'ไม่สามารถจองวันที่ผ่านมาแล้วได้'}},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        if target_date > today + timedelta(days=2):
+        if target_date > max_date:
             return Response(
-                {'error': {'code': 'ADVANCE_LIMIT', 'message': 'เธเธญเธเธฅเนเธงเธเธซเธเนเธฒเนเธ”เนเนเธกเนเน€เธเธดเธ 3 เธงเธฑเธ'}},
+                {'error': {'code': 'ADVANCE_LIMIT', 'message': 'จองล่วงหน้าได้ไม่เกิน 3 วัน'}},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        # Parse operating hours (e.g. "08:00 - 20:00")
+        # Parse operating hours (e.g. "09:00 - 22:00")
         open_hour, close_hour = 6, 22
         if facility.operating_hours:
             try:
@@ -195,7 +193,6 @@ class FacilitySlotsView(APIView):
             except (ValueError, IndexError):
                 pass
 
-        # Determine slot duration based on facility type
         slot_duration = self.SLOT_DURATIONS.get(facility.type, self.DEFAULT_SLOT_DURATION)
 
         # Generate slots
@@ -240,7 +237,7 @@ class FacilityManageView(APIView):
     permission_classes = [IsAuthenticated, IsApproved, IsJuristic]
 
     def get(self, request):
-        """GET /api/manage/facilities/ โ€” List all facilities (including inactive)."""
+        """GET /api/manage/facilities/ — List all facilities (including inactive)."""
         user = request.user_obj
         queryset = Facility.objects.all()
         if user.project_id:
@@ -250,11 +247,11 @@ class FacilityManageView(APIView):
         return Response(serializer.data)
 
     def post(self, request):
-        """POST /api/manage/facilities/ โ€” Create a new facility."""
+        """POST /api/manage/facilities/ — Create a new facility."""
         serializer = FacilityManageSerializer(data=request.data)
         if not serializer.is_valid():
             return Response(
-                {'error': {'code': 'VALIDATION_ERROR', 'message': 'เธเนเธญเธกเธนเธฅเนเธกเนเธ–เธนเธเธ•เนเธญเธ', 'details': serializer.errors}},
+                {'error': {'code': 'VALIDATION_ERROR', 'message': 'ข้อมูลไม่ถูกต้อง', 'details': serializer.errors}},
                 status=status.HTTP_400_BAD_REQUEST,
             )
         facility = serializer.save(project=request.user_obj.project)
@@ -266,41 +263,40 @@ class FacilityManageDetailView(APIView):
     permission_classes = [IsAuthenticated, IsApproved, IsJuristic]
 
     def put(self, request, pk):
-        """PUT /api/manage/facilities/{id}/ โ€” Update a facility."""
+        """PUT /api/manage/facilities/{id}/ — Update a facility."""
         try:
             facility = Facility.objects.get(pk=pk)
         except Facility.DoesNotExist:
             return Response(
-                {'error': {'code': 'NOT_FOUND', 'message': 'เนเธกเนเธเธเธชเธดเนเธเธญเธณเธเธงเธขเธเธงเธฒเธกเธชเธฐเธ”เธงเธ'}},
+                {'error': {'code': 'NOT_FOUND', 'message': 'ไม่พบสิ่งอำนวยความสะดวก'}},
                 status=status.HTTP_404_NOT_FOUND,
             )
-        # Ensure juristic can only manage their own project's facilities
         if request.user_obj.project_id and facility.project_id != request.user_obj.project_id:
             return Response(
-                {'error': {'code': 'FORBIDDEN', 'message': 'เนเธกเนเธกเธตเธชเธดเธ—เธเธดเนเธเธฑเธ”เธเธฒเธฃเธชเธดเนเธเธญเธณเธเธงเธขเธเธงเธฒเธกเธชเธฐเธ”เธงเธเธเธตเน'}},
+                {'error': {'code': 'FORBIDDEN', 'message': 'ไม่มีสิทธิ์จัดการสิ่งอำนวยความสะดวกนี้'}},
                 status=status.HTTP_403_FORBIDDEN,
             )
         serializer = FacilityManageSerializer(facility, data=request.data, partial=True)
         if not serializer.is_valid():
             return Response(
-                {'error': {'code': 'VALIDATION_ERROR', 'message': 'เธเนเธญเธกเธนเธฅเนเธกเนเธ–เธนเธเธ•เนเธญเธ', 'details': serializer.errors}},
+                {'error': {'code': 'VALIDATION_ERROR', 'message': 'ข้อมูลไม่ถูกต้อง', 'details': serializer.errors}},
                 status=status.HTTP_400_BAD_REQUEST,
             )
         serializer.save()
         return Response(FacilityStatusSerializer(facility).data)
 
     def delete(self, request, pk):
-        """DELETE /api/manage/facilities/{id}/ โ€” Delete a facility."""
+        """DELETE /api/manage/facilities/{id}/ — Delete a facility."""
         try:
             facility = Facility.objects.get(pk=pk)
         except Facility.DoesNotExist:
             return Response(
-                {'error': {'code': 'NOT_FOUND', 'message': 'เนเธกเนเธเธเธชเธดเนเธเธญเธณเธเธงเธขเธเธงเธฒเธกเธชเธฐเธ”เธงเธ'}},
+                {'error': {'code': 'NOT_FOUND', 'message': 'ไม่พบสิ่งอำนวยความสะดวก'}},
                 status=status.HTTP_404_NOT_FOUND,
             )
         if request.user_obj.project_id and facility.project_id != request.user_obj.project_id:
             return Response(
-                {'error': {'code': 'FORBIDDEN', 'message': 'เนเธกเนเธกเธตเธชเธดเธ—เธเธดเนเธเธฑเธ”เธเธฒเธฃเธชเธดเนเธเธญเธณเธเธงเธขเธเธงเธฒเธกเธชเธฐเธ”เธงเธเธเธตเน'}},
+                {'error': {'code': 'FORBIDDEN', 'message': 'ไม่มีสิทธิ์จัดการสิ่งอำนวยความสะดวกนี้'}},
                 status=status.HTTP_403_FORBIDDEN,
             )
         facility.delete()
@@ -312,7 +308,7 @@ class BookingManageView(APIView):
     permission_classes = [IsAuthenticated, IsApproved, IsJuristic]
 
     def get(self, request):
-        """GET /api/manage/bookings/ โ€” List all bookings for project facilities."""
+        """GET /api/manage/bookings/ — List all bookings for project facilities."""
         user = request.user_obj
         queryset = Booking.objects.select_related('facility', 'user').all()
         if user.project_id:
@@ -327,17 +323,17 @@ class BookingCancelView(APIView):
     permission_classes = [IsAuthenticated, IsApproved, IsJuristic]
 
     def post(self, request, pk):
-        """POST /api/manage/bookings/{id}/cancel/ โ€” Cancel a booking."""
+        """POST /api/manage/bookings/{id}/cancel/ — Cancel a booking."""
         try:
             booking = Booking.objects.select_related('facility', 'user').get(pk=pk)
         except Booking.DoesNotExist:
             return Response(
-                {'error': {'code': 'NOT_FOUND', 'message': 'เนเธกเนเธเธเธเธฒเธฃเธเธญเธ'}},
+                {'error': {'code': 'NOT_FOUND', 'message': 'ไม่พบการจอง'}},
                 status=status.HTTP_404_NOT_FOUND,
             )
         if request.user_obj.project_id and booking.facility.project_id != request.user_obj.project_id:
             return Response(
-                {'error': {'code': 'FORBIDDEN', 'message': 'เนเธกเนเธกเธตเธชเธดเธ—เธเธดเนเธเธฑเธ”เธเธฒเธฃเธเธฒเธฃเธเธญเธเธเธตเน'}},
+                {'error': {'code': 'FORBIDDEN', 'message': 'ไม่มีสิทธิ์จัดการการจองนี้'}},
                 status=status.HTTP_403_FORBIDDEN,
             )
         booking.status = 'cancelled'

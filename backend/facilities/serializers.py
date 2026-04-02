@@ -1,4 +1,4 @@
-﻿from django.utils import timezone
+from django.utils import timezone
 from rest_framework import serializers
 from facilities.models import Facility, Booking
 
@@ -48,7 +48,7 @@ class BookingManageSerializer(serializers.ModelSerializer):
 
         if start_time and end_time and end_time <= start_time:
             raise serializers.ValidationError(
-                {'end_time': 'เน€เธงเธฅเธฒเธชเธดเนเธเธชเธธเธ”เธ•เนเธญเธเธญเธขเธนเนเธซเธฅเธฑเธเน€เธงเธฅเธฒเน€เธฃเธดเนเธกเธ•เนเธ'}
+                {'end_time': 'เวลาสิ้นสุดต้องอยู่หลังเวลาเริ่มต้น'}
             )
 
         # Check for overlapping confirmed bookings on the same facility
@@ -62,7 +62,7 @@ class BookingManageSerializer(serializers.ModelSerializer):
             )
             if overlapping.exists():
                 raise serializers.ValidationError(
-                    {'non_field_errors': 'เธกเธตเธเธฒเธฃเธเธญเธเธเนเธญเธเนเธเธเนเธงเธเน€เธงเธฅเธฒเธเธตเนเนเธฅเนเธง'}
+                    {'non_field_errors': 'มีการจองซ้อนในช่วงเวลานี้แล้ว'}
                 )
 
         return data
@@ -83,7 +83,7 @@ class BookingCreateSerializer(serializers.Serializer):
     def validate(self, data):
         if data['end_time'] <= data['start_time']:
             raise serializers.ValidationError(
-                {'end_time': 'เน€เธงเธฅเธฒเธชเธดเนเธเธชเธธเธ”เธ•เนเธญเธเธญเธขเธนเนเธซเธฅเธฑเธเน€เธงเธฅเธฒเน€เธฃเธดเนเธกเธ•เนเธ'}
+                {'end_time': 'เวลาสิ้นสุดต้องอยู่หลังเวลาเริ่มต้น'}
             )
 
         facility = self.context.get('facility')
@@ -100,8 +100,8 @@ class BookingCreateSerializer(serializers.Serializer):
                 raise serializers.ValidationError(
                     {
                         'non_field_errors': (
-                            f'เธฃเธฐเธขเธฐเน€เธงเธฅเธฒเธเธฒเธฃเธเธญเธเธ•เนเธญเธเน€เธเนเธ {expected_duration} เธเธฒเธ—เธต '
-                            f'เธชเธณเธซเธฃเธฑเธเธเธฃเธฐเน€เธ เธ— {facility_type or "default"}'
+                            f'ระยะเวลาการจองต้องเป็น {expected_duration} นาที '
+                            f'สำหรับประเภท {facility_type or "default"}'
                         )
                     }
                 )
@@ -116,7 +116,7 @@ class BookingCreateSerializer(serializers.Serializer):
             )
             if overlapping.exists():
                 raise serializers.ValidationError(
-                    {'non_field_errors': 'เธกเธตเธเธฒเธฃเธเธญเธเธเนเธญเธเนเธเธเนเธงเธเน€เธงเธฅเธฒเธเธตเนเนเธฅเนเธง'}
+                    {'non_field_errors': 'มีการจองซ้อนในช่วงเวลานี้แล้ว'}
                 )
 
         return data
