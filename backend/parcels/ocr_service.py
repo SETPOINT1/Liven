@@ -1,17 +1,16 @@
 """
-OCR Pipeline Service — Azure CV + Typhoon LLM.
+OCR Pipeline Service — Azure CV 4.0 + Typhoon LLM.
 
 Pipeline:
-    1. Azure Computer Vision → read raw text from parcel label image
+    1. Azure Computer Vision 4.0 (Image Analysis) → read raw text from parcel label
     2. Typhoon LLM (chat completion) → extract structured JSON from raw text
-    3. Fallback: Typhoon OCR endpoint if Azure fails
+    3. Fallback: Typhoon Vision (chat + base64 image) if Azure fails
 
 Requirements: 9.1, 9.2, 9.4, 9.5
 """
 import base64
 import json
 import logging
-import time
 
 import requests
 from django.conf import settings
@@ -20,10 +19,6 @@ logger = logging.getLogger(__name__)
 
 CONFIDENCE_THRESHOLD = 0.60
 
-_POLL_INTERVAL = 1
-_POLL_MAX_ATTEMPTS = 30
-
-_TYPHOON_OCR_URL = "https://api.opentyphoon.ai/v1/ocr"
 _TYPHOON_CHAT_URL = "https://api.opentyphoon.ai/v1/chat/completions"
 _TYPHOON_CHAT_MODEL = "typhoon-v2-70b-instruct"
 
@@ -40,14 +35,25 @@ _EXTRACT_PROMPT = """คุณเป็น AI ที่เชี่ยวชา�
 {"recipient_name": "สมชาย ใจดี", "unit_number": "112/118", "courier": "SPX Express", "tracking_number": "TH263506730962V"}
 """
 
+_VISION_EXTRACT_PROMPT = """คุณเป็น AI ที่เชี่ยวชาญในการอ่านฉลากพัสดุ (parcel label) ภาษาไทยและอังกฤษ
+ดูจากรูปภาพฉลากพัสดุนี้ ให้ extract ข้อมูลต่อไปนี้เป็น JSON:
+
+- recipient_name: ชื่อผู้รับ (ดูจาก "ผู้รับ (TO)" หรือ "Receiver")
+- unit_number: เลขห้อง/บ้านเลขที่ (เช่น 112/118, A101, B2608)
+- courier: ชื่อบริษัทขนส่ง (เช่น SPX Express, LEX, Flash Express, Kerry, J&T, Shopee Express, Lazada)
+- tracking_number: เลขพัสดุ/tracking (เช่น TH263506730962V, LEXPU0672931350)
+
+ตอบเป็น JSON เท่านั้น ไม่ต้องอธิบาย ถ้าไม่พบข้อมูลให้ใส่ string ว่าง ""
+"""
+
 
 def scan_parcel_image(image_data: bytes) -> dict:
     """Scan a parcel label image and return structured data.
 
     Pipeline:
-        1. Azure CV → raw text + confidence
+        1. Azure CV 4.0 → raw text + confidence
         2. Typhoon LLM → structured extraction from raw text
-        3. Fallback: Typhoon OCR if Azure fails
+        3. Fallback: Typhoon Vision if Azure fails
     """
     empty_result = {
         "recipient_name": "",
@@ -57,17 +63,18 @@ def scan_parcel_image(image_data: bytes) -> dict:
         "confidence": 0.0,
     }
 
-    # Step 1 — Azure CV: read raw text from image
+    # Step 1 — Azure CV 4.0: read raw text from image
     raw_text, confidence = _call_azure_cv(image_data)
 
     if not raw_text or confidence < CONFIDENCE_THRESHOLD:
-        # Fallback: try Typhoon OCR endpoint
-        logger.info("Azure CV returned low confidence (%.2f) — trying Typhoon OCR.", confidence)
-        raw_text = _call_typhoon_ocr(image_data)
-        if not raw_text:
-            empty_result["confidence"] = confidence
-            return empty_result
-        confidence = 0.70  # default confidence for Typhoon OCR fallback
+        # Fallback: try Typhoon Vision (send image directly to LLM)
+        logger.info("Azure CV returned low confidence (%.2f) — trying Typhoon Vision.", confidence)
+        result = _call_typhoon_vision(image_data)
+        if result:
+            result["confidence"] = 0.70
+            return result
+        empty_result["confidence"] = confidence
+        return empty_result
 
     # Step 2 — Typhoon LLM: extract structured data from raw text
     structured = _call_typhoon(raw_text)
@@ -83,7 +90,7 @@ def scan_parcel_image(image_data: bytes) -> dict:
 
 
 def _call_azure_cv(image_data: bytes) -> tuple:
-    """Call Azure Computer Vision Read API to extract text.
+    """Call Azure Computer Vision 4.0 Image Analysis API with Read feature.
 
     Returns (raw_text, confidence) tuple.
     """
@@ -94,56 +101,36 @@ def _call_azure_cv(image_data: bytes) -> tuple:
         logger.warning("Azure CV credentials not configured.")
         return ("", 0.0)
 
-    # Submit read request
-    read_url = f"{endpoint.rstrip('/')}/vision/v3.2/read/analyze"
+    # Image Analysis 4.0 — synchronous, no polling needed
+    analyze_url = (
+        f"{endpoint.rstrip('/')}/computervision/imageanalysis:analyze"
+        f"?api-version=2024-02-01&features=read"
+    )
     headers = {
         "Ocp-Apim-Subscription-Key": key,
         "Content-Type": "application/octet-stream",
     }
 
     try:
-        response = requests.post(read_url, headers=headers, data=image_data, timeout=30)
+        response = requests.post(
+            analyze_url, headers=headers, data=image_data, timeout=30
+        )
         response.raise_for_status()
+        result = response.json()
+        return _extract_azure_text(result)
     except requests.RequestException as e:
         logger.error("Azure CV submit failed: %s", e)
         return ("", 0.0)
 
-    # Get operation location for polling
-    operation_url = response.headers.get("Operation-Location")
-    if not operation_url:
-        logger.error("Azure CV: no Operation-Location header.")
-        return ("", 0.0)
-
-    # Poll for results
-    poll_headers = {"Ocp-Apim-Subscription-Key": key}
-    for _ in range(_POLL_MAX_ATTEMPTS):
-        time.sleep(_POLL_INTERVAL)
-        try:
-            poll_resp = requests.get(operation_url, headers=poll_headers, timeout=15)
-            poll_resp.raise_for_status()
-            result = poll_resp.json()
-        except requests.RequestException as e:
-            logger.error("Azure CV poll failed: %s", e)
-            return ("", 0.0)
-
-        status = result.get("status", "")
-        if status == "succeeded":
-            return _extract_azure_text(result)
-        elif status == "failed":
-            logger.error("Azure CV read failed: %s", result)
-            return ("", 0.0)
-
-    logger.error("Azure CV polling timed out.")
-    return ("", 0.0)
-
 
 def _extract_azure_text(result: dict) -> tuple:
-    """Extract text and average confidence from Azure CV read result."""
+    """Extract text and average confidence from Azure CV 4.0 read result."""
     lines = []
     confidences = []
 
-    for read_result in result.get("analyzeResult", {}).get("readResults", []):
-        for line in read_result.get("lines", []):
+    read_result = result.get("readResult", {})
+    for block in read_result.get("blocks", []):
+        for line in block.get("lines", []):
             lines.append(line.get("text", ""))
             for word in line.get("words", []):
                 conf = word.get("confidence", 0.0)
@@ -155,30 +142,65 @@ def _extract_azure_text(result: dict) -> tuple:
     return (raw_text, avg_confidence)
 
 
-def _call_typhoon_ocr(image_data: bytes) -> str:
-    """Call Typhoon OCR endpoint as fallback. Returns raw text or empty string."""
+def _call_typhoon_vision(image_data: bytes) -> dict | None:
+    """Call Typhoon Vision via chat completions with base64 image.
+
+    Sends the image directly to the LLM for OCR + extraction in one step.
+    Returns structured dict or None.
+    """
     api_key = getattr(settings, "TYPHOON_API_KEY", "")
     if not api_key:
         logger.warning("Typhoon API key not configured.")
-        return ""
+        return None
+
+    b64_image = base64.b64encode(image_data).decode("utf-8")
+
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json",
+    }
+    payload = {
+        "model": "typhoon-v2-72b-vision",
+        "messages": [
+            {
+                "role": "user",
+                "content": [
+                    {"type": "text", "text": _VISION_EXTRACT_PROMPT},
+                    {
+                        "type": "image_url",
+                        "image_url": {
+                            "url": f"data:image/jpeg;base64,{b64_image}"
+                        },
+                    },
+                ],
+            }
+        ],
+        "temperature": 0.0,
+        "max_tokens": 512,
+    }
 
     try:
-        b64_image = base64.b64encode(image_data).decode("utf-8")
-        headers = {
-            "Authorization": f"Bearer {api_key}",
-            "Content-Type": "application/json",
-        }
-        payload = {"image": b64_image}
-
         response = requests.post(
-            _TYPHOON_OCR_URL, headers=headers, json=payload, timeout=30
+            _TYPHOON_CHAT_URL, headers=headers, json=payload, timeout=60
         )
         response.raise_for_status()
         data = response.json()
-        return data.get("text", "")
-    except requests.RequestException as e:
-        logger.error("Typhoon OCR failed: %s", e)
-        return ""
+
+        content = data["choices"][0]["message"]["content"].strip()
+        if content.startswith("```"):
+            content = content.split("\n", 1)[-1]
+            content = content.rsplit("```", 1)[0].strip()
+
+        parsed = json.loads(content)
+        return {
+            "recipient_name": str(parsed.get("recipient_name", "")).strip()[:255],
+            "unit_number": str(parsed.get("unit_number", "")).strip()[:50],
+            "courier": str(parsed.get("courier", "")).strip()[:100],
+            "tracking_number": str(parsed.get("tracking_number", "")).strip()[:100],
+        }
+    except (requests.RequestException, json.JSONDecodeError, KeyError, IndexError) as e:
+        logger.error("Typhoon Vision extraction failed: %s", e)
+        return None
 
 
 def _call_typhoon(raw_text: str) -> dict | None:
@@ -214,7 +236,6 @@ def _call_typhoon(raw_text: str) -> dict | None:
         data = response.json()
 
         content = data["choices"][0]["message"]["content"].strip()
-        # Clean markdown code fences if present
         if content.startswith("```"):
             content = content.split("\n", 1)[-1]
             content = content.rsplit("```", 1)[0].strip()
