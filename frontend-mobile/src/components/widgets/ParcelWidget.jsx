@@ -1,96 +1,49 @@
 ﻿import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { colors, radius } from '../../theme';
+import { ParcelIcon } from '../TabIcons';
 
-export default function ParcelWidget({ data, onPress, onRefresh }) {
+export default function ParcelWidget({ data, onPress }) {
   const loading = data === null;
   const parcels = data || [];
-  const pending = parcels.filter(p => p.status === 'pending');
-  const latest = pending[0];
-  const history = parcels.slice(0, 3);
-
-  const handlePickup = async (id) => {
-    Alert.alert('ยืนยันรับพัสดุ', 'คุณต้องการยืนยันว่ารับพัสดุนี้แล้ว?', [
-      { text: 'ยกเลิก', style: 'cancel' },
-      {
-        text: 'ยืนยัน',
-        onPress: async () => {
-          try {
-            const api = require('../../services/api').default;
-            await api.patch('/parcels/' + id + '/pickup/');
-            Alert.alert('สำเร็จ', 'ยืนยันรับพัสดุแล้ว');
-            if (onRefresh) onRefresh();
-          } catch {
-            Alert.alert('ผิดพลาด', 'ไม่สามารถยืนยันได้ กรุณาลองใหม่');
-          }
-        },
-      },
-    ]);
-  };
-
-  const fmtDate = (d) => d ? new Date(d).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' }) : '-';
+  const pendingCount = parcels.filter(p => p.status === 'pending').length;
 
   return (
-    <View style={s.container}>
-      <View style={s.header}>
-        <Text style={s.title}>พัสดุของฉัน</Text>
-        <TouchableOpacity onPress={onPress} accessibilityLabel="ดูพัสดุทั้งหมด" accessibilityRole="button">
-          <Text style={s.link}>ดูทั้งหมด</Text>
-        </TouchableOpacity>
+    <TouchableOpacity style={s.container} onPress={onPress} activeOpacity={0.7}
+      accessibilityLabel={`พัสดุรอรับ ${pendingCount} ชิ้น`} accessibilityRole="button">
+      <View style={s.left}>
+        <View style={s.iconWrap}>
+          <ParcelIcon size={22} color={colors.warning} />
+        </View>
+        <View>
+          <Text style={s.title}>พัสดุของฉัน</Text>
+          {loading ? (
+            <Text style={s.sub}>กำลังโหลด...</Text>
+          ) : pendingCount > 0 ? (
+            <Text style={s.subHighlight}>{pendingCount} ชิ้นรอรับ</Text>
+          ) : (
+            <Text style={s.sub}>ไม่มีพัสดุรอรับ</Text>
+          )}
+        </View>
       </View>
-      {loading ? (
-        <ActivityIndicator size="small" color={colors.accent} style={{ marginVertical: 8 }} />
-      ) : !latest ? (
-        <Text style={s.muted}>ไม่มีพัสดุรอรับ</Text>
-      ) : (
-        <View style={s.card}>
-          <View style={s.statusRow}>
-            <View style={s.statusDot} />
-            <Text style={s.statusText}>พร้อมรับ</Text>
-            <Text style={s.trackNum}>{latest.tracking_number || '-'}</Text>
-          </View>
-          <Text style={s.detail}>{fmtDate(latest.arrived_at)} {latest.unit_number ? '• ห้อง ' + latest.unit_number : ''}</Text>
-          {latest.courier ? <Text style={s.detail}>{latest.courier}</Text> : null}
-          <TouchableOpacity style={s.pickupBtn} onPress={() => handlePickup(latest.id)} activeOpacity={0.7}
-            accessibilityLabel="ยืนยันรับพัสดุ" accessibilityRole="button">
-            <Text style={s.pickupBtnText}>ยืนยันรับพัสดุ</Text>
-          </TouchableOpacity>
-        </View>
-      )}
-      {!loading && history.length > 0 && (
-        <View style={s.historyBox}>
-          <Text style={s.historyTitle}>ประวัติล่าสุด</Text>
-          {history.map((p) => (
-            <View key={p.id} style={s.historyRow}>
-              <View style={[s.historyDot, { backgroundColor: p.status === 'picked_up' ? colors.success : colors.warning }]} />
-              <Text style={s.historyText} numberOfLines={1}>{p.tracking_number || p.recipient_name || '-'}</Text>
-              <Text style={s.historyDate}>{fmtDate(p.arrived_at)}</Text>
-            </View>
-          ))}
-        </View>
-      )}
-    </View>
+      <Text style={s.arrow}>›</Text>
+    </TouchableOpacity>
   );
 }
 
 const s = StyleSheet.create({
-  container: { marginBottom: 12 },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },
-  title: { fontSize: 16, fontWeight: '700', color: colors.text },
-  link: { fontSize: 13, color: colors.accent, fontWeight: '500' },
-  card: { backgroundColor: colors.card, borderRadius: radius.md, padding: 16, elevation: 2, shadowColor: '#000', shadowOpacity: 0.06, shadowRadius: 4, shadowOffset: { width: 0, height: 2 }, marginBottom: 8 },
-  statusRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 6 },
-  statusDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.success, marginRight: 6 },
-  statusText: { fontSize: 14, fontWeight: '600', color: colors.success, flex: 1 },
-  trackNum: { fontSize: 12, color: colors.textMuted, fontFamily: 'monospace' },
-  detail: { fontSize: 13, color: colors.textSecondary, marginBottom: 2 },
-  pickupBtn: { backgroundColor: colors.success, borderRadius: radius.sm, paddingVertical: 12, alignItems: 'center', marginTop: 12 },
-  pickupBtnText: { color: '#FFF', fontSize: 15, fontWeight: '600' },
-  historyBox: { backgroundColor: colors.card, borderRadius: radius.sm, padding: 12 },
-  historyTitle: { fontSize: 12, fontWeight: '600', color: colors.textMuted, marginBottom: 8 },
-  historyRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 6 },
-  historyDot: { width: 6, height: 6, borderRadius: 3, marginRight: 8 },
-  historyText: { fontSize: 13, color: colors.textSecondary, flex: 1 },
-  historyDate: { fontSize: 11, color: colors.textMuted },
-  muted: { color: colors.textMuted, fontSize: 13 },
+  container: {
+    backgroundColor: colors.card, borderRadius: radius.md, padding: 16,
+    marginBottom: 12, marginHorizontal: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    elevation: 2, shadowColor: '#000', shadowOpacity: 0.06, shadowRadius: 4, shadowOffset: { width: 0, height: 2 },
+  },
+  left: { flexDirection: 'row', alignItems: 'center', flex: 1 },
+  iconWrap: {
+    width: 44, height: 44, borderRadius: 12, backgroundColor: colors.warningLight,
+    justifyContent: 'center', alignItems: 'center', marginRight: 12,
+  },
+  title: { fontSize: 15, fontWeight: '600', color: colors.text },
+  sub: { fontSize: 13, color: colors.textMuted, marginTop: 1 },
+  subHighlight: { fontSize: 13, color: colors.warning, fontWeight: '600', marginTop: 1 },
+  arrow: { fontSize: 22, color: colors.textMuted, fontWeight: '300' },
 });

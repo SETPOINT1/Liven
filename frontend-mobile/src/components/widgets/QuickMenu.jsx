@@ -4,10 +4,10 @@ import { colors, radius } from '../../theme';
 import { ChatbotIcon, ParcelIcon, EventIcon, FacilityIcon } from '../TabIcons';
 
 const menus = [
-  { label: 'ส่วนกลาง', color: '#0C2340', icon: FacilityIcon, screen: 'Facility' },
-  { label: 'แชท', color: '#2B6CB0', icon: ChatbotIcon, screen: 'Chatbot' },
-  { label: 'พัสดุ', color: '#D69E2E', icon: ParcelIcon, screen: 'Parcel', badge: null },
-  { label: 'ข่าวสาร', color: '#38A169', icon: EventIcon, screen: 'News' },
+  { label: 'ส่วนกลาง', color: '#0C2340', bg: '#E8EDF3', icon: FacilityIcon, screen: 'Facility' },
+  { label: 'แชท', color: '#2B6CB0', bg: '#EBF4FF', icon: ChatbotIcon, screen: 'Chatbot' },
+  { label: 'พัสดุ', color: '#B7791F', bg: '#FEFCBF', icon: ParcelIcon, screen: 'Parcel', badge: null },
+  { label: 'ข่าวสาร', color: '#276749', bg: '#C6F6D5', icon: EventIcon, screen: 'News' },
 ];
 
 export default function QuickMenu({ navigation, parcelCount }) {
@@ -17,25 +17,20 @@ export default function QuickMenu({ navigation, parcelCount }) {
 
   return (
     <View style={s.container}>
-      <Text style={s.title}>เมนูด่วน</Text>
       <View style={s.row}>
         {items.map((m) => {
           const IconComp = m.icon;
           return (
             <TouchableOpacity
-              key={m.label}
-              style={s.item}
+              key={m.label} style={s.item}
               onPress={() => navigation.navigate(m.screen)}
-              activeOpacity={0.7}
-              accessibilityLabel={m.label}
-              accessibilityRole="button"
+              activeOpacity={0.65}
+              accessibilityLabel={m.label} accessibilityRole="button"
             >
-              <View style={[s.circle, { backgroundColor: m.color + '18' }]}>
-                <IconComp size={24} color={m.color} />
+              <View style={[s.circle, { backgroundColor: m.bg }]}>
+                <IconComp size={26} color={m.color} />
                 {m.badge > 0 && (
-                  <View style={s.badge}>
-                    <Text style={s.badgeText}>{m.badge}</Text>
-                  </View>
+                  <View style={s.badge}><Text style={s.badgeText}>{m.badge}</Text></View>
                 )}
               </View>
               <Text style={s.label}>{m.label}</Text>
@@ -49,22 +44,21 @@ export default function QuickMenu({ navigation, parcelCount }) {
 
 const s = StyleSheet.create({
   container: {
-    backgroundColor: colors.card, borderRadius: radius.md, padding: 16,
-    marginBottom: 12, elevation: 2,
-    shadowColor: '#000', shadowOpacity: 0.06, shadowRadius: 4, shadowOffset: { width: 0, height: 2 },
+    backgroundColor: colors.card, borderRadius: radius.lg, padding: 18, paddingBottom: 14,
+    marginBottom: 12, marginHorizontal: 16,
+    elevation: 3, shadowColor: '#000', shadowOpacity: 0.08, shadowRadius: 8, shadowOffset: { width: 0, height: 3 },
   },
-  title: { fontSize: 16, fontWeight: '700', color: colors.text, marginBottom: 14 },
-  row: { flexDirection: 'row', justifyContent: 'space-around' },
-  item: { alignItems: 'center', width: 68 },
+  row: { flexDirection: 'row', justifyContent: 'space-between' },
+  item: { alignItems: 'center', flex: 1 },
   circle: {
-    width: 52, height: 52, borderRadius: 26,
-    justifyContent: 'center', alignItems: 'center', marginBottom: 6, position: 'relative',
+    width: 56, height: 56, borderRadius: 16,
+    justifyContent: 'center', alignItems: 'center', marginBottom: 8, position: 'relative',
   },
   badge: {
-    position: 'absolute', top: -2, right: -2,
-    backgroundColor: colors.danger, borderRadius: 10, minWidth: 18, height: 18,
+    position: 'absolute', top: -4, right: -4,
+    backgroundColor: colors.danger, borderRadius: 10, minWidth: 20, height: 20,
     justifyContent: 'center', alignItems: 'center', borderWidth: 2, borderColor: colors.card,
   },
   badgeText: { color: '#FFF', fontSize: 10, fontWeight: '700' },
-  label: { fontSize: 12, color: colors.textSecondary, fontWeight: '500', textAlign: 'center' },
+  label: { fontSize: 12, color: colors.textSecondary, fontWeight: '600' },
 });

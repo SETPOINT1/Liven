@@ -108,35 +108,35 @@ const Tabs = createBottomTabNavigator({
       screen: HomeStack,
       options: {
         title: 'หน้าหลัก',
-        tabBarIcon: ({ color, size }) => <HomeIcon color={color} size={size} />,
+        tabBarIcon: ({ color, size, focused }) => <HomeIcon color={color} size={size} filled={focused} />,
       },
     },
     Facility: {
       screen: FacilityStack,
       options: {
         title: 'ส่วนกลาง',
-        tabBarIcon: ({ color, size }) => <FacilityIcon color={color} size={size} />,
+        tabBarIcon: ({ color, size, focused }) => <FacilityIcon color={color} size={size} filled={focused} />,
       },
     },
     Parcel: {
       screen: ParcelStack,
       options: {
         title: 'พัสดุ',
-        tabBarIcon: ({ color, size }) => <ParcelIcon color={color} size={size} />,
+        tabBarIcon: ({ color, size, focused }) => <ParcelIcon color={color} size={size} filled={focused} />,
       },
     },
     Social: {
       screen: SocialStack,
       options: {
         title: 'ฟีด',
-        tabBarIcon: ({ color, size }) => <SocialIcon color={color} size={size} />,
+        tabBarIcon: ({ color, size, focused }) => <SocialIcon color={color} size={size} filled={focused} />,
       },
     },
     Chatbot: {
       screen: ChatbotStack,
       options: {
         title: 'แชทบอท',
-        tabBarIcon: ({ color, size }) => <ChatbotIcon color={color} size={size} />,
+        tabBarIcon: ({ color, size, focused }) => <ChatbotIcon color={color} size={size} filled={focused} />,
       },
     },
   },

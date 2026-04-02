@@ -9,6 +9,17 @@ import { supabase } from '../services/supabase';
 
 import { colors, radius } from '../theme';
 
+function getRelativeTime(dateStr) {
+  const now = new Date();
+  const d = new Date(dateStr);
+  const diff = Math.floor((now - d) / 1000);
+  if (diff < 60) return 'เมื่อสักครู่';
+  if (diff < 3600) return `${Math.floor(diff / 60)} นาทีที่แล้ว`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)} ชม. ที่แล้ว`;
+  if (diff < 604800) return `${Math.floor(diff / 86400)} วันที่แล้ว`;
+  return d.toLocaleDateString('th-TH', { day: 'numeric', month: 'short' });
+}
+
 const SocialFeedScreen = () => {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -148,32 +159,41 @@ const SocialFeedScreen = () => {
     }
   };
 
-  const renderPost = ({ item }) => (
-    <View style={[styles.card, item.is_pinned && styles.pinnedCard]}>
-      {item.is_pinned || item.post_type === 'alert' ? (
-        <View style={styles.pinnedBadge}>
-          <Text style={styles.pinnedText}>📌 ปักหมุด</Text>
+  const renderPost = ({ item }) => {
+    const initial = (item.author_name || 'ผ')[0].toUpperCase();
+    const relTime = getRelativeTime(item.created_at);
+    return (
+      <View style={[styles.card, item.is_pinned && styles.pinnedCard]}>
+        {item.is_pinned || item.post_type === 'alert' ? (
+          <View style={styles.pinnedBadge}>
+            <Text style={styles.pinnedText}>📌 ปักหมุด</Text>
+          </View>
+        ) : null}
+        <View style={styles.authorRow}>
+          <View style={styles.avatar}><Text style={styles.avatarText}>{initial}</Text></View>
+          <View>
+            <Text style={styles.author}>{item.author_name || 'ผู้ใช้'}</Text>
+            <Text style={styles.date}>{relTime}</Text>
+          </View>
         </View>
-      ) : null}
-      <Text style={styles.author}>{item.author_name || 'ผู้ใช้'}</Text>
-      <Text style={styles.content}>{item.content}</Text>
-      <Text style={styles.date}>{new Date(item.created_at).toLocaleDateString('th-TH')}</Text>
-      <View style={styles.actions}>
-        <TouchableOpacity style={styles.actionBtn} onPress={() => handleLike(item.id)} accessibilityLabel={item.is_liked ? 'เลิกถูกใจ' : 'ถูกใจ'} accessibilityRole="button">
-          <Text style={styles.actionText}>{item.is_liked ? '❤️' : '🤍'} {item.like_count || 0}</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.actionBtn} onPress={() => openComments(item.id)} accessibilityLabel="ความคิดเห็น" accessibilityRole="button">
-          <Text style={styles.actionText}>💬 {item.comment_count || 0}</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.actionBtn} onPress={() => handleShare(item.id)} accessibilityLabel="แชร์" accessibilityRole="button">
-          <Text style={styles.actionText}>🔗 แชร์</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.actionBtn} onPress={() => handleReport(item.id)} accessibilityLabel="รายงานโพสต์" accessibilityRole="button">
-          <Text style={styles.actionText}>⚠️</Text>
-        </TouchableOpacity>
+        <Text style={styles.content}>{item.content}</Text>
+        <View style={styles.actions}>
+          <TouchableOpacity style={styles.actionBtn} onPress={() => handleLike(item.id)} accessibilityLabel={item.is_liked ? 'เลิกถูกใจ' : 'ถูกใจ'} accessibilityRole="button">
+            <Text style={styles.actionText}>{item.is_liked ? '❤️' : '🤍'} {item.like_count || 0}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.actionBtn} onPress={() => openComments(item.id)} accessibilityLabel="ความคิดเห็น" accessibilityRole="button">
+            <Text style={styles.actionText}>💬 {item.comment_count || 0}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.actionBtn} onPress={() => handleShare(item.id)} accessibilityLabel="แชร์" accessibilityRole="button">
+            <Text style={styles.actionText}>🔗 แชร์</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.actionBtn} onPress={() => handleReport(item.id)} accessibilityLabel="รายงานโพสต์" accessibilityRole="button">
+            <Text style={styles.actionText}>⚠️</Text>
+          </TouchableOpacity>
+        </View>
       </View>
-    </View>
-  );
+    );
+  };
 
   if (loading) {
     return <View style={styles.center}><ActivityIndicator size="large" color={colors.accent} /></View>;
@@ -303,8 +323,11 @@ const styles = StyleSheet.create({
   pinnedBadge: { marginBottom: 6 },
   pinnedText: { fontSize: 12, color: colors.warning, fontWeight: '600' },
   author: { fontSize: 14, fontWeight: '700', color: colors.primary },
-  content: { fontSize: 15, color: colors.text, marginTop: 6 },
-  date: { fontSize: 12, color: colors.textMuted, marginTop: 6 },
+  authorRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 8 },
+  avatar: { width: 36, height: 36, borderRadius: 18, backgroundColor: colors.accentLight, justifyContent: 'center', alignItems: 'center', marginRight: 10 },
+  avatarText: { fontSize: 14, fontWeight: '700', color: colors.accent },
+  content: { fontSize: 15, color: colors.text, marginBottom: 6 },
+  date: { fontSize: 11, color: colors.textMuted },
   actions: { flexDirection: 'row', marginTop: 10, borderTopWidth: 1, borderTopColor: colors.bg, paddingTop: 8 },
   actionBtn: { marginRight: 16 },
   actionText: { fontSize: 13, color: colors.textSecondary },

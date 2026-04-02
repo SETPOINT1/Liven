@@ -37,7 +37,7 @@ export default function EventWidget({ data, onPress }) {
 }
 
 const s = StyleSheet.create({
-  container: { marginBottom: 12 },
+  container: { marginBottom: 12, marginHorizontal: 16 },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },
   title: { fontSize: 16, fontWeight: '700', color: colors.text },
   link: { fontSize: 13, color: colors.accent, fontWeight: '500' },

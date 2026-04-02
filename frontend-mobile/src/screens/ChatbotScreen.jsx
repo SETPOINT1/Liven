@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   View, Text, FlatList, TextInput, TouchableOpacity, StyleSheet,
-  ActivityIndicator, KeyboardAvoidingView, Platform,
+  ActivityIndicator, KeyboardAvoidingView, Platform, Animated,
 } from 'react-native';
 import api from '../services/api';
-import { colors, radius } from '../theme';
+import { colors } from '../theme';
 
 const SUGGESTIONS = [
   'ฟิตเนสเปิดกี่โมง?',
@@ -13,6 +13,44 @@ const SUGGESTIONS = [
   'ค่าส่วนกลางจ่ายยังไง?',
   'แจ้งซ่อมยังไง?',
 ];
+
+function TypingDots() {
+  const dot1 = useRef(new Animated.Value(0)).current;
+  const dot2 = useRef(new Animated.Value(0)).current;
+  const dot3 = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    const animate = (dot, delay) =>
+      Animated.loop(
+        Animated.sequence([
+          Animated.delay(delay),
+          Animated.timing(dot, { toValue: 1, duration: 300, useNativeDriver: true }),
+          Animated.timing(dot, { toValue: 0, duration: 300, useNativeDriver: true }),
+        ])
+      );
+    const a1 = animate(dot1, 0);
+    const a2 = animate(dot2, 150);
+    const a3 = animate(dot3, 300);
+    a1.start(); a2.start(); a3.start();
+    return () => { a1.stop(); a2.stop(); a3.stop(); };
+  }, [dot1, dot2, dot3]);
+
+  const dotStyle = (anim) => ({
+    width: 7, height: 7, borderRadius: 4, backgroundColor: colors.textMuted, marginHorizontal: 2,
+    transform: [{ translateY: anim.interpolate({ inputRange: [0, 1], outputRange: [0, -4] }) }],
+  });
+
+  return (
+    <View style={s.typingRow}>
+      <View style={s.avatar}><Text style={s.avatarText}>L</Text></View>
+      <View style={s.typingBubble}>
+        <Animated.View style={dotStyle(dot1)} />
+        <Animated.View style={dotStyle(dot2)} />
+        <Animated.View style={dotStyle(dot3)} />
+      </View>
+    </View>
+  );
+}
 
 export default function ChatbotScreen() {
   const [messages, setMessages] = useState([]);
@@ -107,12 +145,7 @@ export default function ChatbotScreen() {
           </View>
         }
       />
-      {sending && (
-        <View style={s.typingRow}>
-          <ActivityIndicator size="small" color={colors.accent}/>
-          <Text style={s.typingText}>กำลังพิมพ์...</Text>
-        </View>
-      )}
+      {sending && <TypingDots />}
       <View style={s.inputRow}>
         <TextInput style={s.input} placeholder="พิมพ์ข้อความ..." placeholderTextColor={colors.textMuted}
           value={input} onChangeText={setInput} onSubmitEditing={() => handleSend()} editable={!sending}/>
@@ -141,8 +174,8 @@ const s = StyleSheet.create({
   botText: { color:colors.text },
   userText: { color:'#FFF' },
   escalatedText: { fontSize:12, color:colors.warning, marginTop:6, fontStyle:'italic' },
-  typingRow: { flexDirection:'row', alignItems:'center', paddingHorizontal:16, paddingBottom:4 },
-  typingText: { fontSize:13, color:colors.textSecondary, marginLeft:6 },
+  typingRow: { flexDirection:'row', alignItems:'center', paddingHorizontal:16, paddingBottom:8 },
+  typingBubble: { flexDirection:'row', alignItems:'center', backgroundColor:colors.card, borderRadius:16, paddingHorizontal:14, paddingVertical:10 },
   inputRow: { flexDirection:'row', padding:12, backgroundColor:colors.card, borderTopWidth:1, borderTopColor:colors.border },
   input: { flex:1, borderWidth:1, borderColor:colors.border, borderRadius:20, paddingHorizontal:16, paddingVertical:10, fontSize:15, marginRight:8, color:colors.text },
   sendBtn: { backgroundColor:colors.primary, borderRadius:20, paddingHorizontal:20, justifyContent:'center' },

@@ -4,6 +4,7 @@ import {
   ActivityIndicator, RefreshControl,
 } from 'react-native';
 import api from '../services/api';
+import { EventIcon, ChatbotIcon } from '../components/TabIcons';
 
 import { colors, radius } from '../theme';
 
@@ -62,7 +63,12 @@ const NewsScreen = ({ route }) => {
     return (
       <View style={[styles.card, isEvent && styles.eventCard]}>
         <View style={styles.cardHeader}>
-          <Text style={styles.icon}>{isEvent ? '◫' : '▤'}</Text>
+          <View style={[styles.iconWrap, { backgroundColor: isEvent ? colors.accentLight : '#F3E8FF' }]}>
+            {isEvent
+              ? <EventIcon size={16} color={colors.accent} />
+              : <ChatbotIcon size={16} color="#805AD5" />
+            }
+          </View>
           <View style={{ flex: 1 }}>
             <Text style={styles.cardTitle}>{item.title}</Text>
             <View style={styles.metaRow}>
@@ -135,7 +141,7 @@ const styles = StyleSheet.create({
   card: { backgroundColor: '#FFF', borderRadius: 12, padding: 16, marginBottom: 12, elevation: 2, shadowColor: '#000', shadowOpacity: 0.08, shadowRadius: 4, shadowOffset: { width: 0, height: 2 } },
   eventCard: { borderLeftWidth: 3, borderLeftColor: colors.primary },
   cardHeader: { flexDirection: 'row', alignItems: 'flex-start' },
-  icon: { fontSize: 20, marginRight: 10, marginTop: 2 },
+  iconWrap: { width: 32, height: 32, borderRadius: 8, justifyContent: 'center', alignItems: 'center', marginRight: 10, marginTop: 2 },
   cardTitle: { fontSize: 15, fontWeight: '700', color: colors.text, marginBottom: 4 },
   metaRow: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 6 },
   typeBadge: { fontSize: 11, color: colors.primary, backgroundColor: colors.accentLight, paddingHorizontal: 6, paddingVertical: 1, borderRadius: 4 },
