@@ -157,7 +157,11 @@ def _call_typhoon(raw_text: str) -> dict | None:
         response = requests.post(
             _TYPHOON_CHAT_URL, headers=headers, json=payload, timeout=30
         )
-        response.raise_for_status()
+        if response.status_code != 200:
+            logger.error(
+                "Typhoon API error %s: %s", response.status_code, response.text
+            )
+            response.raise_for_status()
         data = response.json()
 
         content = data["choices"][0]["message"]["content"].strip()
