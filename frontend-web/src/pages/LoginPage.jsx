@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import { colors, radius, input as inputBase, btnPrimary } from '../theme';
+import { C, R, inp, lbl, btn } from '../theme';
 import { LogoIcon } from '../components/Icons';
 
 export default function LoginPage() {
@@ -39,24 +39,22 @@ export default function LoginPage() {
   return (
     <div style={{
       display: 'flex', justifyContent: 'center', alignItems: 'center',
-      height: '100vh', background: colors.bg,
+      height: '100vh', background: C.bg,
     }}>
       <div style={{
-        background: colors.card, padding: '40px 36px', borderRadius: radius.lg,
+        background: C.card, padding: '40px 36px', borderRadius: R.lg,
         boxShadow: '0 2px 12px rgba(0,0,0,0.06)', width: 380,
       }}>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 28 }}>
           <LogoIcon size={44} />
-          <div style={{ fontSize: 18, fontWeight: 700, color: colors.text, marginTop: 12 }}>Liven Dashboard</div>
-          <div style={{ fontSize: 12, color: colors.textMuted, marginTop: 2 }}>Smart Community Management</div>
+          <div style={{ fontSize: 18, fontWeight: 700, color: C.text, marginTop: 12 }}>Liven Dashboard</div>
+          <div style={{ fontSize: 12, color: C.muted, marginTop: 2 }}>Smart Community Management</div>
         </div>
 
         <form onSubmit={handleSubmit}>
-          <label style={{ fontSize: 12, fontWeight: 500, color: colors.textSecondary, display: 'block', marginBottom: 4 }}>
-            อีเมล
-          </label>
+          <label style={lbl}>อีเมล</label>
           <input
-            style={inputBase}
+            style={inp}
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -65,11 +63,9 @@ export default function LoginPage() {
             required
           />
 
-          <label style={{ fontSize: 12, fontWeight: 500, color: colors.textSecondary, display: 'block', marginBottom: 4 }}>
-            รหัสผ่าน
-          </label>
+          <label style={lbl}>รหัสผ่าน</label>
           <input
-            style={inputBase}
+            style={inp}
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -80,7 +76,7 @@ export default function LoginPage() {
 
           {error && (
             <div style={{
-              padding: '9px 12px', marginBottom: 14, borderRadius: radius.sm, fontSize: 12,
+              padding: '9px 12px', marginBottom: 14, borderRadius: R.sm, fontSize: 12,
               background: isRedirectError ? '#fffbeb' : '#fef2f2',
               border: `1px solid ${isRedirectError ? '#fde68a' : '#fecaca'}`,
               color: isRedirectError ? '#92400e' : '#b91c1c',
@@ -91,7 +87,7 @@ export default function LoginPage() {
           )}
 
           <button
-            style={{ ...btnPrimary, width: '100%', padding: '10px 0', fontSize: 14, borderRadius: radius.sm }}
+            style={{ ...btn, width: '100%', padding: '10px 0', fontSize: 14, borderRadius: R.sm }}
             type="submit"
             disabled={loading}
           >

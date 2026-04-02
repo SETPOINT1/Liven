@@ -3,20 +3,17 @@ import api from '../services/api';
 import { supabase } from '../services/supabase';
 import { useAuth } from '../hooks/useAuth';
 import ConfirmModal from '../components/ConfirmModal';
-import {
-  colors, radius, card as cardBase, pageTitle, btnPrimary, tabBtn,
-  input as inputBase, label as labelStyle, modalOverlay, modalBox,
-} from '../theme';
+import { C, R, card, pageTitle, btn, tab, inp, lbl, overlay, modal } from '../theme';
 import { PlusIcon, TrashIcon, HeartIcon, ChatIcon, MegaphoneIcon, AlertIcon, CloseIcon } from '../components/Icons';
 
 const typeBadge = {
-  announcement: { label: 'ประกาศ',  icon: MegaphoneIcon, bg: '#eff6ff', color: '#2563eb' },
-  alert:        { label: 'แจ้งเตือน', icon: AlertIcon,     bg: '#fef2f2', color: '#dc2626' },
-  normal:       { label: 'ทั่วไป',   icon: ChatIcon,      bg: '#f0fdf4', color: '#16a34a' },
+  announcement: { label: 'ประกาศ',  icon: MegaphoneIcon, bg: '#eff6ff', color: C.info },
+  alert:        { label: 'แจ้งเตือน', icon: AlertIcon,     bg: '#fef2f2', color: C.err },
+  normal:       { label: 'ทั่วไป',   icon: ChatIcon,      bg: '#f0fdf4', color: C.ok },
 };
 
 const roleBadge = {
-  juristic:  { label: 'นิติบุคคล', bg: '#eff6ff', color: '#2563eb' },
+  juristic:  { label: 'นิติบุคคล', bg: '#eff6ff', color: C.info },
   resident:  { label: 'ลูกบ้าน',  bg: '#faf5ff', color: '#7c3aed' },
   developer: { label: 'Developer', bg: '#fffbeb', color: '#d97706' },
 };
@@ -37,7 +34,7 @@ function timeAgo(dateStr) {
 export default function SocialFeedPage() {
   const { user } = useAuth();
   const isJuristic = user?.role === 'juristic';
-  const [tab, setTab] = useState('feed');
+  const [activeTab, setActiveTab] = useState('feed');
   const [posts, setPosts] = useState([]);
   const [reports, setReports] = useState([]);
   const [showForm, setShowForm] = useState(false);
@@ -56,7 +53,7 @@ export default function SocialFeedPage() {
       setLoading(false);
     })();
   }, []);
-  useEffect(() => { if (tab === 'reports') fetchReports(); }, [tab]);
+  useEffect(() => { if (activeTab === 'reports') fetchReports(); }, [activeTab]);
 
   async function fetchPosts() {
     try { const { data } = await api.get('/posts/'); setPosts(data); } catch { /* ignore */ }
@@ -136,116 +133,116 @@ export default function SocialFeedPage() {
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
         <h1 style={pageTitle}>Social Feed</h1>
-        {tab === 'feed' && (
-          <button style={btnPrimary} onClick={() => setShowForm(!showForm)}>
-            {showForm ? 'ยกเลิก' : <><PlusIcon size={14} color="#fff" /> สร้างโพสต์</>}
+        {activeTab === 'feed' && (
+          <button style={btn} onClick={() => setShowForm(!showForm)}>
+            {showForm ? 'ยกเลิก' : <><PlusIcon s={14} c="#fff" /> สร้างโพสต์</>}
           </button>
         )}
       </div>
 
-      <div style={{ marginBottom: 18, borderBottom: `1px solid ${colors.border}` }}>
-        <button style={tabBtn(tab === 'feed')} onClick={() => setTab('feed')}>Feed</button>
-        <button style={tabBtn(tab === 'reports')} onClick={() => setTab('reports')}>โพสต์ที่ถูกรายงาน</button>
+      <div style={{ marginBottom: 18, borderBottom: `1px solid ${C.border}` }}>
+        <button style={tab(activeTab === 'feed')} onClick={() => setActiveTab('feed')}>Feed</button>
+        <button style={tab(activeTab === 'reports')} onClick={() => setActiveTab('reports')}>โพสต์ที่ถูกรายงาน</button>
       </div>
 
       {toast && (
         <div style={{
-          padding: '10px 16px', marginBottom: 14, borderRadius: radius.sm,
-          background: '#f0fdf4', border: '1px solid #bbf7d0', color: '#166534', fontSize: 14,
+          padding: '10px 16px', marginBottom: 14, borderRadius: R.sm,
+          background: '#f0fdf4', border: `1px solid ${C.ok}33`, color: '#166534', fontSize: 14,
         }}>
           {toast}
         </div>
       )}
 
-      {showForm && tab === 'feed' && (
-        <div style={{ ...cardBase, marginBottom: 18 }}>
-          <h3 style={{ margin: '0 0 14px', fontSize: 15, fontWeight: 600 }}>สร้างโพสต์ใหม่</h3>
+      {showForm && activeTab === 'feed' && (
+        <div style={{ ...card, marginBottom: 18 }}>
+          <h3 style={{ margin: '0 0 14px', fontSize: 15, fontWeight: 600, color: C.text }}>สร้างโพสต์ใหม่</h3>
           <form onSubmit={handleCreatePost}>
-            <label style={labelStyle}>ประเภท</label>
-            <select style={inputBase} value={postForm.post_type} onChange={(e) => setPostForm({ ...postForm, post_type: e.target.value })}>
+            <label style={lbl}>ประเภท</label>
+            <select style={inp} value={postForm.post_type} onChange={(e) => setPostForm({ ...postForm, post_type: e.target.value })}>
               <option value="announcement">ประกาศ</option>
               <option value="alert">แจ้งเตือน</option>
             </select>
-            <label style={labelStyle}>เนื้อหา</label>
-            <textarea style={{ ...inputBase, minHeight: 80, resize: 'vertical' }} value={postForm.content} onChange={(e) => setPostForm({ ...postForm, content: e.target.value })} required />
-            <label style={labelStyle}>รูปภาพ</label>
+            <label style={lbl}>เนื้อหา</label>
+            <textarea style={{ ...inp, minHeight: 80, resize: 'vertical' }} value={postForm.content} onChange={(e) => setPostForm({ ...postForm, content: e.target.value })} required />
+            <label style={lbl}>รูปภาพ</label>
             <input type="file" accept="image/*" onChange={(e) => setPostForm({ ...postForm, image: e.target.files[0] })} style={{ marginBottom: 14 }} />
-            <button style={btnPrimary} type="submit">โพสต์</button>
+            <button style={btn} type="submit">โพสต์</button>
           </form>
         </div>
       )}
 
-      {tab === 'feed' && posts.length === 0 && !showForm && (
-        <div style={{ textAlign: 'center', padding: '60px 20px', color: colors.textMuted, fontSize: 15 }}>
+      {activeTab === 'feed' && posts.length === 0 && !showForm && (
+        <div style={{ textAlign: 'center', padding: '60px 20px', color: C.muted, fontSize: 15 }}>
           ยังไม่มีโพสต์ — กดปุ่ม "สร้างโพสต์" เพื่อเริ่มต้น
         </div>
       )}
 
-      {tab === 'feed' && posts.map((post) => {
+      {activeTab === 'feed' && posts.map((post) => {
         const isAuthorJuristic = post.author_role === 'juristic';
-        const borderColor = isAuthorJuristic && post.post_type === 'alert' ? colors.danger
-          : isAuthorJuristic ? '#7c3aed' : colors.info;
+        const borderColor = isAuthorJuristic && post.post_type === 'alert' ? C.err
+          : isAuthorJuristic ? '#7c3aed' : C.info;
         const tb = typeBadge[post.post_type] || typeBadge.normal;
         const rb = roleBadge[post.author_role] || roleBadge.resident;
         const TypeIcon = tb.icon;
 
         return (
-          <div key={post.id} style={{ ...cardBase, marginBottom: 12, borderLeft: `3px solid ${borderColor}` }}>
+          <div key={post.id} style={{ ...card, marginBottom: 12, borderLeft: `3px solid ${borderColor}` }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <div style={{
-                  width: 34, height: 34, borderRadius: '50%', background: colors.bg,
+                  width: 34, height: 34, borderRadius: '50%', background: C.bg,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 14, fontWeight: 600, color: colors.textSecondary, flexShrink: 0,
+                  fontSize: 14, fontWeight: 600, color: C.sub, flexShrink: 0,
                 }}>
                   {(post.author_name || '?')[0].toUpperCase()}
                 </div>
                 <div>
-                  <div style={{ fontWeight: 600, fontSize: 13, display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <div style={{ fontWeight: 600, fontSize: 13, display: 'flex', alignItems: 'center', gap: 6, color: C.text }}>
                     {post.author_name || 'ผู้ใช้'}
                     <span style={{ fontSize: 10, fontWeight: 500, padding: '1px 6px', borderRadius: 4, background: rb.bg, color: rb.color }}>{rb.label}</span>
                   </div>
-                  <div style={{ fontSize: 11, color: colors.textMuted }}>{timeAgo(post.created_at)}</div>
+                  <div style={{ fontSize: 11, color: C.muted }}>{timeAgo(post.created_at)}</div>
                 </div>
               </div>
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 500, padding: '2px 8px', borderRadius: 99, background: tb.bg, color: tb.color }}>
-                <TypeIcon size={12} color={tb.color} /> {tb.label}
+                <TypeIcon s={12} c={tb.color} /> {tb.label}
               </span>
             </div>
 
-            <p style={{ margin: '8px 0', lineHeight: 1.6, fontSize: 13 }}>{post.content}</p>
-            {post.image_url && <img src={post.image_url} alt="" style={{ maxWidth: '100%', maxHeight: 300, borderRadius: radius.md, marginTop: 8 }} />}
+            <p style={{ margin: '8px 0', lineHeight: 1.6, fontSize: 13, color: C.text }}>{post.content}</p>
+            {post.image_url && <img src={post.image_url} alt="" style={{ maxWidth: '100%', maxHeight: 300, borderRadius: R.md, marginTop: 8 }} />}
 
-            <div style={{ marginTop: 12, paddingTop: 10, borderTop: `1px solid ${colors.borderLight}`, fontSize: 12, color: colors.textMuted, display: 'flex', gap: 14, alignItems: 'center' }}>
+            <div style={{ marginTop: 12, paddingTop: 10, borderTop: `1px solid ${C.borderLight}`, fontSize: 12, color: C.muted, display: 'flex', gap: 14, alignItems: 'center' }}>
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-                <HeartIcon size={14} color={post.is_liked ? colors.danger : colors.textMuted} filled={post.is_liked} /> {post.like_count || 0}
+                <HeartIcon s={14} c={post.is_liked ? C.err : C.muted} filled={post.is_liked} /> {post.like_count || 0}
               </span>
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-                <ChatIcon size={14} color={colors.textMuted} /> {post.comment_count || 0}
+                <ChatIcon s={14} c={C.muted} /> {post.comment_count || 0}
               </span>
               {isJuristic && (
                 <button onClick={() => handleDeletePost(post.id)} style={{
-                  marginLeft: 'auto', padding: '3px 10px', border: `1px solid ${colors.danger}`, borderRadius: radius.sm,
-                  background: 'transparent', color: colors.danger, cursor: 'pointer', fontSize: 11, fontWeight: 500,
+                  marginLeft: 'auto', padding: '3px 10px', border: `1px solid ${C.err}`, borderRadius: R.sm,
+                  background: 'transparent', color: C.err, cursor: 'pointer', fontSize: 11, fontWeight: 500,
                   display: 'inline-flex', alignItems: 'center', gap: 4,
                 }}>
-                  <TrashIcon size={12} color={colors.danger} /> ลบ
+                  <TrashIcon s={12} c={C.err} /> ลบ
                 </button>
               )}
             </div>
 
             {post.comments?.length > 0 && (
-              <div style={{ marginTop: 10, paddingTop: 10, borderTop: `1px solid ${colors.borderLight}` }}>
+              <div style={{ marginTop: 10, paddingTop: 10, borderTop: `1px solid ${C.borderLight}` }}>
                 {post.comments.map((c) => (
                   <div key={c.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '5px 0', fontSize: 12 }}>
                     <div>
-                      <span style={{ fontWeight: 600 }}>{c.author_name}</span>
-                      <span style={{ color: colors.textSecondary, marginLeft: 8 }}>{c.content}</span>
-                      <span style={{ color: colors.textMuted, marginLeft: 8, fontSize: 10 }}>{timeAgo(c.created_at)}</span>
+                      <span style={{ fontWeight: 600, color: C.text }}>{c.author_name}</span>
+                      <span style={{ color: C.sub, marginLeft: 8 }}>{c.content}</span>
+                      <span style={{ color: C.muted, marginLeft: 8, fontSize: 10 }}>{timeAgo(c.created_at)}</span>
                     </div>
                     {isJuristic && (
-                      <button onClick={() => handleDeleteComment(post.id, c.id)} style={{ padding: '1px 4px', border: 'none', background: 'none', color: colors.danger, cursor: 'pointer' }}>
-                        <CloseIcon size={13} color={colors.danger} />
+                      <button onClick={() => handleDeleteComment(post.id, c.id)} style={{ padding: '1px 4px', border: 'none', background: 'none', color: C.err, cursor: 'pointer' }}>
+                        <CloseIcon s={13} c={C.err} />
                       </button>
                     )}
                   </div>
@@ -256,34 +253,34 @@ export default function SocialFeedPage() {
         );
       })}
 
-      {tab === 'reports' && (
+      {activeTab === 'reports' && (
         <div>
           {reviewResult && (
-            <div style={{ padding: '10px 14px', marginBottom: 12, borderRadius: radius.sm, background: '#f0fdf4', border: '1px solid #bbf7d0', color: '#166534', fontSize: 13 }}>
+            <div style={{ padding: '10px 14px', marginBottom: 12, borderRadius: R.sm, background: '#f0fdf4', border: `1px solid ${C.ok}33`, color: '#166534', fontSize: 13 }}>
               {reviewResult}
             </div>
           )}
-          {reports.length === 0 && <p style={{ color: colors.textMuted, fontSize: 13 }}>ไม่มีโพสต์ที่ถูกรายงาน</p>}
+          {reports.length === 0 && <p style={{ color: C.muted, fontSize: 13 }}>ไม่มีโพสต์ที่ถูกรายงาน</p>}
           {reports.map((r) => (
-            <div key={r.id} style={{ ...cardBase, marginBottom: 12 }}>
-              <div style={{ marginBottom: 6, fontSize: 13 }}>
+            <div key={r.id} style={{ ...card, marginBottom: 12 }}>
+              <div style={{ marginBottom: 6, fontSize: 13, color: C.text }}>
                 <span style={{ fontWeight: 600 }}>โพสต์: </span>{r.post?.content?.substring(0, 100) || '-'}
               </div>
-              <div style={{ fontSize: 12, color: colors.textSecondary, marginBottom: 4 }}>
+              <div style={{ fontSize: 12, color: C.sub, marginBottom: 4 }}>
                 ผู้รายงาน: {r.reporter_name || 'ผู้ใช้'} | เหตุผล: {r.reason || 'ไม่ระบุ'}
               </div>
-              <div style={{ fontSize: 11, color: colors.textMuted, marginBottom: 8 }}>
+              <div style={{ fontSize: 11, color: C.muted, marginBottom: 8 }}>
                 {r.created_at ? new Date(r.created_at).toLocaleString('th-TH') : ''}
               </div>
               {r.status === 'pending' ? (
                 <button
                   onClick={() => setReviewModal({ open: true, postId: r.post?.id, reportId: r.id })}
-                  style={{ ...btnPrimary, background: colors.accent, fontSize: 12, padding: '6px 14px' }}
+                  style={{ ...btn, background: C.accent, fontSize: 12, padding: '6px 14px' }}
                 >
                   ตรวจสอบ
                 </button>
               ) : (
-                <span style={{ fontSize: 12, color: colors.success, fontWeight: 500 }}>ตรวจสอบแล้ว</span>
+                <span style={{ fontSize: 12, color: C.ok, fontWeight: 500 }}>ตรวจสอบแล้ว</span>
               )}
             </div>
           ))}
@@ -291,18 +288,18 @@ export default function SocialFeedPage() {
       )}
 
       {reviewModal.open && (
-        <div style={modalOverlay}>
-          <div style={{ ...modalBox, width: 380 }} onClick={(e) => e.stopPropagation()}>
-            <h3 style={{ margin: '0 0 6px', fontSize: 16, fontWeight: 600 }}>ตรวจสอบโพสต์ที่ถูกรายงาน</h3>
-            <p style={{ margin: '0 0 18px', color: colors.textSecondary, fontSize: 13 }}>เลือกการดำเนินการสำหรับโพสต์นี้</p>
+        <div style={overlay}>
+          <div style={{ ...modal, width: 380 }} onClick={(e) => e.stopPropagation()}>
+            <h3 style={{ margin: '0 0 6px', fontSize: 16, fontWeight: 600, color: C.text }}>ตรวจสอบโพสต์ที่ถูกรายงาน</h3>
+            <p style={{ margin: '0 0 18px', color: C.sub, fontSize: 13 }}>เลือกการดำเนินการสำหรับโพสต์นี้</p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              <button onClick={() => handleReviewAction('delete')} style={{ ...btnPrimary, background: colors.danger, width: '100%', justifyContent: 'center', padding: '10px 0' }}>
-                <TrashIcon size={14} color="#fff" /> ลบโพสต์
+              <button onClick={() => handleReviewAction('delete')} style={{ ...btn, background: C.err, width: '100%', justifyContent: 'center', padding: '10px 0' }}>
+                <TrashIcon s={14} c="#fff" /> ลบโพสต์
               </button>
-              <button onClick={() => handleReviewAction('dismiss')} style={{ ...btnPrimary, background: 'transparent', color: colors.text, border: `1px solid ${colors.border}`, width: '100%', justifyContent: 'center', padding: '10px 0' }}>
+              <button onClick={() => handleReviewAction('dismiss')} style={{ ...btn, background: 'transparent', color: C.text, border: `1px solid ${C.border}`, width: '100%', justifyContent: 'center', padding: '10px 0' }}>
                 ไม่พบปัญหา
               </button>
-              <button onClick={() => setReviewModal({ open: false, postId: null, reportId: null })} style={{ background: 'none', border: 'none', color: colors.textMuted, cursor: 'pointer', fontSize: 13, padding: '8px 0' }}>
+              <button onClick={() => setReviewModal({ open: false, postId: null, reportId: null })} style={{ background: 'none', border: 'none', color: C.muted, cursor: 'pointer', fontSize: 13, padding: '8px 0' }}>
                 ยกเลิก
               </button>
             </div>

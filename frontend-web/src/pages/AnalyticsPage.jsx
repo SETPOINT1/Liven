@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
 import api from '../services/api';
-import { colors, radius, card as cardBase, pageTitle, pageSubtitle, btnPrimary, input as inputBase } from '../theme';
+import { C, R, card, pageTitle, pageSub, btn, inp } from '../theme';
 import { FilterIcon } from '../components/Icons';
 
 export default function AnalyticsPage() {
@@ -51,68 +51,68 @@ export default function AnalyticsPage() {
     ? chatbotTrends.slice(0, 10).map((t) => ({ question: (t.question || t.keyword || '').substring(0, 30), count: t.count || 0 }))
     : [];
 
-  const satColor = satisfactionRate >= 70 ? colors.success : satisfactionRate >= 40 ? colors.warning : colors.danger;
+  const satColor = satisfactionRate >= 70 ? C.ok : satisfactionRate >= 40 ? C.warn : C.err;
 
   return (
     <div>
       <h1 style={pageTitle}>Analytics</h1>
-      <p style={pageSubtitle}>สถิติและข้อมูลเชิงลึกของชุมชน</p>
+      <p style={pageSub}>สถิติและข้อมูลเชิงลึกของชุมชน</p>
 
       <div style={{ marginBottom: 20, display: 'flex', alignItems: 'center', gap: 8 }}>
-        <input style={{ ...inputBase, width: 160, marginBottom: 0 }} type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
-        <span style={{ fontSize: 12, color: colors.textMuted }}>ถึง</span>
-        <input style={{ ...inputBase, width: 160, marginBottom: 0 }} type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
-        <button onClick={fetchAll} style={btnPrimary}>
-          <FilterIcon size={14} color="#fff" /> กรอง
+        <input style={{ ...inp, width: 160, marginBottom: 0 }} type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+        <span style={{ fontSize: 12, color: C.muted }}>ถึง</span>
+        <input style={{ ...inp, width: 160, marginBottom: 0 }} type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+        <button onClick={fetchAll} style={btn}>
+          <FilterIcon s={14} c="#fff" /> กรอง
         </button>
       </div>
 
-      <div style={{ ...cardBase, marginBottom: 16 }}>
-        <div style={{ fontSize: 12, fontWeight: 500, color: colors.textMuted, marginBottom: 4, textTransform: 'uppercase', letterSpacing: '0.03em' }}>อัตราความพึงพอใจ</div>
+      <div style={{ ...card, marginBottom: 16 }}>
+        <div style={{ fontSize: 12, fontWeight: 500, color: C.muted, marginBottom: 4, textTransform: 'uppercase', letterSpacing: '0.03em' }}>อัตราความพึงพอใจ</div>
         <div style={{ fontSize: 44, fontWeight: 700, color: satColor }}>{satisfactionRate}%</div>
       </div>
 
-      <div style={{ ...cardBase, marginBottom: 16 }}>
-        <h3 style={{ fontSize: 14, fontWeight: 600, margin: '0 0 14px' }}>สถิติการใช้ Facility</h3>
-        {facilityChartData.length === 0 ? <p style={{ color: colors.textMuted, fontSize: 13 }}>ไม่มีข้อมูล</p> : (
+      <div style={{ ...card, marginBottom: 16 }}>
+        <h3 style={{ fontSize: 14, fontWeight: 600, margin: '0 0 14px', color: C.text }}>สถิติการใช้ Facility</h3>
+        {facilityChartData.length === 0 ? <p style={{ color: C.muted, fontSize: 13 }}>ไม่มีข้อมูล</p> : (
           <ResponsiveContainer width="100%" height={280}>
             <BarChart data={facilityChartData}>
-              <CartesianGrid strokeDasharray="3 3" stroke={colors.borderLight} />
-              <XAxis dataKey="name" fontSize={11} tick={{ fill: colors.textMuted }} />
-              <YAxis fontSize={11} tick={{ fill: colors.textMuted }} />
-              <Tooltip contentStyle={{ borderRadius: radius.sm, border: `1px solid ${colors.border}`, fontSize: 12 }} />
-              <Bar dataKey="bookings" fill={colors.primary} name="จำนวนการจอง" radius={[4, 4, 0, 0]} />
+              <CartesianGrid strokeDasharray="3 3" stroke={C.borderLight} />
+              <XAxis dataKey="name" fontSize={11} tick={{ fill: C.muted }} />
+              <YAxis fontSize={11} tick={{ fill: C.muted }} />
+              <Tooltip contentStyle={{ borderRadius: R.sm, border: `1px solid ${C.border}`, fontSize: 12 }} />
+              <Bar dataKey="bookings" fill={C.primary} name="จำนวนการจอง" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         )}
       </div>
 
-      <div style={{ ...cardBase, marginBottom: 16 }}>
-        <h3 style={{ fontSize: 14, fontWeight: 600, margin: '0 0 14px' }}>สถิติพัสดุ</h3>
-        {parcelChartData.length === 0 ? <p style={{ color: colors.textMuted, fontSize: 13 }}>ไม่มีข้อมูล</p> : (
+      <div style={{ ...card, marginBottom: 16 }}>
+        <h3 style={{ fontSize: 14, fontWeight: 600, margin: '0 0 14px', color: C.text }}>สถิติพัสดุ</h3>
+        {parcelChartData.length === 0 ? <p style={{ color: C.muted, fontSize: 13 }}>ไม่มีข้อมูล</p> : (
           <ResponsiveContainer width="100%" height={280}>
             <LineChart data={parcelChartData}>
-              <CartesianGrid strokeDasharray="3 3" stroke={colors.borderLight} />
-              <XAxis dataKey="date" fontSize={11} tick={{ fill: colors.textMuted }} />
-              <YAxis fontSize={11} tick={{ fill: colors.textMuted }} />
-              <Tooltip contentStyle={{ borderRadius: radius.sm, border: `1px solid ${colors.border}`, fontSize: 12 }} />
-              <Line type="monotone" dataKey="received" stroke={colors.primary} name="รับเข้า" strokeWidth={2} dot={{ r: 3 }} />
-              <Line type="monotone" dataKey="pickedUp" stroke={colors.success} name="รับแล้ว" strokeWidth={2} dot={{ r: 3 }} />
+              <CartesianGrid strokeDasharray="3 3" stroke={C.borderLight} />
+              <XAxis dataKey="date" fontSize={11} tick={{ fill: C.muted }} />
+              <YAxis fontSize={11} tick={{ fill: C.muted }} />
+              <Tooltip contentStyle={{ borderRadius: R.sm, border: `1px solid ${C.border}`, fontSize: 12 }} />
+              <Line type="monotone" dataKey="received" stroke={C.primary} name="รับเข้า" strokeWidth={2} dot={{ r: 3 }} />
+              <Line type="monotone" dataKey="pickedUp" stroke={C.ok} name="รับแล้ว" strokeWidth={2} dot={{ r: 3 }} />
             </LineChart>
           </ResponsiveContainer>
         )}
       </div>
 
-      <div style={{ ...cardBase, marginBottom: 16 }}>
-        <h3 style={{ fontSize: 14, fontWeight: 600, margin: '0 0 14px' }}>Top 10 คำถาม Chatbot</h3>
-        {chatbotChartData.length === 0 ? <p style={{ color: colors.textMuted, fontSize: 13 }}>ไม่มีข้อมูล</p> : (
+      <div style={{ ...card, marginBottom: 16 }}>
+        <h3 style={{ fontSize: 14, fontWeight: 600, margin: '0 0 14px', color: C.text }}>Top 10 คำถาม Chatbot</h3>
+        {chatbotChartData.length === 0 ? <p style={{ color: C.muted, fontSize: 13 }}>ไม่มีข้อมูล</p> : (
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={chatbotChartData} layout="vertical">
-              <CartesianGrid strokeDasharray="3 3" stroke={colors.borderLight} />
-              <XAxis type="number" fontSize={11} tick={{ fill: colors.textMuted }} />
-              <YAxis dataKey="question" type="category" width={200} fontSize={11} tick={{ fill: colors.textMuted }} />
-              <Tooltip contentStyle={{ borderRadius: radius.sm, border: `1px solid ${colors.border}`, fontSize: 12 }} />
-              <Bar dataKey="count" fill={colors.accent} name="จำนวนครั้ง" radius={[0, 4, 4, 0]} />
+              <CartesianGrid strokeDasharray="3 3" stroke={C.borderLight} />
+              <XAxis type="number" fontSize={11} tick={{ fill: C.muted }} />
+              <YAxis dataKey="question" type="category" width={200} fontSize={11} tick={{ fill: C.muted }} />
+              <Tooltip contentStyle={{ borderRadius: R.sm, border: `1px solid ${C.border}`, fontSize: 12 }} />
+              <Bar dataKey="count" fill={C.accent} name="จำนวนครั้ง" radius={[0, 4, 4, 0]} />
             </BarChart>
           </ResponsiveContainer>
         )}

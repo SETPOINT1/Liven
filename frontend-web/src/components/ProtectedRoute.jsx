@@ -1,5 +1,6 @@
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import { C } from '../theme';
 
 export default function ProtectedRoute({ children }) {
   const { session, user, loading } = useAuth();
@@ -7,9 +8,9 @@ export default function ProtectedRoute({ children }) {
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100vh', background: '#F7F8FA' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100vh', background: C.bg }}>
         <div className="spinner" />
-        <div style={{ marginTop: 16, fontSize: 14, color: '#A0AEC0' }}>กำลังโหลด...</div>
+        <div style={{ marginTop: 16, fontSize: 14, color: C.muted }}>กำลังโหลด...</div>
       </div>
     );
   }
@@ -18,7 +19,6 @@ export default function ProtectedRoute({ children }) {
     return <Navigate to="/login" replace />;
   }
 
-  // session มีแต่ยังไม่ได้ user info (กำลังโหลด)
   if (!user) {
     return <Navigate to="/login" state={{ error: 'ไม่พบข้อมูลผู้ใช้ในระบบ กรุณาติดต่อนิติบุคคล' }} replace />;
   }

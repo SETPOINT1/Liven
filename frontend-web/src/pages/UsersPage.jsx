@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import api from '../services/api';
 import { supabase } from '../services/supabase';
 import ConfirmModal from '../components/ConfirmModal';
-import { colors, radius, table as tableStyle, th as thStyle, td as tdStyle, pageTitle } from '../theme';
+import { C, R, th, td, pageTitle } from '../theme';
 
 const statusMap = {
   pending:   { label: 'รอการอนุมัติ', bg: '#fef9c3', color: '#a16207' },
@@ -66,27 +66,27 @@ export default function UsersPage() {
 
       {toast && (
         <div style={{
-          padding: '10px 16px', marginBottom: 14, borderRadius: radius.sm,
-          background: '#f0fdf4', border: '1px solid #bbf7d0', color: '#166534', fontSize: 14,
+          padding: '10px 16px', marginBottom: 14, borderRadius: R.sm,
+          background: '#f0fdf4', border: `1px solid ${C.ok}33`, color: '#166534', fontSize: 14,
         }}>
           {toast}
         </div>
       )}
 
       {users.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '60px 20px', color: colors.textMuted, fontSize: 15 }}>
+        <div style={{ textAlign: 'center', padding: '60px 20px', color: C.muted, fontSize: 15 }}>
           ยังไม่มีผู้ใช้ในระบบ
         </div>
       ) : (
-        <div style={{ background: colors.card, borderRadius: radius.lg, overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
-          <table style={tableStyle}>
+        <div style={{ background: C.card, borderRadius: R.lg, overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr>
-                <th style={thStyle}>ชื่อ</th>
-                <th style={thStyle}>อีเมล</th>
-                <th style={thStyle}>ห้อง</th>
-                <th style={thStyle}>สถานะ</th>
-                <th style={thStyle}>บทบาท</th>
+                <th style={th}>ชื่อ</th>
+                <th style={th}>อีเมล</th>
+                <th style={th}>ห้อง</th>
+                <th style={th}>สถานะ</th>
+                <th style={th}>บทบาท</th>
               </tr>
             </thead>
             <tbody>
@@ -94,16 +94,16 @@ export default function UsersPage() {
                 const s = statusMap[u.status] || statusMap.pending;
                 return (
                   <tr key={u.id}>
-                    <td style={{ ...tdStyle, fontWeight: 500 }}>{u.full_name}</td>
-                    <td style={{ ...tdStyle, color: colors.textSecondary }}>{u.email}</td>
-                    <td style={tdStyle}>{u.unit_number || '-'}</td>
-                    <td style={tdStyle}>
+                    <td style={{ ...td, fontWeight: 500 }}>{u.full_name}</td>
+                    <td style={{ ...td, color: C.sub }}>{u.email}</td>
+                    <td style={td}>{u.unit_number || '-'}</td>
+                    <td style={td}>
                       <select
                         value={u.status}
                         onChange={(e) => handleStatusChange(u.id, u.full_name, e.target.value)}
                         style={{
-                          padding: '6px 10px', borderRadius: radius.sm, fontSize: 13, fontWeight: 500,
-                          border: `1px solid ${colors.border}`, color: s.color, background: s.bg,
+                          padding: '6px 10px', borderRadius: R.sm, fontSize: 13, fontWeight: 500,
+                          border: `1px solid ${C.border}`, color: s.color, background: s.bg,
                           cursor: 'pointer', minWidth: 120,
                         }}
                       >
@@ -112,13 +112,13 @@ export default function UsersPage() {
                         ))}
                       </select>
                     </td>
-                    <td style={tdStyle}>
+                    <td style={td}>
                       <select
                         value={u.role}
                         onChange={(e) => handleRoleChange(u.id, e.target.value)}
                         style={{
-                          padding: '6px 10px', borderRadius: radius.sm, fontSize: 13,
-                          border: `1px solid ${colors.border}`, cursor: 'pointer', minWidth: 100,
+                          padding: '6px 10px', borderRadius: R.sm, fontSize: 13,
+                          border: `1px solid ${C.border}`, cursor: 'pointer', minWidth: 100,
                         }}
                       >
                         <option value="resident">Resident</option>

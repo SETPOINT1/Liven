@@ -1,10 +1,7 @@
 import { useState, useEffect } from 'react';
 import api from '../services/api';
-import {
-  colors, radius, table as tableStyle, th as thStyle, td as tdStyle,
-  pageTitle, btnPrimary, btnSmall, input as inputBase, label as labelStyle,
-  modalOverlay, modalBox,
-} from '../theme';
+import { supabase } from '../services/supabase';
+import { C, R, card, th, td, pageTitle, btn, btnSm, inp, lbl, overlay, modal } from '../theme';
 import { CameraIcon, CheckIcon } from '../components/Icons';
 
 export default function ParcelsPage() {
@@ -42,10 +39,20 @@ export default function ParcelsPage() {
   }
 
   async function handleSave() {
-    const fd = new FormData();
-    Object.entries(form).forEach(([k, v]) => fd.append(k, v));
-    if (imageFile) fd.append('image', imageFile);
-    await api.post('/parcels/', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+    let imageUrl = '';
+    if (imageFile) {
+      const ext = imageFile.name.split('.').pop();
+      const path = `parcels/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+      const { error: uploadErr } = await supabase.storage.from('parcels').upload(path, imageFile);
+      if (!uploadErr) {
+        const { data: urlData } = supabase.storage.from('parcels').getPublicUrl(path);
+        imageUrl = urlData?.publicUrl || '';
+      }
+    }
+    await api.post('/parcels/', {
+      ...form,
+      image_url: imageUrl,
+    });
     setShowModal(false);
     setForm({ recipient_name: '', unit_number: '', courier: '', tracking_number: '' });
     setImageFile(null);
@@ -69,46 +76,46 @@ export default function ParcelsPage() {
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
         <h1 style={pageTitle}>จัดการพัสดุ</h1>
-        <button style={btnPrimary} onClick={() => setShowModal(true)}>
-          <CameraIcon size={15} color="#fff" /> สแกนพัสดุ
+        <button style={btn} onClick={() => setShowModal(true)}>
+          <CameraIcon s={15} c="#fff" /> สแกนพัสดุ
         </button>
       </div>
 
       {toast && (
         <div style={{
-          padding: '10px 16px', marginBottom: 14, borderRadius: radius.sm,
-          background: '#f0fdf4', border: '1px solid #bbf7d0', color: '#166534', fontSize: 14,
+          padding: '10px 16px', marginBottom: 14, borderRadius: R.sm,
+          background: '#f0fdf4', border: `1px solid ${C.ok}33`, color: '#166534', fontSize: 14,
         }}>
           {toast}
         </div>
       )}
 
       {parcels.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '60px 20px', color: colors.textMuted, fontSize: 15 }}>
+        <div style={{ textAlign: 'center', padding: '60px 20px', color: C.muted, fontSize: 15 }}>
           ยังไม่มีพัสดุในระบบ — กดปุ่ม "สแกนพัสดุ" เพื่อเริ่มต้น
         </div>
       ) : (
-      <div style={{ background: colors.card, borderRadius: 14, overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
-        <table style={tableStyle}>
+      <div style={{ background: C.card, borderRadius: R.lg, overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
             <tr>
-              <th style={thStyle}>ชื่อผู้รับ</th>
-              <th style={thStyle}>ห้อง</th>
-              <th style={thStyle}>ขนส่ง</th>
-              <th style={thStyle}>เลขพัสดุ</th>
-              <th style={thStyle}>สถานะ</th>
-              <th style={thStyle}>วันที่มาถึง</th>
-              <th style={thStyle}>การดำเนินการ</th>
+              <th style={th}>ชื่อผู้รับ</th>
+              <th style={th}>ห้อง</th>
+              <th style={th}>ขนส่ง</th>
+              <th style={th}>เลขพัสดุ</th>
+              <th style={th}>สถานะ</th>
+              <th style={th}>วันที่มาถึง</th>
+              <th style={th}>การดำเนินการ</th>
             </tr>
           </thead>
           <tbody>
             {parcels.map((p) => (
               <tr key={p.id}>
-                <td style={tdStyle}>{p.recipient_name}</td>
-                <td style={tdStyle}>{p.unit_number}</td>
-                <td style={{ ...tdStyle, color: colors.textSecondary }}>{p.courier || '-'}</td>
-                <td style={{ ...tdStyle, fontFamily: 'monospace', fontSize: 13 }}>{p.tracking_number || '-'}</td>
-                <td style={tdStyle}>
+                <td style={td}>{p.recipient_name}</td>
+                <td style={td}>{p.unit_number}</td>
+                <td style={{ ...td, color: C.sub }}>{p.courier || '-'}</td>
+                <td style={{ ...td, fontFamily: 'monospace', fontSize: 13 }}>{p.tracking_number || '-'}</td>
+                <td style={td}>
                   <span style={{
                     fontSize: 11, fontWeight: 500, padding: '2px 8px', borderRadius: 99,
                     background: p.status === 'picked_up' ? '#dcfce7' : '#fef9c3',
@@ -117,14 +124,14 @@ export default function ParcelsPage() {
                     {p.status === 'picked_up' ? 'รับแล้ว' : 'รอรับ'}
                   </span>
                 </td>
-                <td style={{ ...tdStyle, color: colors.textSecondary, fontSize: 13 }}>
+                <td style={{ ...td, color: C.sub, fontSize: 13 }}>
                   {p.arrived_at ? new Date(p.arrived_at).toLocaleDateString('th-TH') : '-'}
                 </td>
-                <td style={tdStyle}>
+                <td style={td}>
                   {p.status === 'pending' && (
-                    <button style={btnSmall(colors.success)} onClick={() => handlePickup(p.id)}>
+                    <button style={btnSm(C.ok)} onClick={() => handlePickup(p.id)}>
                       <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-                        <CheckIcon size={12} color="#fff" /> ยืนยันรับ
+                        <CheckIcon s={12} c="#fff" /> ยืนยันรับ
                       </span>
                     </button>
                   )}
@@ -137,26 +144,26 @@ export default function ParcelsPage() {
       )}
 
       {showModal && (
-        <div style={modalOverlay} onClick={() => setShowModal(false)}>
-          <div style={modalBox} onClick={(e) => e.stopPropagation()}>
-            <h3 style={{ margin: '0 0 18px', fontSize: 16, fontWeight: 600 }}>สแกนพัสดุ (OCR)</h3>
+        <div style={overlay} onClick={() => setShowModal(false)}>
+          <div style={modal} onClick={(e) => e.stopPropagation()}>
+            <h3 style={{ margin: '0 0 18px', fontSize: 16, fontWeight: 600, color: C.text }}>สแกนพัสดุ (OCR)</h3>
             <input type="file" accept="image/*" onChange={(e) => setImageFile(e.target.files[0])} style={{ marginBottom: 12 }} />
-            <button style={{ ...btnPrimary, marginBottom: 20 }} onClick={handleOCR} disabled={!imageFile || ocrLoading}>
+            <button style={{ ...btn, marginBottom: 20 }} onClick={handleOCR} disabled={!imageFile || ocrLoading}>
               {ocrLoading ? 'กำลังสแกน...' : 'สแกน OCR'}
             </button>
             <div>
-              <label style={labelStyle}>ชื่อผู้รับ</label>
-              <input style={inputBase} value={form.recipient_name} onChange={(e) => setForm({ ...form, recipient_name: e.target.value })} />
-              <label style={labelStyle}>หมายเลขห้อง</label>
-              <input style={inputBase} value={form.unit_number} onChange={(e) => setForm({ ...form, unit_number: e.target.value })} />
-              <label style={labelStyle}>บริษัทขนส่ง</label>
-              <input style={inputBase} value={form.courier} onChange={(e) => setForm({ ...form, courier: e.target.value })} />
-              <label style={labelStyle}>เลขพัสดุ</label>
-              <input style={inputBase} value={form.tracking_number} onChange={(e) => setForm({ ...form, tracking_number: e.target.value })} />
+              <label style={lbl}>ชื่อผู้รับ</label>
+              <input style={inp} value={form.recipient_name} onChange={(e) => setForm({ ...form, recipient_name: e.target.value })} />
+              <label style={lbl}>หมายเลขห้อง</label>
+              <input style={inp} value={form.unit_number} onChange={(e) => setForm({ ...form, unit_number: e.target.value })} />
+              <label style={lbl}>บริษัทขนส่ง</label>
+              <input style={inp} value={form.courier} onChange={(e) => setForm({ ...form, courier: e.target.value })} />
+              <label style={lbl}>เลขพัสดุ</label>
+              <input style={inp} value={form.tracking_number} onChange={(e) => setForm({ ...form, tracking_number: e.target.value })} />
             </div>
             <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 8 }}>
-              <button style={{ ...btnPrimary, background: 'transparent', color: colors.text, border: `1px solid ${colors.border}` }} onClick={() => setShowModal(false)}>ยกเลิก</button>
-              <button style={btnPrimary} onClick={handleSave}>บันทึก</button>
+              <button style={{ ...btn, background: 'transparent', color: C.text, border: `1px solid ${C.border}` }} onClick={() => setShowModal(false)}>ยกเลิก</button>
+              <button style={btn} onClick={handleSave}>บันทึก</button>
             </div>
           </div>
         </div>
