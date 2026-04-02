@@ -1,7 +1,7 @@
 ﻿import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { colors, radius } from '../../theme';
-import { EventIcon } from '../TabIcons';
+import { EventIcon, PinIcon } from '../TabIcons';
 
 export default function EventWidget({ data, onPress }) {
   const loading = data === null;
@@ -47,7 +47,7 @@ export default function EventWidget({ data, onPress }) {
             </View>
             <View style={s.cardContent}>
               <Text style={s.evTitle} numberOfLines={2}>{ev.title}</Text>
-              {ev.location ? <Text style={s.evMeta}>📍 {ev.location}</Text> : null}
+              {ev.location ? <View style={{ flexDirection: 'row', alignItems: 'center' }}><PinIcon size={12} color={colors.textMuted} /><Text style={s.evMeta}> {ev.location}</Text></View> : null}
             </View>
           </View>
         ))

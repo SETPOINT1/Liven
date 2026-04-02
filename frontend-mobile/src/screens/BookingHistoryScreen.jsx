@@ -5,7 +5,7 @@ import {
 } from 'react-native';
 import api from '../services/api';
 import { colors, radius, spacing } from '../theme';
-import { EventIcon } from '../components/TabIcons';
+import { EventIcon, CalendarIcon, ClockIcon, AlertIcon } from '../components/TabIcons';
 
 const BookingHistoryScreen = () => {
   const [bookings, setBookings] = useState([]);
@@ -98,8 +98,8 @@ const BookingHistoryScreen = () => {
             <Text style={[styles.statusText, { color: st.color }]}>{st.label}</Text>
           </View>
         </View>
-        <Text style={styles.dateText}>📅 {formatDate(item.start_time)}</Text>
-        <Text style={styles.timeText}>🕐 {formatTime(item.start_time)} - {formatTime(item.end_time)}</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 2 }}><CalendarIcon size={13} color={colors.textSecondary} /><Text style={styles.dateText}> {formatDate(item.start_time)}</Text></View>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}><ClockIcon size={13} color={colors.textSecondary} /><Text style={styles.timeText}> {formatTime(item.start_time)} - {formatTime(item.end_time)}</Text></View>
         {isUpcoming && (
           <TouchableOpacity
             style={[styles.cancelBtn, isCancelling && { opacity: 0.6 }]}
@@ -123,7 +123,7 @@ const BookingHistoryScreen = () => {
     if (error) {
       return (
         <View style={styles.emptyContainer}>
-          <Text style={styles.emptyIcon}>⚠️</Text>
+          <AlertIcon size={32} color={colors.textMuted} />
           <Text style={styles.emptyTitle}>ไม่สามารถโหลดข้อมูลได้</Text>
           <TouchableOpacity style={styles.retryBtn} onPress={fetchData} accessibilityLabel="ลองใหม่" accessibilityRole="button">
             <Text style={styles.retryBtnText}>ลองใหม่</Text>

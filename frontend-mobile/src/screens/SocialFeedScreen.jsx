@@ -8,6 +8,7 @@ import Svg, { Path } from 'react-native-svg';
 import api from '../services/api';
 import { supabase } from '../services/supabase';
 import { colors, radius } from '../theme';
+import { PinIcon, AlertIcon, ChatbotIcon } from '../components/TabIcons';
 
 function getRelativeTime(dateStr) {
   const now = new Date();
@@ -152,7 +153,7 @@ const SocialFeedScreen = () => {
     return (
       <View style={st.card}>
         {(item.is_pinned || item.post_type === 'alert') && (
-          <View style={st.pinnedBar}><Text style={st.pinnedText}>📌 ปักหมุดโดยนิติบุคคล</Text></View>
+          <View style={st.pinnedBar}><View style={st.pinnedRow}><PinIcon size={14} color="#92400E" /><Text style={st.pinnedText}> ปักหมุดโดยนิติบุคคล</Text></View></View>
         )}
         {/* Author row */}
         <View style={st.authorRow}>
@@ -175,7 +176,7 @@ const SocialFeedScreen = () => {
         {/* Stats row */}
         {(item.like_count > 0 || item.comment_count > 0) && (
           <View style={st.statsRow}>
-            {item.like_count > 0 && <Text style={st.statsText}>❤️ {item.like_count}</Text>}
+            {item.like_count > 0 && <Text style={st.statsText}>{item.is_liked ? '♥' : '♥'} {item.like_count}</Text>}
             {item.comment_count > 0 && (
               <Text style={st.statsText}>{item.comment_count} ความคิดเห็น</Text>
             )}
@@ -221,7 +222,7 @@ const SocialFeedScreen = () => {
         ListEmptyComponent={
           fetchError ? (
             <View style={st.emptyContainer}>
-              <Text style={st.emptyIcon}>⚠️</Text>
+              <AlertIcon size={32} color={colors.textMuted} />
               <Text style={st.emptyTitle}>ไม่สามารถโหลดโพสต์ได้</Text>
               <TouchableOpacity style={st.retryBtn} onPress={() => { setRefreshing(true); fetchPosts(); }}>
                 <Text style={st.retryBtnText}>ลองใหม่</Text>
@@ -229,7 +230,7 @@ const SocialFeedScreen = () => {
             </View>
           ) : (
             <View style={st.emptyContainer}>
-              <Text style={st.emptyIcon}>💬</Text>
+              <ChatbotIcon size={32} color={colors.textMuted} />
               <Text style={st.emptyTitle}>ยังไม่มีโพสต์</Text>
               <Text style={st.emptyDesc}>เริ่มสร้างโพสต์แรกเพื่อพูดคุยกับเพื่อนบ้าน</Text>
             </View>
@@ -336,6 +337,7 @@ const st = StyleSheet.create({
     borderTopWidth: 0.5, borderTopColor: '#E8E8E8',
   },
   pinnedBar: { backgroundColor: colors.warningLight, paddingHorizontal: 16, paddingVertical: 6 },
+  pinnedRow: { flexDirection: 'row', alignItems: 'center' },
   pinnedText: { fontSize: 12, color: '#92400E', fontWeight: '500' },
   authorRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingTop: 14, paddingBottom: 8 },
   avatar: { width: 40, height: 40, borderRadius: 20, justifyContent: 'center', alignItems: 'center', marginRight: 10 },

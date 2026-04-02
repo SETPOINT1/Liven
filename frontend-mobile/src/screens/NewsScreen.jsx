@@ -4,7 +4,7 @@ import {
   ActivityIndicator, RefreshControl,
 } from 'react-native';
 import api from '../services/api';
-import { EventIcon, AnnouncementIcon } from '../components/TabIcons';
+import { EventIcon, AnnouncementIcon, PinIcon, NewsIcon, AlertIcon } from '../components/TabIcons';
 
 import { colors, radius } from '../theme';
 
@@ -88,7 +88,7 @@ const NewsScreen = ({ route }) => {
           <Text style={styles.contentText} numberOfLines={3}>{item.content}</Text>
         ) : null}
         {isEvent && item.location ? (
-          <Text style={styles.locationText}>📍 {item.location}</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}><PinIcon size={13} color={colors.textSecondary} /><Text style={styles.locationText}> {item.location}</Text></View>
         ) : null}
       </View>
     );
@@ -119,7 +119,7 @@ const NewsScreen = ({ route }) => {
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); fetchData(); }} />}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <Text style={styles.emptyIcon}>📰</Text>
+            <NewsIcon size={32} color={colors.textMuted} />
             <Text style={styles.emptyTitle}>ไม่มีข่าวสารหรือกิจกรรม</Text>
             <Text style={styles.emptyDesc}>ข่าวสารและกิจกรรมจากนิติบุคคลจะแสดงที่นี่</Text>
           </View>

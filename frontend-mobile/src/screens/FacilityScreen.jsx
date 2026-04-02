@@ -7,7 +7,7 @@ import { useNavigation } from '@react-navigation/native';
 import api from '../services/api';
 import { supabase } from '../services/supabase';
 import { colors, radius, spacing } from '../theme';
-import { FacilityIcon } from '../components/TabIcons';
+import { FacilityIcon, ClockIcon, CalendarIcon, CheckCircleIcon, AlertIcon, ClipboardIcon } from '../components/TabIcons';
 
 const PLACEHOLDER_IMG = 'https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=400';
 
@@ -59,16 +59,16 @@ const FacilityScreen = () => {
           </View>
         </View>
         <Text style={styles.type}>{item.type}</Text>
-        {item.operating_hours ? <Text style={styles.hours}>🕐 {item.operating_hours}</Text> : null}
+        {item.operating_hours ? <View style={styles.metaItem}><ClockIcon size={14} color={colors.textSecondary} /><Text style={styles.hours}> {item.operating_hours}</Text></View> : null}
         {item.description ? <Text style={styles.desc} numberOfLines={2}>{item.description}</Text> : null}
         <View style={styles.cardFooter}>
           {item.requires_booking ? (
             <View style={styles.bookTag}>
-              <Text style={styles.bookTagText}>📅 ต้องจองล่วงหน้า</Text>
+              <Text style={styles.bookTagText}><CalendarIcon size={12} color="#92400E" /> ต้องจองล่วงหน้า</Text>
             </View>
           ) : (
             <View style={styles.freeTag}>
-              <Text style={styles.freeTagText}>✅ ใช้งานได้เลย</Text>
+              <Text style={styles.freeTagText}><CheckCircleIcon size={12} color="#065F46" /> ใช้งานได้เลย</Text>
             </View>
           )}
           <Text style={styles.viewMore}>ดูรายละเอียด →</Text>
@@ -81,7 +81,7 @@ const FacilityScreen = () => {
     if (error) {
       return (
         <View style={styles.emptyContainer}>
-          <Text style={styles.emptyIcon}>⚠️</Text>
+          <AlertIcon size={32} color={colors.textMuted} />
           <Text style={styles.emptyTitle}>ไม่สามารถโหลดข้อมูลได้</Text>
           <Text style={styles.emptyText}>กรุณาตรวจสอบการเชื่อมต่อแล้วลองใหม่</Text>
           <TouchableOpacity style={styles.retryBtn} onPress={fetchData} accessibilityLabel="ลองใหม่" accessibilityRole="button">
@@ -114,7 +114,7 @@ const FacilityScreen = () => {
         ListHeaderComponent={
           <TouchableOpacity style={styles.historyLink} onPress={() => navigation.navigate('BookingHistory')}
             accessibilityLabel="ประวัติการจอง" accessibilityRole="button">
-            <Text style={styles.historyLinkText}>📋 ดูประวัติการจอง ›</Text>
+            <Text style={styles.historyLinkText}><ClipboardIcon size={14} color={colors.accent} /> ดูประวัติการจอง ›</Text>
           </TouchableOpacity>
         }
         ListEmptyComponent={renderEmpty}
@@ -142,6 +142,7 @@ const styles = StyleSheet.create({
   badgeText: { fontSize: 12, fontWeight: '600' },
   type: { fontSize: 12, color: colors.textSecondary, marginTop: 4, textTransform: 'capitalize' },
   hours: { fontSize: 13, color: colors.textSecondary, marginTop: 4 },
+  metaItem: { flexDirection: 'row', alignItems: 'center', marginTop: 4 },
   desc: { fontSize: 13, color: colors.textSecondary, marginTop: 4, lineHeight: 19 },
   cardFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 10 },
   bookTag: { backgroundColor: colors.warningLight, borderRadius: radius.sm, paddingHorizontal: 10, paddingVertical: 4 },

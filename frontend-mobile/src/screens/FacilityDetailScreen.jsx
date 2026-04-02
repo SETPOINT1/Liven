@@ -6,6 +6,7 @@ import {
 import api from '../services/api';
 import { supabase } from '../services/supabase';
 import { colors, radius, spacing } from '../theme';
+import { ClockIcon, CheckCircleIcon } from '../components/TabIcons';
 
 const PLACEHOLDER_IMG = 'https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800';
 
@@ -109,7 +110,7 @@ const FacilityDetailScreen = ({ route }) => {
         </View>
 
         {facility.operating_hours ? (
-          <Text style={styles.hours}>🕐 เวลาเปิด-ปิด: {facility.operating_hours}</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}><ClockIcon size={14} color={colors.textSecondary} /><Text style={styles.hours}> เวลาเปิด-ปิด: {facility.operating_hours}</Text></View>
         ) : null}
 
         {facility.description ? (
@@ -118,7 +119,7 @@ const FacilityDetailScreen = ({ route }) => {
 
         {!facility.requires_booking ? (
           <View style={styles.noBookingBox}>
-            <Text style={styles.noBookingIcon}>✅</Text>
+            <CheckCircleIcon size={28} color="#065F46" />
             <Text style={styles.noBookingText}>ใช้งานได้เลย ไม่ต้องจองล่วงหน้า</Text>
           </View>
         ) : (

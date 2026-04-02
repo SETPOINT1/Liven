@@ -9,11 +9,11 @@ import api from '../services/api';
 import { colors, radius } from '../theme';
 
 const SUGGESTIONS = [
-  { emoji: '🏋️', text: 'ฟิตเนสเปิดกี่โมง?' },
-  { emoji: '📦', text: 'รับพัสดุที่ไหน?' },
-  { emoji: '🏢', text: 'จองห้องประชุมยังไง?' },
-  { emoji: '💰', text: 'ค่าส่วนกลางจ่ายยังไง?' },
-  { emoji: '🔧', text: 'แจ้งซ่อมยังไง?' },
+  { text: 'ฟิตเนสเปิดกี่โมง?' },
+  { text: 'รับพัสดุที่ไหน?' },
+  { text: 'จองห้องประชุมยังไง?' },
+  { text: 'ค่าส่วนกลางจ่ายยังไง?' },
+  { text: 'แจ้งซ่อมยังไง?' },
 ];
 
 function SendIcon({ size = 20, color = '#FFF' }) {
@@ -130,7 +130,7 @@ export default function ChatbotScreen() {
             <Text style={[s.msgText, item.isBot ? s.botText : s.userText]}>{item.text}</Text>
             {item.isEscalated && (
               <View style={s.escalatedRow}>
-                <Text style={s.escalatedText}>📋 ส่งต่อไปยังนิติบุคคลแล้ว</Text>
+                <Text style={s.escalatedText}>ส่งต่อไปยังนิติบุคคลแล้ว</Text>
               </View>
             )}
           </View>
@@ -165,7 +165,7 @@ export default function ChatbotScreen() {
             <Text style={s.emptySubtitle}>ผู้ช่วยอัจฉริยะประจำชุมชน</Text>
 
             <View style={s.emptyCard}>
-              <Text style={s.emptyCardTitle}>สวัสดีครับ! 👋</Text>
+              <Text style={s.emptyCardTitle}>สวัสดีครับ!</Text>
               <Text style={s.emptyCardText}>
                 ผมช่วยตอบคำถามเกี่ยวกับชุมชนได้ครับ เช่น สิ่งอำนวยความสะดวก พัสดุ กิจกรรม หรือกฎระเบียบ
               </Text>
@@ -176,7 +176,6 @@ export default function ChatbotScreen() {
               {SUGGESTIONS.map((q, i) => (
                 <TouchableOpacity key={i} style={s.suggestionChip} onPress={() => handleSend(q.text)}
                   accessibilityLabel={q.text} accessibilityRole="button">
-                  <Text style={s.suggestionEmoji}>{q.emoji}</Text>
                   <Text style={s.suggestionText}>{q.text}</Text>
                 </TouchableOpacity>
               ))}
