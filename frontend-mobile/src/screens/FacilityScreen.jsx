@@ -111,17 +111,14 @@ const FacilityScreen = () => {
         renderItem={renderFacility}
         contentContainerStyle={styles.list}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); fetchData(); }} />}
+        ListHeaderComponent={
+          <TouchableOpacity style={styles.historyLink} onPress={() => navigation.navigate('BookingHistory')}
+            accessibilityLabel="ประวัติการจอง" accessibilityRole="button">
+            <Text style={styles.historyLinkText}>📋 ดูประวัติการจอง ›</Text>
+          </TouchableOpacity>
+        }
         ListEmptyComponent={renderEmpty}
       />
-      <TouchableOpacity
-        style={styles.fab}
-        activeOpacity={0.85}
-        onPress={() => navigation.navigate('BookingHistory')}
-        accessibilityLabel="ประวัติการจอง"
-        accessibilityRole="button"
-      >
-        <Text style={styles.fabText}>📋 ประวัติการจอง</Text>
-      </TouchableOpacity>
     </View>
   );
 };
@@ -129,13 +126,13 @@ const FacilityScreen = () => {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.bg },
-  list: { padding: spacing.lg, paddingBottom: 80 },
+  list: { padding: spacing.lg, paddingBottom: 16 },
   card: {
     backgroundColor: colors.card, borderRadius: radius.md, marginBottom: 14,
     elevation: 2, shadowColor: '#000', shadowOpacity: 0.08, shadowRadius: 4,
     shadowOffset: { width: 0, height: 2 }, overflow: 'hidden',
   },
-  cardImage: { width: '100%', height: 150, backgroundColor: colors.border },
+  cardImage: { width: '100%', height: 130, backgroundColor: colors.border },
   cardBody: { padding: 14 },
   cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   facilityName: { fontSize: 16, fontWeight: '700', color: colors.text, flex: 1, marginRight: 8 },
@@ -162,13 +159,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24, paddingVertical: 10, marginTop: 16,
   },
   retryBtnText: { color: '#FFF', fontWeight: '600', fontSize: 14 },
-  // FAB
-  fab: {
-    position: 'absolute', bottom: 24, alignSelf: 'center',
-    backgroundColor: colors.primary, borderRadius: 24, paddingVertical: 12, paddingHorizontal: 24,
-    elevation: 6, shadowColor: '#000', shadowOpacity: 0.2, shadowRadius: 6, shadowOffset: { width: 0, height: 3 },
+  // History link
+  historyLink: {
+    backgroundColor: colors.accentLight, borderRadius: radius.sm,
+    paddingVertical: 12, paddingHorizontal: 16, marginBottom: 14, alignItems: 'center',
   },
-  fabText: { color: '#FFF', fontWeight: '700', fontSize: 14 },
+  historyLinkText: { fontSize: 14, fontWeight: '600', color: colors.accent },
 });
 
 export default FacilityScreen;

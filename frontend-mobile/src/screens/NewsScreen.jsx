@@ -4,7 +4,7 @@ import {
   ActivityIndicator, RefreshControl,
 } from 'react-native';
 import api from '../services/api';
-import { EventIcon, ChatbotIcon } from '../components/TabIcons';
+import { EventIcon, AnnouncementIcon } from '../components/TabIcons';
 
 import { colors, radius } from '../theme';
 
@@ -66,7 +66,7 @@ const NewsScreen = ({ route }) => {
           <View style={[styles.iconWrap, { backgroundColor: isEvent ? colors.accentLight : '#F3E8FF' }]}>
             {isEvent
               ? <EventIcon size={16} color={colors.accent} />
-              : <ChatbotIcon size={16} color="#805AD5" />
+              : <AnnouncementIcon size={16} color="#805AD5" />
             }
           </View>
           <View style={{ flex: 1 }}>

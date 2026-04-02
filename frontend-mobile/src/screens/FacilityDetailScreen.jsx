@@ -88,12 +88,13 @@ const FacilityDetailScreen = ({ route }) => {
   };
 
   return (
-    <ScrollView
-      style={styles.container}
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); fetchSlots(selectedDate); }} />
-      }
-    >
+    <View style={{ flex: 1, backgroundColor: colors.bg }}>
+      <ScrollView
+        style={styles.container}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); fetchSlots(selectedDate); }} />
+        }
+      >
       <Image source={{ uri: facility.image_url || PLACEHOLDER_IMG }} style={styles.heroImage} />
 
       <View style={styles.content}>
@@ -179,32 +180,42 @@ const FacilityDetailScreen = ({ route }) => {
             )}
 
             {selectedSlot && (
-              <TouchableOpacity
-                style={[styles.bookBtn, booking && { opacity: 0.6 }]}
-                onPress={handleBook}
-                disabled={booking}
-                accessibilityLabel="ยืนยันจอง"
-                accessibilityRole="button"
-              >
-                {booking ? (
-                  <ActivityIndicator color="#FFF" />
-                ) : (
-                  <Text style={styles.bookBtnText}>
-                    ยืนยันจอง {formatTime(selectedSlot.start_time)} - {formatTime(selectedSlot.end_time)}
-                  </Text>
-                )}
-              </TouchableOpacity>
+              <View style={styles.selectedInfo}>
+                <Text style={styles.selectedText}>
+                  เลือก: {formatTime(selectedSlot.start_time)} - {formatTime(selectedSlot.end_time)}
+                </Text>
+              </View>
             )}
           </View>
         )}
       </View>
     </ScrollView>
+
+    {/* Sticky book button */}
+    {selectedSlot && (
+      <View style={styles.stickyBar}>
+        <TouchableOpacity
+          style={[styles.bookBtn, booking && { opacity: 0.6 }]}
+          onPress={handleBook} disabled={booking}
+          accessibilityLabel="ยืนยันจอง" accessibilityRole="button"
+        >
+          {booking ? (
+            <ActivityIndicator color="#FFF" />
+          ) : (
+            <Text style={styles.bookBtnText}>
+              ยืนยันจอง {formatTime(selectedSlot.start_time)} - {formatTime(selectedSlot.end_time)}
+            </Text>
+          )}
+        </TouchableOpacity>
+      </View>
+    )}
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
-  heroImage: { width: '100%', height: 220, backgroundColor: colors.border },
+  heroImage: { width: '100%', height: 180, backgroundColor: colors.border },
   content: { padding: spacing.xl },
   name: { fontSize: 22, fontWeight: '700', color: colors.text, marginBottom: 8 },
   metaRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 12 },
@@ -248,9 +259,15 @@ const styles = StyleSheet.create({
   slotTextSelected: { color: '#FFF' },
   slotBooked: { fontSize: 10, color: colors.textMuted, marginTop: 2 },
   emptySlots: { color: colors.textMuted, textAlign: 'center', marginTop: 16 },
+  selectedInfo: { backgroundColor: colors.accentLight, borderRadius: radius.sm, padding: 10, marginTop: 12, alignItems: 'center' },
+  selectedText: { fontSize: 13, fontWeight: '600', color: colors.accent },
+  stickyBar: {
+    backgroundColor: '#FFF', paddingHorizontal: 16, paddingVertical: 12,
+    borderTopWidth: 0.5, borderTopColor: colors.border,
+  },
   bookBtn: {
     backgroundColor: colors.primary, borderRadius: radius.md,
-    padding: 16, alignItems: 'center', marginTop: 20, marginBottom: 32,
+    padding: 16, alignItems: 'center',
   },
   bookBtnText: { color: '#FFF', fontWeight: '700', fontSize: 16 },
 });

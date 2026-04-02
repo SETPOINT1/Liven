@@ -12,7 +12,7 @@ export const colors = {
   textMuted: '#A0AEC0',
   border: '#E2E8F0',
   borderLight: '#EDF2F7',
-  bg: '#F7F8FA',
+  bg: '#F0F2F5',
   card: '#FFFFFF',
   success: '#38A169',
   successLight: '#C6F6D5',

@@ -23,7 +23,13 @@ export default function QuickMenu({ navigation, parcelCount }) {
           return (
             <TouchableOpacity
               key={m.label} style={s.item}
-              onPress={() => navigation.navigate(m.screen)}
+              onPress={() => {
+                if (m.screen === 'Facility') {
+                  navigation.navigate('Facility', { screen: 'FacilityList' });
+                } else {
+                  navigation.navigate(m.screen);
+                }
+              }}
               activeOpacity={0.65}
               accessibilityLabel={m.label} accessibilityRole="button"
             >
