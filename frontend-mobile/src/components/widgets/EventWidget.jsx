@@ -29,9 +29,6 @@ export default function EventWidget({ onPress, navigation }) {
             <Text style={s.evTitle} numberOfLines={1}>{ev.title}</Text>
             <Text style={s.evMeta}>{formatDate(ev.event_date)} {formatTime(ev.event_date) ? '• ' + formatTime(ev.event_date) : ''}</Text>
             {ev.location ? <Text style={s.evMeta}>{ev.location}</Text> : null}
-            <TouchableOpacity style={s.joinBtn} onPress={() => navigation?.navigate('News')} activeOpacity={0.7}>
-              <Text style={s.joinBtnText}>ลงทะเบียนเข้าร่วม</Text>
-            </TouchableOpacity>
           </View>
         ))
       )}
@@ -46,7 +43,5 @@ const s = StyleSheet.create({
   card: { backgroundColor: colors.card, borderRadius: radius.md, padding: 14, marginBottom: 8, elevation: 2, shadowColor: '#000', shadowOpacity: 0.06, shadowRadius: 4, shadowOffset: { width: 0, height: 2 } },
   evTitle: { fontSize: 15, fontWeight: '600', color: colors.text, marginBottom: 4 },
   evMeta: { fontSize: 12, color: colors.textMuted, marginBottom: 2 },
-  joinBtn: { backgroundColor: colors.primary, borderRadius: radius.sm, paddingVertical: 10, alignItems: 'center', marginTop: 10 },
-  joinBtnText: { color: '#FFF', fontSize: 14, fontWeight: '600' },
   muted: { color: colors.textMuted, fontSize: 13 },
 });
