@@ -24,7 +24,7 @@ _POLL_MAX_ATTEMPTS = 30
 
 _TYPHOON_OCR_URL = "https://api.opentyphoon.ai/v1/ocr"
 _TYPHOON_CHAT_URL = "https://api.opentyphoon.ai/v1/chat/completions"
-_TYPHOON_LLM_MODEL = "typhoon-v2.1-12b-instruct"
+_TYPHOON_LLM_MODEL = "typhoon-v2.5-30b-a3b-instruct"
 
 
 def scan_parcel_image(image_data: bytes) -> dict:
@@ -247,29 +247,24 @@ def _call_typhoon_llm(raw_text: str) -> dict:
         logger.warning("Typhoon API key not configured — using fallback.")
         return _typhoon_fallback(raw_text)
 
-    headers = {
-        "Authorization": f"Bearer {api_key}",
-        "Content-Type": "application/json",
-    }
-    payload = {
-        "model": _TYPHOON_LLM_MODEL,
-        "messages": [
-            {"role": "system", "content": _TYPHOON_SYSTEM_PROMPT},
-            {"role": "user", "content": raw_text},
-        ],
-        "max_tokens": 512,
-        "temperature": 0.1,
-    }
-
     try:
-        resp = requests.post(_TYPHOON_CHAT_URL, headers=headers, json=payload, timeout=30)
-        if resp.status_code != 200:
-            logger.error(
-                "Typhoon LLM HTTP %s — body: %s", resp.status_code, resp.text[:500]
-            )
-            resp.raise_for_status()
-        data = resp.json()
-        content = data["choices"][0]["message"]["content"]
+        from openai import OpenAI
+
+        client = OpenAI(
+            api_key=api_key,
+            base_url="https://api.opentyphoon.ai/v1",
+        )
+        response = client.chat.completions.create(
+            model=_TYPHOON_LLM_MODEL,
+            messages=[
+                {"role": "system", "content": _TYPHOON_SYSTEM_PROMPT},
+                {"role": "user", "content": raw_text},
+            ],
+            max_completion_tokens=512,
+            temperature=0.1,
+            top_p=0.6,
+        )
+        content = response.choices[0].message.content
         return _parse_typhoon_response(content)
     except Exception as exc:
         logger.error("Typhoon LLM error: %s — using fallback.", exc)
