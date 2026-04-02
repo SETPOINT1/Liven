@@ -38,8 +38,7 @@ export default function HomeScreen() {
   return (
     <ScrollView style={s.container} contentContainerStyle={s.content}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.accent} />}>
-      <Text style={s.greeting}>สวัสดี, คุณ{userName || 'ลูกบ้าน'}</Text>
-      <Text style={s.sub}>ยินดีต้อนรับสู่ Liven - ระบบจัดการชุมชนอัจฉริยะ</Text>
+
       <View style={s.projectCard}>
         <Text style={s.projectName}>{projectName}</Text>
         <Text style={s.projectDate}>{today}</Text>
