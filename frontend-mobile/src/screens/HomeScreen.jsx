@@ -29,13 +29,18 @@ const HomeScreen = () => {
   useEffect(() => {
     const fetchRecommendation = async () => {
       try {
-        const res = await api.get('/bookings/');
-        const bookings = res.data.results || res.data || [];
+        const [bookingsRes, facilitiesRes] = await Promise.all([
+          api.get('/bookings/'),
+          api.get('/facilities/'),
+        ]);
+        const bookings = bookingsRes.data.results || bookingsRes.data || [];
+        const facilities = facilitiesRes.data.results || facilitiesRes.data || [];
+        const facilityMap = {};
+        facilities.forEach((f) => { facilityMap[f.id] = f.name; });
         if (bookings.length > 0) {
-          // Find most frequently booked facility
           const counts = {};
           bookings.forEach((b) => {
-            const name = b.facility_name || b.facility_id;
+            const name = facilityMap[b.facility_id] || b.facility_name || 'สิ่งอำนวยความสะดวก';
             counts[name] = (counts[name] || 0) + 1;
           });
           const top = Object.entries(counts).sort((a, b) => b[1] - a[1])[0];

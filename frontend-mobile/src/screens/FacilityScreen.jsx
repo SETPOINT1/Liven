@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+﻿import React, { useState, useEffect, useCallback } from 'react';
 import {
   View, Text, FlatList, TouchableOpacity, StyleSheet, Image,
   ActivityIndicator, RefreshControl,
@@ -78,13 +78,6 @@ const FacilityScreen = () => {
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity
-        style={styles.historyBtn}
-        activeOpacity={0.7}
-        onPress={() => navigation.navigate('BookingHistory')}
-      >
-        <Text style={styles.historyBtnText}>📋 ประวัติการจอง</Text>
-      </TouchableOpacity>
       <FlatList
         data={facilities}
         keyExtractor={(item) => item.id}
@@ -93,6 +86,13 @@ const FacilityScreen = () => {
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); fetchData(); }} />}
         ListEmptyComponent={<Text style={styles.emptyText}>ไม่มีสิ่งอำนวยความสะดวก</Text>}
       />
+      <TouchableOpacity
+        style={styles.fab}
+        activeOpacity={0.85}
+        onPress={() => navigation.navigate('BookingHistory')}
+      >
+        <Text style={styles.fabText}>📋 ประวัติการจอง</Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -100,7 +100,7 @@ const FacilityScreen = () => {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F3F4F6' },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  list: { padding: 16 },
+  list: { padding: 16, paddingBottom: 80 },
   card: { backgroundColor: '#FFF', borderRadius: 12, marginBottom: 14, elevation: 2, shadowColor: '#000', shadowOpacity: 0.08, shadowRadius: 4, shadowOffset: { width: 0, height: 2 }, overflow: 'hidden' },
   cardImage: { width: '100%', height: 150, backgroundColor: '#E5E7EB' },
   cardBody: { padding: 14 },
@@ -120,11 +120,12 @@ const styles = StyleSheet.create({
   freeTagText: { fontSize: 12, fontWeight: '600', color: '#065F46' },
   viewMore: { fontSize: 13, color: '#4F46E5', fontWeight: '600' },
   emptyText: { textAlign: 'center', color: '#9CA3AF', marginTop: 40 },
-  historyBtn: {
-    backgroundColor: '#4F46E5', borderRadius: 10, paddingVertical: 10,
-    marginHorizontal: 16, marginTop: 12, alignItems: 'center',
+  fab: {
+    position: 'absolute', bottom: 24, alignSelf: 'center',
+    backgroundColor: '#4F46E5', borderRadius: 24, paddingVertical: 12, paddingHorizontal: 24,
+    elevation: 6, shadowColor: '#000', shadowOpacity: 0.2, shadowRadius: 6, shadowOffset: { width: 0, height: 3 },
   },
-  historyBtnText: { color: '#FFF', fontWeight: '600', fontSize: 14 },
+  fabText: { color: '#FFF', fontWeight: '700', fontSize: 14 },
 });
 
 export default FacilityScreen;

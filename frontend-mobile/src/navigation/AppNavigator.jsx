@@ -41,7 +41,7 @@ const Tabs = createBottomTabNavigator({
   },
   screens: {
     Home: { screen: HomeScreen, options: { title: 'หน้าหลัก' } },
-    Facility: { screen: FacilityStack, options: { title: 'ส่วนกลาง', headerShown: false } },
+    Facility: { screen: FacilityStack, options: { title: 'ส่วนกลาง' } },
     News: { screen: NewsScreen, options: { title: 'ข่าวสาร' } },
     Parcel: { screen: ParcelScreen, options: { title: 'พัสดุ' } },
     Social: { screen: SocialFeedScreen, options: { title: 'ฟีด' } },
