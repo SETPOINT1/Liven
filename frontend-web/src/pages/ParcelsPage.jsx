@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import api from '../services/api';
 import { supabase } from '../services/supabase';
+import { useAuth } from '../hooks/useAuth';
 import { C, R, card, th, td, pageTitle, btn, btnSm, inp, lbl, overlay, modal } from '../theme';
 import { CameraIcon, CheckIcon } from '../components/Icons';
 
 export default function ParcelsPage() {
+  const { user } = useAuth();
   const [parcels, setParcels] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -52,6 +54,7 @@ export default function ParcelsPage() {
     await api.post('/parcels/', {
       ...form,
       image_url: imageUrl,
+      project_id: user?.project_id,
     });
     setShowModal(false);
     setForm({ recipient_name: '', unit_number: '', courier: '', tracking_number: '' });
