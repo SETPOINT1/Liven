@@ -1,7 +1,7 @@
 import { NavLink, Outlet } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { C, R } from '../theme';
-import { DashboardIcon, UsersIcon, ParcelIcon, EventIcon, ChatIcon, BarChartIcon, PlusIcon, BellIcon, LogoIcon, BuildingIcon, CalendarCheckIcon } from './Icons';
+import { DashboardIcon, UsersIcon, ParcelIcon, EventIcon, ChatIcon, PlusIcon, BellIcon, LogoIcon, BuildingIcon, CalendarCheckIcon } from './Icons';
 
 const nav = [
   { to:'/',label:'แดชบอร์ด',icon:DashboardIcon },
@@ -9,7 +9,6 @@ const nav = [
   { to:'/parcels',label:'จัดการพัสดุ',icon:ParcelIcon },
   { to:'/events',label:'จัดการกิจกรรม',icon:EventIcon },
   { to:'/social',label:'Social Feed',icon:ChatIcon },
-  { to:'/analytics',label:'Analytics',icon:BarChartIcon },
   { to:'/facilities',label:'สิ่งอำนวยความสะดวก',icon:BuildingIcon },
   { to:'/bookings',label:'การจอง',icon:CalendarCheckIcon },
   { to:'/register-user',label:'ลงทะเบียน',icon:PlusIcon },

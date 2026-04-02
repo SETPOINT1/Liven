@@ -7,7 +7,6 @@ import UsersPage from './pages/UsersPage';
 import ParcelsPage from './pages/ParcelsPage';
 import EventsPage from './pages/EventsPage';
 import SocialFeedPage from './pages/SocialFeedPage';
-import AnalyticsPage from './pages/AnalyticsPage';
 import RegisterUserPage from './pages/RegisterUserPage';
 import FacilitiesPage from './pages/FacilitiesPage';
 import BookingsPage from './pages/BookingsPage';
@@ -29,7 +28,6 @@ function App() {
           <Route path="/parcels" element={<ParcelsPage />} />
           <Route path="/events" element={<EventsPage />} />
           <Route path="/social" element={<SocialFeedPage />} />
-          <Route path="/analytics" element={<AnalyticsPage />} />
           <Route path="/facilities" element={<FacilitiesPage />} />
           <Route path="/bookings" element={<BookingsPage />} />
           <Route path="/register-user" element={<RegisterUserPage />} />
