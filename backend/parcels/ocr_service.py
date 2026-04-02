@@ -1,13 +1,12 @@
 """
 OCR Pipeline Service — Typhoon OCR + Typhoon LLM (with Azure CV fallback).
 
-Primary:  Typhoon OCR 1.5 reads parcel label images (optimized for Thai).
+Primary:  Typhoon OCR 1.5 via /v1/ocr endpoint (multipart upload).
 Fallback: Azure Computer Vision Read API.
-Then:     Typhoon v2.5 LLM parses the raw text into structured fields.
+Then:     Typhoon LLM parses the raw text into structured fields.
 
 Requirements: 9.1, 9.2, 9.4, 9.5
 """
-import base64
 import json
 import logging
 import tempfile
@@ -18,31 +17,18 @@ from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
-# Confidence threshold: >= 60% returns data, < 60% returns empty form
 CONFIDENCE_THRESHOLD = 0.60
 
-# Azure CV polling settings
-_POLL_INTERVAL = 1  # seconds
+_POLL_INTERVAL = 1
 _POLL_MAX_ATTEMPTS = 30
 
-# Typhoon endpoints
+_TYPHOON_OCR_URL = "https://api.opentyphoon.ai/v1/ocr"
 _TYPHOON_CHAT_URL = "https://api.opentyphoon.ai/v1/chat/completions"
-_TYPHOON_LLM_MODEL = "typhoon-v2.5-30b-a3b-instruct"
+_TYPHOON_LLM_MODEL = "typhoon-v2.1-12b-instruct"
 
 
 def scan_parcel_image(image_data: bytes) -> dict:
-    """Main entry point — scan a parcel label image and return structured data.
-
-    Pipeline:
-        1. Try Typhoon OCR first (best for Thai text).
-        2. Fall back to Azure CV if Typhoon OCR fails.
-        3. Use Typhoon LLM to parse raw text into structured fields.
-
-    Returns:
-        dict with keys: recipient_name, unit_number, courier,
-        tracking_number, confidence.
-        If confidence < 60%, all text fields are empty strings.
-    """
+    """Scan a parcel label image and return structured data."""
     empty_result = {
         "recipient_name": "",
         "unit_number": "",
@@ -51,7 +37,7 @@ def scan_parcel_image(image_data: bytes) -> dict:
         "confidence": 0.0,
     }
 
-    # Step 1 — OCR: try Typhoon OCR first, then Azure CV
+    # Step 1 — OCR: Typhoon OCR first, Azure CV fallback
     raw_text, confidence = _call_typhoon_ocr(image_data)
 
     if not raw_text:
@@ -69,54 +55,74 @@ def scan_parcel_image(image_data: bytes) -> dict:
 
 
 # ---------------------------------------------------------------------------
-# Typhoon OCR 1.5
+# Typhoon OCR 1.5 — /v1/ocr multipart endpoint
 # ---------------------------------------------------------------------------
 
 def _call_typhoon_ocr(image_data: bytes) -> tuple:
-    """Call Typhoon OCR 1.5 via the typhoon_ocr library.
+    """Call Typhoon OCR 1.5 via /v1/ocr endpoint (multipart file upload).
 
     Returns:
         (raw_text: str, confidence: float)
-        Typhoon OCR doesn't return per-word confidence, so we use 0.85
-        as a reasonable default when text is returned successfully.
     """
     api_key = getattr(settings, "TYPHOON_API_KEY", "") or ""
     if not api_key:
         logger.warning("Typhoon API key not configured — skipping Typhoon OCR.")
         return ("", 0.0)
 
+    headers = {"Authorization": f"Bearer {api_key}"}
+
+    # Write to temp file so we can send as multipart
+    with tempfile.NamedTemporaryFile(suffix=".jpg", delete=False) as tmp:
+        tmp.write(image_data)
+        tmp_path = tmp.name
+
     try:
+        with open(tmp_path, "rb") as f:
+            files = {"file": ("parcel.jpg", f, "image/jpeg")}
+            data = {
+                "model": "typhoon-ocr",
+                "task_type": "default",
+                "max_tokens": "16384",
+                "temperature": "0.1",
+                "top_p": "0.6",
+                "repetition_penalty": "1.2",
+            }
+            resp = requests.post(
+                _TYPHOON_OCR_URL,
+                files=files,
+                data=data,
+                headers=headers,
+                timeout=60,
+            )
+            resp.raise_for_status()
+
+        result = resp.json()
+        extracted_texts = []
+        for page_result in result.get("results", []):
+            if page_result.get("success") and page_result.get("message"):
+                content = page_result["message"]["choices"][0]["message"]["content"]
+                try:
+                    parsed = json.loads(content)
+                    text = parsed.get("natural_text", content)
+                except (json.JSONDecodeError, TypeError):
+                    text = content
+                extracted_texts.append(text)
+
+        raw_text = "\n".join(extracted_texts).strip()
+        if not raw_text:
+            return ("", 0.0)
+
+        return (raw_text, 0.85)
+
+    except Exception as exc:
+        logger.error("Typhoon OCR error: %s", exc)
+        return ("", 0.0)
+    finally:
         import os
-        os.environ["TYPHOON_OCR_API_KEY"] = api_key
-
-        from typhoon_ocr import ocr_document
-
-        # Write image to a temp file (typhoon_ocr needs a file path)
-        with tempfile.NamedTemporaryFile(suffix=".jpg", delete=False) as tmp:
-            tmp.write(image_data)
-            tmp_path = tmp.name
-
-        markdown = ocr_document(pdf_or_image_path=tmp_path)
-
-        # Clean up temp file
         try:
             os.unlink(tmp_path)
         except OSError:
             pass
-
-        if not markdown or not markdown.strip():
-            return ("", 0.0)
-
-        # Typhoon OCR doesn't give word-level confidence.
-        # If we got text back, assume 0.85 confidence.
-        return (markdown.strip(), 0.85)
-
-    except ImportError:
-        logger.warning("typhoon_ocr package not installed — skipping Typhoon OCR.")
-        return ("", 0.0)
-    except Exception as exc:
-        logger.error("Typhoon OCR error: %s", exc)
-        return ("", 0.0)
 
 
 # ---------------------------------------------------------------------------
@@ -124,12 +130,7 @@ def _call_typhoon_ocr(image_data: bytes) -> tuple:
 # ---------------------------------------------------------------------------
 
 def _call_azure_cv(image_data: bytes, _retry: bool = True) -> tuple:
-    """Call Azure Computer Vision Read API to extract text from an image.
-
-    Returns:
-        (raw_text: str, confidence: float)  — concatenated text lines and
-        average word-level confidence.  On failure returns ("", 0.0).
-    """
+    """Call Azure Computer Vision Read API."""
     endpoint = getattr(settings, "AZURE_CV_ENDPOINT", "") or ""
     api_key = getattr(settings, "AZURE_CV_KEY", "") or ""
 
@@ -137,8 +138,7 @@ def _call_azure_cv(image_data: bytes, _retry: bool = True) -> tuple:
         logger.warning("Azure CV credentials not configured.")
         return ("", 0.0)
 
-    endpoint = endpoint.rstrip("/")
-    read_url = f"{endpoint}/vision/v3.2/read/analyze"
+    read_url = f"{endpoint.rstrip('/')}/vision/v3.2/read/analyze"
     headers = {
         "Ocp-Apim-Subscription-Key": api_key,
         "Content-Type": "application/octet-stream",
@@ -166,9 +166,7 @@ def _call_azure_cv(image_data: bytes, _retry: bool = True) -> tuple:
 
 
 def _poll_azure_cv_result(operation_url: str, api_key: str) -> tuple:
-    """Poll Azure CV for the Read result until succeeded/failed."""
     headers = {"Ocp-Apim-Subscription-Key": api_key}
-
     for _ in range(_POLL_MAX_ATTEMPTS):
         time.sleep(_POLL_INTERVAL)
         try:
@@ -191,17 +189,13 @@ def _poll_azure_cv_result(operation_url: str, api_key: str) -> tuple:
 
 
 def _extract_text_from_read_result(result: dict) -> tuple:
-    """Extract concatenated text and average confidence from Azure CV result."""
     lines = []
     confidences = []
-
     for read_result in result.get("analyzeResult", {}).get("readResults", []):
         for line in read_result.get("lines", []):
             lines.append(line.get("text", ""))
             for word in line.get("words", []):
-                conf = word.get("confidence", 0.0)
-                confidences.append(conf)
-
+                confidences.append(word.get("confidence", 0.0))
     raw_text = "\n".join(lines)
     avg_confidence = sum(confidences) / len(confidences) if confidences else 0.0
     return (raw_text, avg_confidence)
@@ -247,12 +241,7 @@ _TYPHOON_SYSTEM_PROMPT = (
 
 
 def _call_typhoon_llm(raw_text: str) -> dict:
-    """Call Typhoon LLM to parse raw OCR text into structured parcel data.
-
-    Returns:
-        dict with keys: recipient_name, unit_number, courier, tracking_number.
-        On failure, falls back to returning raw_text as recipient_name.
-    """
+    """Call Typhoon LLM to parse raw OCR text into structured parcel data."""
     api_key = getattr(settings, "TYPHOON_API_KEY", "") or ""
     if not api_key:
         logger.warning("Typhoon API key not configured — using fallback.")
@@ -262,7 +251,6 @@ def _call_typhoon_llm(raw_text: str) -> dict:
         "Authorization": f"Bearer {api_key}",
         "Content-Type": "application/json",
     }
-
     payload = {
         "model": _TYPHOON_LLM_MODEL,
         "messages": [
@@ -274,9 +262,7 @@ def _call_typhoon_llm(raw_text: str) -> dict:
     }
 
     try:
-        resp = requests.post(
-            _TYPHOON_CHAT_URL, headers=headers, json=payload, timeout=30
-        )
+        resp = requests.post(_TYPHOON_CHAT_URL, headers=headers, json=payload, timeout=30)
         resp.raise_for_status()
         data = resp.json()
         content = data["choices"][0]["message"]["content"]
@@ -287,9 +273,7 @@ def _call_typhoon_llm(raw_text: str) -> dict:
 
 
 def _parse_typhoon_response(content: str) -> dict:
-    """Parse the JSON string returned by Typhoon into a dict."""
     cleaned = content.strip()
-    # Strip markdown code fences if present
     if cleaned.startswith("```"):
         cleaned = cleaned.split("\n", 1)[-1] if "\n" in cleaned else cleaned[3:]
     if cleaned.endswith("```"):
@@ -299,12 +283,7 @@ def _parse_typhoon_response(content: str) -> dict:
         parsed = json.loads(cleaned)
     except json.JSONDecodeError:
         logger.warning("Failed to parse Typhoon response as JSON: %s", content)
-        return {
-            "recipient_name": "",
-            "unit_number": "",
-            "courier": "",
-            "tracking_number": "",
-        }
+        return {"recipient_name": "", "unit_number": "", "courier": "", "tracking_number": ""}
 
     return {
         "recipient_name": str(parsed.get("recipient_name", "")),
@@ -315,7 +294,6 @@ def _parse_typhoon_response(content: str) -> dict:
 
 
 def _typhoon_fallback(raw_text: str) -> dict:
-    """Fallback when Typhoon LLM is unavailable — return raw text as recipient_name."""
     return {
         "recipient_name": raw_text.strip()[:255],
         "unit_number": "",
