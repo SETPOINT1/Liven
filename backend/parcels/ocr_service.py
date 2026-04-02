@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 CONFIDENCE_THRESHOLD = 0.60
 
 _TYPHOON_CHAT_URL = "https://api.opentyphoon.ai/v1/chat/completions"
-_TYPHOON_CHAT_MODEL = "typhoon-v2-70b-instruct"
+_TYPHOON_CHAT_MODEL = "typhoon-v2.5-30b-a3b-instruct"
 
 _EXTRACT_PROMPT = """คุณเป็น AI ที่เชี่ยวชาญในการอ่านฉลากพัสดุ (parcel label) ภาษาไทยและอังกฤษ
 จาก raw text ที่ได้จาก OCR ให้ extract ข้อมูลต่อไปนี้เป็น JSON:
@@ -146,8 +146,11 @@ def _call_typhoon(raw_text: str) -> dict | None:
             {"role": "system", "content": _EXTRACT_PROMPT},
             {"role": "user", "content": f"Raw OCR text:\n{raw_text}"},
         ],
-        "temperature": 0.0,
-        "max_tokens": 512,
+        "temperature": 0.6,
+        "max_completion_tokens": 512,
+        "top_p": 0.6,
+        "repetition_penalty": 1.05,
+        "stream": False,
     }
 
     try:
