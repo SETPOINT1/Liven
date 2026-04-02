@@ -2,8 +2,11 @@
 import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { colors, radius } from '../../theme';
 
-const priorityStyle = { emergency: { border: '#E53E3E', bg: '#FFF5F5' }, important: { border: '#D69E2E', bg: '#FFFFF0' }, normal: { border: '#805AD5', bg: '#FAF5FF' } };
-const priorityLabel = { emergency: 'ฉุกเฉิน', important: 'สำคัญ', normal: 'ทั่วไป' };
+const pConfig = {
+  emergency: { dot: colors.danger, bg: '#FFF5F5', label: 'ฉุกเฉิน' },
+  important: { dot: colors.warning, bg: '#FFFFF0', label: 'สำคัญ' },
+  normal: { dot: '#805AD5', bg: '#FAF5FF', label: 'ทั่วไป' },
+};
 
 export default function AnnouncementWidget({ data, onPress }) {
   const loading = data === null;
@@ -12,14 +15,14 @@ export default function AnnouncementWidget({ data, onPress }) {
     ? [...data].sort((a, b) => (order[a.priority] ?? 2) - (order[b.priority] ?? 2)).slice(0, 3)
     : [];
 
-  const formatDate = (d) => d ? new Date(d).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
+  const formatDate = (d) => d ? new Date(d).toLocaleDateString('th-TH', { day: 'numeric', month: 'short' }) : '';
 
   return (
     <View style={s.container}>
       <View style={s.header}>
-        <Text style={s.title}>ประกาศจากนิติบุคคล</Text>
+        <Text style={s.title}>ประกาศ</Text>
         <TouchableOpacity onPress={onPress} accessibilityLabel="ดูประกาศทั้งหมด" accessibilityRole="button">
-          <Text style={s.link}>ดูทั้งหมด</Text>
+          <Text style={s.link}>ดูทั้งหมด ›</Text>
         </TouchableOpacity>
       </View>
       {loading ? (
@@ -27,19 +30,23 @@ export default function AnnouncementWidget({ data, onPress }) {
       ) : items.length === 0 ? (
         <Text style={s.muted}>ไม่มีประกาศ</Text>
       ) : (
-        items.map((a) => {
-          const ps = priorityStyle[a.priority] || priorityStyle.normal;
-          return (
-            <View key={a.id} style={[s.card, { borderLeftColor: ps.border, backgroundColor: ps.bg }]}>
-              <View style={s.cardHeader}>
-                <Text style={s.cardTitle} numberOfLines={1}>{a.title}</Text>
-                <Text style={[s.badge, { color: ps.border }]}>{priorityLabel[a.priority] || 'ทั่วไป'}</Text>
+        <View style={s.list}>
+          {items.map((a) => {
+            const p = pConfig[a.priority] || pConfig.normal;
+            return (
+              <View key={a.id} style={s.item}>
+                <View style={[s.dot, { backgroundColor: p.dot }]} />
+                <View style={s.itemContent}>
+                  <Text style={s.itemTitle} numberOfLines={1}>{a.title}</Text>
+                  <Text style={s.itemDate}>{formatDate(a.created_at)}</Text>
+                </View>
+                <View style={[s.badge, { backgroundColor: p.bg }]}>
+                  <Text style={[s.badgeText, { color: p.dot }]}>{p.label}</Text>
+                </View>
               </View>
-              {a.content ? <Text style={s.cardContent} numberOfLines={2}>{a.content}</Text> : null}
-              <Text style={s.cardDate}>{formatDate(a.created_at)}</Text>
-            </View>
-          );
-        })
+            );
+          })}
+        </View>
       )}
     </View>
   );
@@ -50,11 +57,19 @@ const s = StyleSheet.create({
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },
   title: { fontSize: 16, fontWeight: '700', color: colors.text },
   link: { fontSize: 13, color: colors.accent, fontWeight: '500' },
-  card: { borderLeftWidth: 4, borderRadius: radius.sm, padding: 14, marginBottom: 8, elevation: 1, shadowColor: '#000', shadowOpacity: 0.04, shadowRadius: 2, shadowOffset: { width: 0, height: 1 } },
-  cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 },
-  cardTitle: { fontSize: 14, fontWeight: '600', color: colors.text, flex: 1, marginRight: 8 },
-  badge: { fontSize: 11, fontWeight: '600' },
-  cardContent: { fontSize: 13, color: colors.textSecondary, lineHeight: 19, marginBottom: 4 },
-  cardDate: { fontSize: 11, color: colors.textMuted },
+  list: {
+    backgroundColor: colors.card, borderRadius: radius.md, overflow: 'hidden',
+    elevation: 2, shadowColor: '#000', shadowOpacity: 0.06, shadowRadius: 4, shadowOffset: { width: 0, height: 2 },
+  },
+  item: {
+    flexDirection: 'row', alignItems: 'center', padding: 14,
+    borderBottomWidth: 1, borderBottomColor: colors.bg,
+  },
+  dot: { width: 8, height: 8, borderRadius: 4, marginRight: 12 },
+  itemContent: { flex: 1 },
+  itemTitle: { fontSize: 14, fontWeight: '600', color: colors.text },
+  itemDate: { fontSize: 11, color: colors.textMuted, marginTop: 2 },
+  badge: { borderRadius: 6, paddingHorizontal: 8, paddingVertical: 2, marginLeft: 8 },
+  badgeText: { fontSize: 10, fontWeight: '600' },
   muted: { color: colors.textMuted, fontSize: 13 },
 });

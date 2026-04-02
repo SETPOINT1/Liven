@@ -75,12 +75,10 @@ export default function HomeScreen() {
       <QuickMenu navigation={navigation} parcelCount={parcels ? parcels.filter(p => p.status === 'pending').length : 0} />
       <ParcelWidget data={parcels} onPress={() => navigation.navigate('Parcel')} />
 
-      {/* Section divider */}
       <Text style={s.sectionLabel}>ข่าวสารและกิจกรรม</Text>
       <EventWidget data={events} onPress={() => navigation.navigate('News', { initialTab: 'กิจกรรม' })} />
       <AnnouncementWidget data={announcements} onPress={() => navigation.navigate('News', { initialTab: 'ประกาศ' })} />
 
-      <Text style={s.sectionLabel}>สิ่งอำนวยความสะดวก</Text>
       <FacilityWidget data={facilities} navigation={navigation} />
     </ScrollView>
   );
