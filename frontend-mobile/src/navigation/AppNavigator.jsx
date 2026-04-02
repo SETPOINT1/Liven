@@ -5,6 +5,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { supabase } from '../services/supabase';
 import api from '../services/api';
+import { HomeIcon, FacilityIcon, ParcelIcon, SocialIcon, ChatbotIcon } from '../components/TabIcons';
 import LoginScreen from '../screens/LoginScreen';
 import HomeScreen from '../screens/HomeScreen';
 import NewsScreen from '../screens/NewsScreen';
@@ -14,6 +15,19 @@ import ChatbotScreen from '../screens/ChatbotScreen';
 import FacilityScreen from '../screens/FacilityScreen';
 import FacilityDetailScreen from '../screens/FacilityDetailScreen';
 import BookingHistoryScreen from '../screens/BookingHistoryScreen';
+
+const HomeStack = createNativeStackNavigator({
+  screens: {
+    HomeMain: {
+      screen: HomeScreen,
+      options: { headerShown: false },
+    },
+    News: {
+      screen: NewsScreen,
+      options: { title: 'ข่าวสาร' },
+    },
+  },
+});
 
 const FacilityStack = createNativeStackNavigator({
   screens: {
@@ -44,12 +58,41 @@ const Tabs = createBottomTabNavigator({
     },
   },
   screens: {
-    Home: { screen: HomeScreen, options: { title: 'หน้าหลัก' } },
-    Facility: { screen: FacilityStack, options: { title: 'ส่วนกลาง' } },
-    News: { screen: NewsScreen, options: { title: 'ข่าวสาร' } },
-    Parcel: { screen: ParcelScreen, options: { title: 'พัสดุ' } },
-    Social: { screen: SocialFeedScreen, options: { title: 'ฟีด' } },
-    Chatbot: { screen: ChatbotScreen, options: { title: 'แชทบอท' } },
+    Home: {
+      screen: HomeStack,
+      options: {
+        title: 'หน้าหลัก',
+        tabBarIcon: ({ color, size }) => <HomeIcon color={color} size={size} />,
+      },
+    },
+    Facility: {
+      screen: FacilityStack,
+      options: {
+        title: 'ส่วนกลาง',
+        tabBarIcon: ({ color, size }) => <FacilityIcon color={color} size={size} />,
+      },
+    },
+    Parcel: {
+      screen: ParcelScreen,
+      options: {
+        title: 'พัสดุ',
+        tabBarIcon: ({ color, size }) => <ParcelIcon color={color} size={size} />,
+      },
+    },
+    Social: {
+      screen: SocialFeedScreen,
+      options: {
+        title: 'ฟีด',
+        tabBarIcon: ({ color, size }) => <SocialIcon color={color} size={size} />,
+      },
+    },
+    Chatbot: {
+      screen: ChatbotScreen,
+      options: {
+        title: 'แชทบอท',
+        tabBarIcon: ({ color, size }) => <ChatbotIcon color={color} size={size} />,
+      },
+    },
   },
 });
 
