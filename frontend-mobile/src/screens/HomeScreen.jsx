@@ -99,8 +99,8 @@ export default function HomeScreen() {
 
       <QuickMenu navigation={navigation} parcelCount={parcelCount} />
       <ParcelWidget data={parcels} onPress={() => navigation.navigate('Parcel')} onRefresh={fetchAll} />
-      <EventWidget data={events} onPress={() => navigation.navigate('News')} />
-      <AnnouncementWidget data={announcements} onPress={() => navigation.navigate('News')} />
+      <EventWidget data={events} onPress={() => navigation.navigate('News', { initialTab: 'กิจกรรม' })} />
+      <AnnouncementWidget data={announcements} onPress={() => navigation.navigate('News', { initialTab: 'ประกาศ' })} />
       <FacilityWidget data={facilities} navigation={navigation} />
     </ScrollView>
   );

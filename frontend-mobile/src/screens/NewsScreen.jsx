@@ -12,11 +12,11 @@ const tabOptions = ['ทั้งหมด', 'ประกาศ', 'กิจก
 const priorityLabels = { emergency: 'ฉุกเฉิน', important: 'สำคัญ', normal: 'ทั่วไป' };
 const priorityColors = { emergency: colors.danger, important: colors.warning, normal: colors.textSecondary };
 
-const NewsScreen = () => {
+const NewsScreen = ({ route }) => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [activeTab, setActiveTab] = useState('ทั้งหมด');
+  const [activeTab, setActiveTab] = useState(route?.params?.initialTab || 'ทั้งหมด');
 
   const fetchData = useCallback(async () => {
     try {
