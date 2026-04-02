@@ -263,7 +263,11 @@ def _call_typhoon_llm(raw_text: str) -> dict:
 
     try:
         resp = requests.post(_TYPHOON_CHAT_URL, headers=headers, json=payload, timeout=30)
-        resp.raise_for_status()
+        if resp.status_code != 200:
+            logger.error(
+                "Typhoon LLM HTTP %s — body: %s", resp.status_code, resp.text[:500]
+            )
+            resp.raise_for_status()
         data = resp.json()
         content = data["choices"][0]["message"]["content"]
         return _parse_typhoon_response(content)
