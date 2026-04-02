@@ -70,7 +70,7 @@ button:disabled {
 
 /* Nav link hover */
 nav a:hover {
-  background: #EDF2F7;
+  background: #EBF4FF;
 }
 nav a[style*="background: rgb(12, 35, 64)"]:hover,
 nav a[style*="background: #0C2340"]:hover {

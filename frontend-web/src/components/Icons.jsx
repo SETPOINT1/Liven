@@ -20,9 +20,20 @@ export const FilterIcon = (p) => <I {...p}><polygon points="22 3 2 3 10 12.46 10
 export const ShieldIcon = (p) => <I {...p}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></I>;
 export const BuildingIcon = (p) => <I {...p}><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="9" y1="6" x2="9" y2="6.01"/><line x1="15" y1="6" x2="15" y2="6.01"/><line x1="9" y1="10" x2="9" y2="10.01"/><line x1="15" y1="10" x2="15" y2="10.01"/><line x1="9" y1="14" x2="9" y2="14.01"/><line x1="15" y1="14" x2="15" y2="14.01"/><line x1="9" y1="18" x2="15" y2="18"/></I>;
 export const CalendarCheckIcon = (p) => <I {...p}><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><polyline points="9 16 11 18 15 14"/></I>;
+export const SearchIcon = (p) => <I {...p}><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></I>;
+export const TrendUpIcon = (p) => <I {...p}><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></I>;
+export const TrendDownIcon = (p) => <I {...p}><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></I>;
+export const RefreshIcon = (p) => <I {...p}><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></I>;
+export const EyeIcon = (p) => <I {...p}><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></I>;
+export const DownloadIcon = (p) => <I {...p}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></I>;
+export const InboxIcon = (p) => <I {...p}><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></I>;
+export const LayersIcon = (p) => <I {...p}><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></I>;
 export function LogoIcon({ size = 36 }) {
   return <svg width={size} height={size} viewBox="0 0 36 36" fill="none"><rect width="36" height="36" rx="10" fill="#0C2340"/><path d="M10 22V14L18 10L26 14V22L18 26L10 22Z" fill="white" fillOpacity=".9"/><path d="M18 10V26" stroke="white" strokeWidth="1.5" strokeOpacity=".5"/></svg>;
 }
 export function DashboardHeroIcon({ size = 56 }) {
   return <svg width={size} height={size} viewBox="0 0 56 56" fill="none"><circle cx="28" cy="28" r="28" fill="#2B6CB0"/><rect x="17" y="20" width="8" height="16" rx="2" fill="white" fillOpacity=".9"/><rect x="27" y="16" width="8" height="20" rx="2" fill="white" fillOpacity=".7"/><rect x="22" y="24" width="8" height="12" rx="2" fill="white" fillOpacity=".5"/></svg>;
 }
+
+export const UserPlusIcon = (p) => <I {...p}><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></I>;
+export const EyeOffIcon = (p) => <I {...p}><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></I>;

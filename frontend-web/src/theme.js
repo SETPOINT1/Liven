@@ -5,7 +5,7 @@ export const C = {
   ok:'#38A169',warn:'#D69E2E',err:'#E53E3E',info:'#3182CE',
 };
 export const R = { sm:8, md:12, lg:16, full:9999 };
-export const card = { background:C.card, borderRadius:R.lg, padding:24, boxShadow:'0 1px 3px rgba(0,0,0,.04)' };
+export const card = { background:C.card, borderRadius:R.lg, padding:24, boxShadow:'0 2px 8px rgba(0,0,0,.06)' };
 export const pageTitle = { fontSize:22, fontWeight:700, color:C.text, margin:0 };
 export const pageSub = { fontSize:14, color:C.muted, margin:'6px 0 28px' };
 export const th = { padding:'12px 18px', textAlign:'left', background:'#F7FAFC', borderBottom:`1px solid ${C.border}`, fontSize:13, fontWeight:600, color:C.sub, letterSpacing:'.02em' };
@@ -17,3 +17,54 @@ export const btnSm = (bg) => ({ padding:'6px 14px', border:'none', borderRadius:
 export const tab = (a) => ({ padding:'10px 20px', border:'none', borderBottom:a?`2px solid ${C.primary}`:'2px solid transparent', background:'none', cursor:'pointer', fontWeight:a?600:400, fontSize:14, color:a?C.text:C.muted });
 export const overlay = { position:'fixed', inset:0, background:'rgba(0,0,0,.35)', display:'flex', justifyContent:'center', alignItems:'center', zIndex:1000, backdropFilter:'blur(2px)' };
 export const modal = { background:C.card, borderRadius:R.lg, padding:'32px 30px 28px', width:460, maxHeight:'85vh', overflow:'auto', boxShadow:'0 8px 30px rgba(0,0,0,.12)' };
+
+/* ── New shared styles ── */
+export const pageHeader = (color = C.primary) => ({
+  background: `linear-gradient(135deg, ${color}08 0%, ${color}03 100%)`,
+  borderRadius: R.lg,
+  padding: '24px 28px',
+  marginBottom: 20,
+  borderLeft: `4px solid ${color}`,
+});
+export const searchBox = {
+  display:'flex', alignItems:'center', gap:8,
+  padding:'10px 14px', border:`1px solid ${C.border}`, borderRadius:R.sm,
+  background:C.card, fontSize:14, color:C.text, flex:1, maxWidth:320,
+};
+export const statCard = (color) => ({
+  background: C.card, borderRadius: R.lg, padding: '20px 22px',
+  boxShadow: '0 2px 8px rgba(0,0,0,.06)',
+  borderLeft: `4px solid ${color}`,
+  display: 'flex', alignItems: 'center', gap: 16,
+  transition: 'box-shadow 0.2s, transform 0.2s',
+});
+export const badge = (bg, color) => ({
+  fontSize: 11, fontWeight: 600, padding: '3px 10px', borderRadius: 99,
+  background: bg, color: color, display: 'inline-block', lineHeight: '18px',
+});
+export const tableRow = {
+  transition: 'background 0.15s',
+};
+export const emptyState = {
+  textAlign: 'center', padding: '60px 20px',
+  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12,
+};
+export const tabBadge = (count, active) => ({
+  display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+  minWidth: 20, height: 20, borderRadius: 10, fontSize: 11, fontWeight: 600,
+  marginLeft: 6, padding: '0 6px',
+  background: active ? C.primary : C.borderLight,
+  color: active ? '#fff' : C.sub,
+});
+export const toastStyle = (type = 'success') => ({
+  padding: '10px 16px', marginBottom: 14, borderRadius: R.sm, fontSize: 14,
+  display: 'flex', alignItems: 'center', gap: 8,
+  background: type === 'error' ? '#fef2f2' : '#f0fdf4',
+  border: `1px solid ${type === 'error' ? C.err : C.ok}33`,
+  color: type === 'error' ? '#b91c1c' : '#166534',
+});
+export const fileUpload = {
+  border: `2px dashed ${C.border}`, borderRadius: R.md, padding: 20,
+  textAlign: 'center', marginBottom: 16, background: C.bg, cursor: 'pointer',
+  transition: 'border-color 0.15s',
+};

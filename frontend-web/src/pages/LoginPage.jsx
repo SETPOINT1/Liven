@@ -2,11 +2,12 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { C, R, inp, lbl, btn } from '../theme';
-import { LogoIcon } from '../components/Icons';
+import { LogoIcon, EyeIcon, EyeOffIcon } from '../components/Icons';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPw, setShowPw] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { signIn, signOut } = useAuth();
@@ -38,7 +39,7 @@ export default function LoginPage() {
 
   return (
     <div style={{
-      display: 'flex', justifyContent: 'center', alignItems: 'center',
+      display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center',
       height: '100vh', background: C.bg,
     }}>
       <div style={{
@@ -64,15 +65,30 @@ export default function LoginPage() {
           />
 
           <label style={lbl}>รหัสผ่าน</label>
-          <input
-            style={inp}
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="••••••••"
-            autoComplete="current-password"
-            required
-          />
+          <div style={{ position: 'relative' }}>
+            <input
+              style={{ ...inp, paddingRight: 40 }}
+              type={showPw ? 'text' : 'password'}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+              autoComplete="current-password"
+              required
+            />
+            <button
+              type="button"
+              onClick={() => setShowPw(!showPw)}
+              style={{
+                position: 'absolute', right: 10, top: 10,
+                background: 'none', border: 'none', cursor: 'pointer', padding: 2,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}
+              aria-label={showPw ? 'ซ่อนรหัสผ่าน' : 'แสดงรหัสผ่าน'}
+              title={showPw ? 'ซ่อนรหัสผ่าน' : 'แสดงรหัสผ่าน'}
+            >
+              {showPw ? <EyeOffIcon s={18} c={C.accent} /> : <EyeIcon s={18} c={C.muted} />}
+            </button>
+          </div>
 
           {error && (
             <div style={{
@@ -94,6 +110,9 @@ export default function LoginPage() {
             {loading ? 'กำลังเข้าสู่ระบบ...' : 'เข้าสู่ระบบ'}
           </button>
         </form>
+      </div>
+      <div style={{ marginTop: 24, textAlign: 'center', fontSize: 11, color: C.muted }}>
+        Liven Smart Community © 2025
       </div>
     </div>
   );
