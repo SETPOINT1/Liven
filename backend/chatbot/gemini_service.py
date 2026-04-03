@@ -2,6 +2,7 @@ import os
 import logging
 from google import genai
 from chatbot.models import KnowledgeBase
+from facilities.models import Facility
 
 logger = logging.getLogger(__name__)
 
@@ -70,15 +71,30 @@ SYSTEM_PROMPT_TEMPLATE = '''คุณคือ "Liven Assistant" ผู้ช่
 - ร้องเรียนที่ต้องการ action จากนิติ
 
 === Knowledge Base ===
-{kb_text}'''
+{kb_text}
+
+=== ข้อมูลสิ่งอำนวยความสะดวก (Real-time) ===
+{facilities_text}'''
 
 
-def _build_system_prompt(knowledge_entries):
+def _build_system_prompt(knowledge_entries, facilities):
     kb_text = ""
     for entry in knowledge_entries:
         category = entry.category or "ทั่วไป"
         kb_text += f"[{category}] Q: {entry.question}\nA: {entry.answer}\n\n"
-    return SYSTEM_PROMPT_TEMPLATE.format(kb_text=kb_text)
+
+    fac_text = ""
+    for f in facilities:
+        status = "เปิดให้บริการ" if f.is_active else "ปิดปรับปรุง"
+        hours = f.operating_hours or "ไม่ระบุ"
+        booking = "ต้องจองล่วงหน้า" if f.requires_booking else "ใช้ได้เลยไม่ต้องจอง"
+        desc = f.description or ""
+        fac_text += f"- {f.name} ({f.type}): {status}, เวลา: {hours}, {booking}. {desc}\n"
+
+    if not fac_text:
+        fac_text = "ไม่มีข้อมูลสิ่งอำนวยความสะดวก\n"
+
+    return SYSTEM_PROMPT_TEMPLATE.format(kb_text=kb_text, facilities_text=fac_text)
 
 
 def _is_escalation_needed(response_text):
@@ -102,7 +118,10 @@ def get_chatbot_response(user_message, project_id):
     knowledge_entries = list(
         KnowledgeBase.objects.filter(project_id=project_id)
     )
-    system_prompt = _build_system_prompt(knowledge_entries)
+    facilities = list(
+        Facility.objects.filter(project_id=project_id)
+    )
+    system_prompt = _build_system_prompt(knowledge_entries, facilities)
 
     last_error = None
     for attempt in range(MAX_RETRIES + 1):
